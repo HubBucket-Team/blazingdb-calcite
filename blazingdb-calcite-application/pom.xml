@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.blazingdb</groupId>
+		<artifactId>blazingdb-calcite-parent</artifactId>
+		<version>1.0.0.RC</version>
+	</parent>
+
+	<artifactId>blazingdb-calcite-application</artifactId>
+	<packaging>jar</packaging>
+
+	<properties>
+		<sourceEncoding>UTF-8</sourceEncoding>
+		<project.build.sourceEncoding>${sourceEncoding}</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>${sourceEncoding}</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<org.slf4j-version>1.5.10</org.slf4j-version>
+		<junit.version>4.12</junit.version>
+		<org.testng.version>6.14.3</org.testng.version>
+		<spring.security.ad.version>1.0-SNAPSHOT</spring.security.ad.version>
+		<org.springframework-version>3.2.18.RELEASE</org.springframework-version>
+		<org.aspectj-version>1.6.9</org.aspectj-version>
+		<org.slf4j-version>1.5.10</org.slf4j-version>
+		<org.springframework-version-security>3.2.10.RELEASE</org.springframework-version-security>
+		<org.apache.calcite-version>1.16.0</org.apache.calcite-version>
+		<org.apache.calcite.avatica-version>1.11.0</org.apache.calcite.avatica-version>
+	</properties>
+
+	<dependencies>
+		<!-- BlazingDB -->
+		<dependency>
+			<groupId>com.blazingdb</groupId>
+			<artifactId>blazing-core</artifactId>
+			<version>2.0.0.RC</version>
+		</dependency>
+		<!-- Unix Sockets for BlazingConnection https://mvnrepository.com/artifact/com.github.jnr/jnr-unixsocket -->
+		<dependency>
+			<groupId>com.github.jnr</groupId>
+			<artifactId>jnr-unixsocket</artifactId>
+			<version>0.19</version>
+		</dependency>
+		<!-- Apache Commons Net -->
+		<dependency>
+			<groupId>commons-net</groupId>
+			<artifactId>commons-net</artifactId>
+			<version>3.3</version>
+		</dependency>
+		<!-- Database Backends -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.192</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>3.6.8.Final</version>
+			<exclusions>
+				<exclusion>
+					<groupId>cglib</groupId>
+					<artifactId>cglib</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+			<version>3.5.3</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<finalName>ParquetGenerator</finalName>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>com.blazingdb.parquet.generator.Main</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
