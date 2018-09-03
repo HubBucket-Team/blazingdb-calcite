@@ -14,20 +14,12 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<sourceEncoding>UTF-8</sourceEncoding>
-		<project.build.sourceEncoding>${sourceEncoding}</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>${sourceEncoding}</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		<org.slf4j-version>1.5.10</org.slf4j-version>
-		<junit.version>4.12</junit.version>
-		<org.testng.version>6.14.3</org.testng.version>
-		<spring.security.ad.version>1.0-SNAPSHOT</spring.security.ad.version>
-		<org.springframework-version>3.2.18.RELEASE</org.springframework-version>
-		<org.aspectj-version>1.6.9</org.aspectj-version>
-		<org.slf4j-version>1.5.10</org.slf4j-version>
-		<org.springframework-version-security>3.2.10.RELEASE</org.springframework-version-security>
-		<org.apache.calcite-version>1.16.0</org.apache.calcite-version>
-		<org.apache.calcite.avatica-version>1.11.0</org.apache.calcite.avatica-version>
+
+		<!-- Maven properties -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
 	</properties>
 
 	<dependencies>
@@ -83,7 +75,6 @@
 					<finalName>ParquetGenerator</finalName>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
@@ -101,6 +92,16 @@
 									<mainClass>com.blazingdb.application.UnixServer</mainClass>
 								</transformer>
 							</transformers>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+									</excludes>
+								</filter>
+							</filters>
 						</configuration>
 					</execution>
 				</executions>
