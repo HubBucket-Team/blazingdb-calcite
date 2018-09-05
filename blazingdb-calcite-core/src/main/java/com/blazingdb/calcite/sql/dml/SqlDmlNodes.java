@@ -1,3 +1,8 @@
+/*
+ * Copyright 2018 BlazingDB, Inc.
+ *     Copyright 2018 Percy Camilo Triveño Aucahuasi <percy@blazingdb.com>
+ */
+
 package com.blazingdb.calcite.sql.dml;
 
 import org.apache.calcite.sql.SqlIdentifier;

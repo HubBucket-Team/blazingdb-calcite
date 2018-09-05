@@ -1,3 +1,8 @@
+/*
+ * Copyright 2018 BlazingDB, Inc.
+ *     Copyright 2018 Percy Camilo Triveño Aucahuasi <percy@blazingdb.com>
+ */
+
 /**
  * 
  * get data folders
@@ -9,9 +14,5 @@
  * list tables
  * list views
  * use database
- */
-/**
- * @author BlazingDB
- *
  */
 package com.blazingdb.calcite.sql.custom;
