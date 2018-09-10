@@ -84,6 +84,7 @@ import org.apache.calcite.tools.RuleSet;
 import org.apache.calcite.tools.RuleSets;
 import org.apache.calcite.tools.ValidationException;
 
+import com.blazingdb.calcite.schema.BzSchema;
 import com.blazingdb.calcite.schema.CsvSchema;
 import com.blazingdb.calcite.schema.CsvTable.Flavor;
 import com.blazingdb.calcite.sql.parser.SqlParserImpl;
@@ -127,7 +128,10 @@ public class BlazingPlanner {
 		// Flavor flavor = Flavor.SCANNABLE;
 		// CsvSchema schema = new CsvSchema(directoryFile, flavor);
 
-		TpchSchema schema = new TpchSchema(0.01, 1, 1, true);
+		
+		//TpchSchema schema = new TpchSchema(0.01, 1, 1, true);
+		
+		BzSchema schema = new BzSchema();
 
 		SchemaPlus catalog = Frameworks.createRootSchema(true);
 		catalog.add("tpch", schema);
