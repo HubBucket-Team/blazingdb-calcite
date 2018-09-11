@@ -6,6 +6,8 @@
 package com.blazingdb.calcite.schema;
 
 import com.blazingdb.calcite.sql.parser.BlazingSqlParser;
+import com.blazingdb.catalog.connection.CatalogService;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,9 +25,9 @@ public class BzSchema implements Schema {
 
 	final static Logger MAPDLOGGER = LoggerFactory.getLogger(BzSchema.class);
 
-	final private CatalogConnect metaConnect;
+	final private CatalogService metaConnect;
 
-	public BzSchema() {
+	public BzSchema(String schemaName) {
 		// System.setProperty("saffron.default.charset", ConversionUtil.NATIVE_UTF16_CHARSET_NAME);
 		// System.setProperty("saffron.default.nationalcharset", ConversionUtil.NATIVE_UTF16_CHARSET_NAME);
 		// System.setProperty("saffron.default.collation.name", ConversionUtil.NATIVE_UTF16_CHARSET_NAME + "$en_US");
@@ -33,7 +35,7 @@ public class BzSchema implements Schema {
 		// TODO percy
 		BlazingSqlParser parser = new BlazingSqlParser();
 
-		metaConnect = new CatalogConnect(parser);
+		metaConnect = new CatalogService(parser);
 	}
 
 	@Override

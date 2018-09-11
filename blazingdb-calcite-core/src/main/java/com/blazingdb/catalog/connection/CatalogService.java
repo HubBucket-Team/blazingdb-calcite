@@ -1,9 +1,10 @@
-package com.blazingdb.calcite.schema;
+package com.blazingdb.catalog.connection;
 
 import java.util.Set;
 
 import org.apache.calcite.schema.Table;
 
+import com.blazingdb.calcite.schema.BzTable;
 import com.blazingdb.calcite.sql.parser.BlazingSqlParser;
 
 import com.google.common.collect.ImmutableList;
@@ -21,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CatalogConnect {
+public class CatalogService {
 
-	final static Logger MAPDLOGGER = LoggerFactory.getLogger(CatalogConnect.class);
+	final static Logger MAPDLOGGER = LoggerFactory.getLogger(CatalogService.class);
 	private Connection catConn;
 	private final BlazingSqlParser parser;
 
@@ -55,7 +56,7 @@ public class CatalogConnect {
 	private static volatile Map<String, Set<String>> MAPD_DATABASE_TO_TABLES = new ConcurrentHashMap();
 	private static volatile Map<List<String>, Table> MAPD_TABLE_DETAILS = new ConcurrentHashMap();
 
-	public CatalogConnect(BlazingSqlParser parser) {
+	public CatalogService(BlazingSqlParser parser) {
 		this.parser = parser;
 	}
 

@@ -128,10 +128,10 @@ public class BlazingPlanner {
 		// Flavor flavor = Flavor.SCANNABLE;
 		// CsvSchema schema = new CsvSchema(directoryFile, flavor);
 
-		
-		//TpchSchema schema = new TpchSchema(0.01, 1, 1, true);
-		
-		BzSchema schema = new BzSchema();
+		// TpchSchema schema = new TpchSchema(0.01, 1, 1, true);
+
+		String rootDefaultSchema = "holisdb";
+		BzSchema schema = new BzSchema(rootDefaultSchema);
 
 		SchemaPlus catalog = Frameworks.createRootSchema(true);
 		catalog.add("tpch", schema);
