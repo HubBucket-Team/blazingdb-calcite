@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.blazingdb.application;
+package com.blazingdb.calcite.application;
 
 import jnr.enxio.channels.NativeSelectorProvider;
 import java.io.IOException;
