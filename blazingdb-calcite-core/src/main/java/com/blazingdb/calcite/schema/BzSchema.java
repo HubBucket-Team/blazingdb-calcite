@@ -6,7 +6,7 @@
 package com.blazingdb.calcite.schema;
 
 import com.blazingdb.calcite.sql.parser.BlazingSqlParser;
-import com.blazingdb.catalog.connection.CatalogService;
+import com.blazingdb.calcite.catalog.connection.CatalogService;
 
 import java.util.Collection;
 import java.util.HashSet;

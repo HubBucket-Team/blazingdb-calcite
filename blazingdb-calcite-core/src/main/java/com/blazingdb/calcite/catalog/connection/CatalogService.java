@@ -1,4 +1,4 @@
-package com.blazingdb.catalog.connection;
+package com.blazingdb.calcite.catalog.connection;
 
 import java.util.Set;
 

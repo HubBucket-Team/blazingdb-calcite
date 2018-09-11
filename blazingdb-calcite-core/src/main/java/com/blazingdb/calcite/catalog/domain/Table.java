@@ -1,4 +1,4 @@
-package com.blazingdb.catalog.domain;
+package com.blazingdb.calcite.catalog.domain;
 
 import java.util.Collection;
 
