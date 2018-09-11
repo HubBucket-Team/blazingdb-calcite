@@ -1,11 +1,11 @@
 package com.blazingdb.calcite.catalog.domain;
 
-import java.util.Collection;
+import java.util.Set;
 
 public interface Table {
 
-	public String tableName();
+	public String getTableName();
 
-	public Collection<Column> getColumns();
+	public Set<Column> getColumns();
 
 }

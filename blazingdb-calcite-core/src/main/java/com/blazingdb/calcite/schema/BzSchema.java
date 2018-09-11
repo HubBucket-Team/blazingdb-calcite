@@ -25,9 +25,10 @@ public class BzSchema implements Schema {
 
 	final static Logger MAPDLOGGER = LoggerFactory.getLogger(BzSchema.class);
 
+	// TODO percy improve thi member ... we don need servicer ref here
 	final private CatalogService metaConnect;
 
-	public BzSchema(String schemaName) {
+	public BzSchema(String schemaName, CatalogService catalogService) {
 		// System.setProperty("saffron.default.charset", ConversionUtil.NATIVE_UTF16_CHARSET_NAME);
 		// System.setProperty("saffron.default.nationalcharset", ConversionUtil.NATIVE_UTF16_CHARSET_NAME);
 		// System.setProperty("saffron.default.collation.name", ConversionUtil.NATIVE_UTF16_CHARSET_NAME + "$en_US");
@@ -35,19 +36,22 @@ public class BzSchema implements Schema {
 		// TODO percy
 		BlazingSqlParser parser = new BlazingSqlParser();
 
-		metaConnect = new CatalogService(parser);
+		// TODO percy assert null
+		metaConnect = catalogService;
 	}
 
 	@Override
 	public Table getTable(String string) {
-		Table table = metaConnect.getTable(string);
-		return table;
+		// Table table = metaConnect.getTable(string);
+		// return table;
+		return null;
 	}
 
 	@Override
 	public Set<String> getTableNames() {
-		Set<String> tableSet = metaConnect.getTables();
-		return tableSet;
+		// Set<String> tableSet = metaConnect.getTables();
+		// return tableSet;
+		return null;
 	}
 
 	@Override

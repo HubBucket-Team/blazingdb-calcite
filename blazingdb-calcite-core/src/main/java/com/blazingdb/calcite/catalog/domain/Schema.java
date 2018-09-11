@@ -1,11 +1,11 @@
 package com.blazingdb.calcite.catalog.domain;
 
-import java.util.Collection;
+import java.util.Set;
 
 public interface Schema {
 
-	public String getSchemaName();
+	public String getTableName();
 
-	public Collection<Table> getTable();
+	public Set<Table> getDatabases();
 
 }
