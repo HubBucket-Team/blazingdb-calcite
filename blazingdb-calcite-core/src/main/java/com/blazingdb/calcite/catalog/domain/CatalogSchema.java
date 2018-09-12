@@ -2,10 +2,10 @@ package com.blazingdb.calcite.catalog.domain;
 
 import java.util.Set;
 
-public interface Table {
+public interface CatalogSchema {
 
 	public String getTableName();
 
-	public Set<Column> getColumns();
+	public Set<CatalogTable> getDatabases();
 
 }

@@ -7,6 +7,8 @@ package com.blazingdb.calcite.schema;
 
 import com.blazingdb.calcite.sql.parser.BlazingSqlParser;
 import com.blazingdb.calcite.catalog.connection.CatalogService;
+import com.blazingdb.calcite.catalog.domain.CatalogDatabase;
+import com.blazingdb.calcite.catalog.domain.CatalogSchema;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -25,19 +27,12 @@ public class BzSchema implements Schema {
 
 	final static Logger MAPDLOGGER = LoggerFactory.getLogger(BzSchema.class);
 
-	// TODO percy improve thi member ... we don need servicer ref here
-	final private CatalogService metaConnect;
+	final private CatalogSchema catalogSchema;
+	final private CatalogDatabase catalogDatabase;
 
-	public BzSchema(String schemaName, CatalogService catalogService) {
-		// System.setProperty("saffron.default.charset", ConversionUtil.NATIVE_UTF16_CHARSET_NAME);
-		// System.setProperty("saffron.default.nationalcharset", ConversionUtil.NATIVE_UTF16_CHARSET_NAME);
-		// System.setProperty("saffron.default.collation.name", ConversionUtil.NATIVE_UTF16_CHARSET_NAME + "$en_US");
-
-		// TODO percy
-		BlazingSqlParser parser = new BlazingSqlParser();
-
-		// TODO percy assert null
-		metaConnect = catalogService;
+	public BzSchema(CatalogSchema catalogSchema) {
+		this.catalogSchema = catalogSchema;
+		this.catalogDatabase = null;
 	}
 
 	@Override

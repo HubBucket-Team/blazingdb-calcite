@@ -2,22 +2,22 @@ package com.blazingdb.calcite.catalog.connection;
 
 import java.util.Collection;
 
-import com.blazingdb.calcite.catalog.domain.Database;
-import com.blazingdb.calcite.catalog.domain.Schema;
-import com.blazingdb.calcite.catalog.domain.Table;
+import com.blazingdb.calcite.catalog.domain.CatalogDatabase;
+import com.blazingdb.calcite.catalog.domain.CatalogSchema;
+import com.blazingdb.calcite.catalog.domain.CatalogTable;
 
 public interface CatalogService {
 
-	public Schema getSchema(String schemaName);
+	public CatalogSchema getSchema(String schemaName);
 
 	// for calcite schema get subschemas
-	public Database getDatabase(String schemaName, String databaseName);
+	public CatalogDatabase getDatabase(String schemaName, String databaseName);
 
-	public Collection<Table> getTables(String databaseName);
+	public Collection<CatalogTable> getTables(String databaseName);
 
-	public Table getTable(String schemaName, String tableName);
+	public CatalogTable getTable(String schemaName, String tableName);
 
 	// TODO we may not need this api
-	public Table getTable(String tableName);
+	public CatalogTable getTable(String tableName);
 
 }

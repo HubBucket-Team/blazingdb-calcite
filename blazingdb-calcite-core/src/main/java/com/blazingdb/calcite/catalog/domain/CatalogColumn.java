@@ -1,9 +1,9 @@
 package com.blazingdb.calcite.catalog.domain;
 
-public interface Column {
+public interface CatalogColumn {
 
 	public String getColumnName();
 
-	public ColumnDataType getColumnDataType();
+	public CatalogColumnDataType getColumnDataType();
 
 }

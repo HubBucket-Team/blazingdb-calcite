@@ -1,6 +1,6 @@
 package com.blazingdb.calcite.catalog.domain;
 
-public interface ColumnDataType {
+public interface CatalogColumnDataType {
 
 	public String getDataTypeName();
 

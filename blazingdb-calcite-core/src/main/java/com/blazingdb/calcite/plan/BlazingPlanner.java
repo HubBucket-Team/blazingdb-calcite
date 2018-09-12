@@ -134,7 +134,8 @@ public class BlazingPlanner {
 		String rootDefaultSchema = "holisdb";
 		CatalogService x = null;
 
-		BzSchema schema = new BzSchema(rootDefaultSchema, x);
+		// TODO percy
+		BzSchema schema = new BzSchema(null);
 
 		SchemaPlus catalog = Frameworks.createRootSchema(true);
 		catalog.add("tpch", schema);
