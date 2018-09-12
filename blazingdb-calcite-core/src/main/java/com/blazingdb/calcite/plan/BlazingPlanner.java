@@ -85,7 +85,7 @@ import org.apache.calcite.tools.RuleSets;
 import org.apache.calcite.tools.ValidationException;
 
 import com.blazingdb.calcite.catalog.connection.CatalogService;
-import com.blazingdb.calcite.schema.BzSchema;
+import com.blazingdb.calcite.schema.BlazingSchema;
 import com.blazingdb.calcite.schema.CsvSchema;
 import com.blazingdb.calcite.schema.CsvTable.Flavor;
 import com.blazingdb.calcite.sql.parser.SqlParserImpl;
@@ -135,7 +135,7 @@ public class BlazingPlanner {
 		CatalogService x = null;
 
 		// TODO percy
-		BzSchema schema = new BzSchema(null);
+		BlazingSchema schema = new BlazingSchema(null);
 
 		SchemaPlus catalog = Frameworks.createRootSchema(true);
 		catalog.add("tpch", schema);

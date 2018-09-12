@@ -23,14 +23,14 @@ import org.apache.calcite.util.ConversionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BzSchema implements Schema {
+public class BlazingSchema implements Schema {
 
-	final static Logger MAPDLOGGER = LoggerFactory.getLogger(BzSchema.class);
+	final static Logger MAPDLOGGER = LoggerFactory.getLogger(BlazingSchema.class);
 
 	final private CatalogSchema catalogSchema;
 	final private CatalogDatabase catalogDatabase;
 
-	public BzSchema(CatalogSchema catalogSchema) {
+	public BlazingSchema(CatalogSchema catalogSchema) {
 		this.catalogSchema = catalogSchema;
 		this.catalogDatabase = null;
 	}

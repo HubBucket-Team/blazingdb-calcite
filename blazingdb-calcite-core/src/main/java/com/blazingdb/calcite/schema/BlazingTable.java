@@ -27,12 +27,12 @@ import org.apache.calcite.util.ConversionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BzTable implements Table {
+public class BlazingTable implements Table {
 
-	final static Logger MAPDLOGGER = LoggerFactory.getLogger(BzTable.class);
+	final static Logger MAPDLOGGER = LoggerFactory.getLogger(BlazingTable.class);
 	// private final TTableDetails rowInfo;
 
-	public BzTable() {
+	public BlazingTable() {
 	}
 
 	@Override
