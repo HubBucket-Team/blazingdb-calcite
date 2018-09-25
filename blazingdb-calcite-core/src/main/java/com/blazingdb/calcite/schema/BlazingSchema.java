@@ -5,10 +5,9 @@
 
 package com.blazingdb.calcite.schema;
 
-import com.blazingdb.calcite.sql.parser.BlazingSqlParser;
-import com.blazingdb.calcite.catalog.connection.CatalogService;
 import com.blazingdb.calcite.catalog.domain.CatalogDatabase;
 import com.blazingdb.calcite.catalog.domain.CatalogSchema;
+import com.blazingdb.calcite.catalog.domain.CatalogTable;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,7 +18,6 @@ import org.apache.calcite.schema.Schema;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.schema.SchemaVersion;
 import org.apache.calcite.schema.Table;
-import org.apache.calcite.util.ConversionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,10 +33,20 @@ public class BlazingSchema implements Schema {
 		this.catalogDatabase = null;
 	}
 
+	public BlazingSchema(CatalogDatabase catalogDatabase) {
+		this.catalogSchema = null;
+		this.catalogDatabase = catalogDatabase;
+	}
+
 	@Override
-	public Table getTable(String string) {
-		// Table table = metaConnect.getTable(string);
-		// return table;
+	public Table getTable(String name) {
+		if (isDatabase()) {
+			final CatalogTable catalogTable = this.catalogDatabase.getTable(name);
+			return new BlazingTable(catalogTable);
+		}
+
+		// TODO percy raise unsupported operation for schema
+
 		return null;
 	}
 
@@ -90,4 +98,9 @@ public class BlazingSchema implements Schema {
 	public Schema snapshot(SchemaVersion sv) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
+
+	private boolean isDatabase() {
+		return (this.catalogSchema == null && this.catalogDatabase != null);
+	}
+
 }

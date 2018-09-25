@@ -5,6 +5,7 @@
 
 package com.blazingdb.calcite.schema;
 
+import com.blazingdb.calcite.catalog.domain.CatalogTable;
 import com.blazingdb.calcite.sql.parser.BlazingSqlParser;
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,9 +31,11 @@ import org.slf4j.LoggerFactory;
 public class BlazingTable implements Table {
 
 	final static Logger MAPDLOGGER = LoggerFactory.getLogger(BlazingTable.class);
-	// private final TTableDetails rowInfo;
 
-	public BlazingTable() {
+	private final CatalogTable catalogTable;
+
+	public BlazingTable(CatalogTable catalogTable) {
+		this.catalogTable = catalogTable;
 	}
 
 	@Override

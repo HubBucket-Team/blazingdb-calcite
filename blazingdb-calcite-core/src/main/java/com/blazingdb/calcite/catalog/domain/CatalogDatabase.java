@@ -6,6 +6,8 @@ public interface CatalogDatabase {
 
 	public String getDatabaseName();
 
-	public Set<CatalogTable> getTables();
+	public CatalogTable getTable(String tableName);
+
+	public Set<String> getTableNames();
 
 }

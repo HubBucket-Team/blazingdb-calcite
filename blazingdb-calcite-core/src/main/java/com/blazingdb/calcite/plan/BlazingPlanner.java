@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import org.apache.calcite.DataContext;
@@ -85,6 +86,8 @@ import org.apache.calcite.tools.RuleSets;
 import org.apache.calcite.tools.ValidationException;
 
 import com.blazingdb.calcite.catalog.connection.CatalogService;
+import com.blazingdb.calcite.catalog.domain.CatalogDatabase;
+import com.blazingdb.calcite.catalog.domain.CatalogTable;
 import com.blazingdb.calcite.schema.BlazingSchema;
 import com.blazingdb.calcite.schema.CsvSchema;
 import com.blazingdb.calcite.schema.CsvTable.Flavor;
@@ -135,7 +138,26 @@ public class BlazingPlanner {
 		CatalogService x = null;
 
 		// TODO percy
-		BlazingSchema schema = new BlazingSchema(null);
+		BlazingSchema schema = new BlazingSchema(new CatalogDatabase() {
+			
+			@Override
+			public Set<String> getTableNames() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+			@Override
+			public CatalogTable getTable(String tableName) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+			@Override
+			public String getDatabaseName() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		});
 
 		SchemaPlus catalog = Frameworks.createRootSchema(true);
 		catalog.add("tpch", schema);
