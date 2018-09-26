@@ -4,8 +4,8 @@ import java.util.Set;
 
 public interface CatalogSchema {
 
-	public String getTableName();
+	public String getSchemaName();
 
-	public Set<CatalogTable> getDatabases();
+	public Set<CatalogDatabase> getDatabases();
 
 }
