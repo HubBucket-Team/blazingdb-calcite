@@ -27,11 +27,11 @@
 
 	<dependencies>
 		<!-- BlazingDB -->
-		<dependency>
-			<groupId>com.blazingdb</groupId>
-			<artifactId>blazing-common</artifactId>
-			<version>2.0.0.RC</version>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.blazingdb</groupId> -->
+<!-- 			<artifactId>blazing-common</artifactId> -->
+<!-- 			<version>2.0.0.RC</version> -->
+<!-- 		</dependency> -->
 		<!-- Unix Sockets for BlazingConnection https://mvnrepository.com/artifact/com.github.jnr/jnr-unixsocket -->
 		<dependency>
 			<groupId>com.github.jnr</groupId>
