@@ -23,6 +23,11 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.6.5</version>
+		</dependency>
 		<!-- BlazingDB -->
 		<dependency>
 			<groupId>com.blazingdb</groupId>
@@ -46,6 +51,11 @@
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>1.4.192</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.40</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>

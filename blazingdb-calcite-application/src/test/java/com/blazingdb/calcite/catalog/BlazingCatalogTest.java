@@ -4,18 +4,21 @@ import static org.testng.Assert.*;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.tools.RelConversionException;
 import org.apache.calcite.tools.ValidationException;
-import org.h2.jdbcx.JdbcDataSource;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Enumeration;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -62,10 +65,11 @@ public class BlazingCatalogTest {
 	private String contexts;
 	private String labels;
 
-	private void executeUpdate() throws NamingException, SQLException, LiquibaseException {
+	private void executeUpdate() throws NamingException, SQLException, LiquibaseException, InstantiationException,
+			IllegalAccessException, ClassNotFoundException {
 		// setDataSource((String) servletValueContainer.getValue(LIQUIBASE_DATASOURCE));
 
-		this.dataSourceName = "TODO";
+		this.dataSourceName = "bz3";
 
 		if (this.dataSourceName == null) {
 			throw new RuntimeException("Cannot run Liquibase, " + LIQUIBASE_DATASOURCE + " is not set");
@@ -73,7 +77,7 @@ public class BlazingCatalogTest {
 
 		// setChangeLogFile((String) servletValueContainer.getValue(LIQUIBASE_CHANGELOG));
 
-		String changeLogFile = "classpath:master.xml";
+		String changeLogFile = "liquibase-bz-master.xml";
 		this.changeLogFile = changeLogFile;
 
 		if (this.changeLogFile == null) {
@@ -81,10 +85,10 @@ public class BlazingCatalogTest {
 		}
 
 		// setContexts((String) servletValueContainer.getValue(LIQUIBASE_CONTEXTS));
-		this.contexts = "TODO";
+		this.contexts = "";
 		// setLabels((String) servletValueContainer.getValue(LIQUIBASE_LABELS));
 
-		this.labels = "TODO";
+		this.labels = "";
 
 		// this.defaultSchema = StringUtil.trimToNull((String)
 		// servletValueContainer.getValue(LIQUIBASE_SCHEMA_DEFAULT));
@@ -93,11 +97,24 @@ public class BlazingCatalogTest {
 		Connection connection = null;
 		Database database = null;
 		try {
-			JdbcDataSource dataSource = new JdbcDataSource(); // (DataSource) ic.lookup(this.dataSourceName);
-			dataSource.setURL("jdbc:h2:/home/percy/Blazing/root/newblazing3.0/catalog/data");
-			dataSource.setUser("blazing");
-			dataSource.setPassword("blazing");
+			// DriverManager.registerDriver((Driver) Class.forName("com.mysql.jdbc.Driver").newInstance());
+			// String url = "jdbc:mysql://localhost:3306/bz3";
+			// connection = DriverManager.getConnection(url);
 
+			BasicDataSource dataSource = new BasicDataSource();
+			dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+			dataSource.setUsername("blazing");
+			dataSource.setPassword("blazing");
+			dataSource.setUrl("jdbc:mysql://localhost:3306/bz3");
+			dataSource.setMaxActive(10);
+			dataSource.setMaxIdle(5);
+			dataSource.setInitialSize(5);
+			dataSource.setValidationQuery("SELECT 1");
+
+			// MySQLData dataSource = new JdbcDataSource(); // (DataSource) ic.lookup(this.dataSourceName);
+			// dataSource.setURL("jdbc:mysql://localhost:3306/bz3");
+			// dataSource.setUser("blazing");
+			// dataSource.setPassword("blazing");
 			connection = dataSource.getConnection();
 
 			Thread currentThread = Thread.currentThread();
@@ -112,15 +129,15 @@ public class BlazingCatalogTest {
 			Liquibase liquibase = new Liquibase(this.changeLogFile,
 					new CompositeResourceAccessor(clFO, fsFO, threadClFO), database);
 
-			@SuppressWarnings("unchecked")
-			Enumeration<String> initParameters = null; // servletContext.getInitParameterNames();
-			while (initParameters.hasMoreElements()) {
-				String name = initParameters.nextElement().trim();
-				if (name.startsWith(LIQUIBASE_PARAMETER + ".")) {
-					// liquibase.setChangeLogParameter(name.substring(LIQUIBASE_PARAMETER.length() + 1),
-					// servletValueContainer.getValue(name));
-				}
-			}
+			// @SuppressWarnings("unchecked")
+			// StringTokenizer initParameters = new StringTokenizer(""); // servletContext.getInitParameterNames();
+			// while (initParameters.hasMoreElements()) {
+			// String name = initParameters.nextElement().trim();
+			// if (name.startsWith(LIQUIBASE_PARAMETER + ".")) {
+			// // liquibase.setChangeLogParameter(name.substring(LIQUIBASE_PARAMETER.length() + 1),
+			// // servletValueContainer.getValue(name));
+			// }
+			// }
 
 			liquibase.update(new Contexts(this.contexts), new LabelExpression(this.labels));
 		} finally {
