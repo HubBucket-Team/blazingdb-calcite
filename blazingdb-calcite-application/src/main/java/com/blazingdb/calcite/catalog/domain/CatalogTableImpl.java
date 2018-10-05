@@ -12,7 +12,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "blazing_catalog_databases")
+@Table(name = "blazing_catalog_tables")
 public class CatalogTableImpl implements CatalogTable {
 
 	@Id
