@@ -12,16 +12,15 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-
+/*
+ * NOTE: the data in here can just be generated via liquibase no repository necessary
+ */
 @Entity
 @Table(name = "blazing_catalog_column_datatypes")
 public class CatalogColumnDataTypeImpl implements CatalogColumnDataType {
 
-	@Id
-	@GeneratedValue
-	@Column(name = "id")
-	private Long id;
 
+	@Id
 	@Column(name = "name", nullable = false)
 	private String name;
 
@@ -32,20 +31,16 @@ public class CatalogColumnDataTypeImpl implements CatalogColumnDataType {
 		this.name = name;
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	@Override
 	public String getDataTypeName() {
 		return this.name;
 	}
 
-	public void setDataTypeName(String name) {
+
+	public void getName(String name) {
+		this.name = name;
+	}
+	public void setName(String name) {
 		this.name = name;
 	}
 

@@ -8,4 +8,6 @@ public interface CatalogSchema {
 
 	public Set<CatalogDatabase> getDatabases();
 
+	public CatalogDatabase getDatabaseByName(String databaseName);
+
 }

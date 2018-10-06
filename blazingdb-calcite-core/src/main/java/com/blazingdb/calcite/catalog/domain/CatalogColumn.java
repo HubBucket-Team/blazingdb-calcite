@@ -6,4 +6,5 @@ public interface CatalogColumn {
 
 	public CatalogColumnDataType getColumnDataType();
 
+	public CatalogTable getTable();
 }

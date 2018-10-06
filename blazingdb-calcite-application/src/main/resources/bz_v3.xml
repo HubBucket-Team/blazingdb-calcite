@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
 	<changeSet id="1"
 		author="Percy Camilo Triveño Aucahuasi - percy@blazingdb.com">
 		<createTable tableName="blazing_catalog_column_datatypes">
-			<column name="id" type="BIGINT" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
-			</column>
 			<column name="name" type="varchar(128)">
-				<constraints nullable="false" />
+				<constraints primaryKey="true" nullable="false" />
 			</column>
 		</createTable>
 
-		<createIndex tableName="blazing_catalog_column_datatypes"
-			indexName="ix_blazing_catalog_column_datatypes_name">
-			<column name="name"></column>
-		</createIndex>
+
 
 		<createTable tableName="blazing_catalog_columns">
 			<column name="id" type="BIGINT" autoIncrement="true">
@@ -26,21 +21,20 @@
 			<column name="name" type="varchar(50)">
 				<constraints nullable="false" />
 			</column>
-			<column name="data_type_id" type="BIGINT">
+			<column name="data_type_id" type="varchar(128)">
+				<constraints nullable="false" />
+			</column>
+			<column name="table_id" type="BIGINT">
 				<constraints nullable="false" />
 			</column>
 		</createTable>
 
 		<addForeignKeyConstraint
 			constraintName="fk_blazing_catalog_columns_blazing_catalog_column_datatypes"
-			baseTableName="blazing_catalog_columns" baseColumnNames="data_type_id"
+			baseTableName="blazing_catalog_columns"
+			baseColumnNames="data_type_id"
 			referencedTableName="blazing_catalog_column_datatypes"
-			referencedColumnNames="id" />
-
-		<createIndex tableName="blazing_catalog_columns"
-			indexName="ix_blazing_catalog_columns_name">
-			<column name="name" />
-		</createIndex>
+			referencedColumnNames="name" />
 
 		<createTable tableName="blazing_catalog_tables">
 			<column name="id" type="BIGINT" autoIncrement="true">
@@ -49,24 +43,65 @@
 			<column name="name" type="varchar(50)">
 				<constraints nullable="false" />
 			</column>
+			<column name="database_id" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
 		</createTable>
+
+
+		<addForeignKeyConstraint
+			constraintName="fk_columns_table"
+			baseTableName="blazing_catalog_columns" baseColumnNames="table_id"
+			referencedTableName="blazing_catalog_tables"
+			referencedColumnNames="id" />
+
+		<createIndex tableName="blazing_catalog_columns"
+			indexName="ix_blazing_catalog_columns_name">
+			<column name="name" />
+		</createIndex>
+
 
 		<createIndex tableName="blazing_catalog_tables"
 			indexName="ix_blazing_catalog_tables_name">
 			<column name="name" />
 		</createIndex>
 
-		<createTable tableName="blazing_catalog_tables_columns">
+		<createTable tableName="blazing_catalog_database">
 			<column name="id" type="BIGINT" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false" />
 			</column>
-			<column name="table_id" type="BIGINT">
+			<column name="name" type="varchar(50)">
 				<constraints nullable="false" />
 			</column>
-			<column name="column_id" type="BIGINT">
+			<column name="schema_id" type="BIGINT">
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+
+		<addForeignKeyConstraint
+			constraintName="fk_tables_database"
+			baseTableName="blazing_catalog_tables" baseColumnNames="database_id"
+			referencedTableName="blazing_catalog_database"
+			referencedColumnNames="id" />
+
+		<createTable tableName="blazing_catalog_schema">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(50)">
+				<constraints nullable="false" />
+			</column>
+
+		</createTable>
+
+		<addForeignKeyConstraint
+			constraintName="fk_database_schema"
+			baseTableName="blazing_catalog_database" baseColumnNames="schema_id"
+			referencedTableName="blazing_catalog_schema"
+			referencedColumnNames="id" />
+
+
+
 	</changeSet>
 
 </databaseChangeLog>

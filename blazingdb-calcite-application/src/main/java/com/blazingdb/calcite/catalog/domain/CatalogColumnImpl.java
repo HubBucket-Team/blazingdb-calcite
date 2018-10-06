@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Table;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -12,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 @Entity
@@ -26,8 +28,13 @@ public class CatalogColumnImpl implements CatalogColumn {
 	@Column(name = "name", nullable = false)
 	private String name;
 
-	@OneToOne(mappedBy = "blazing_catalog_column_datatypes")
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "data_type_id")
 	private CatalogColumnDataTypeImpl dataType;
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "table_id")
+	private CatalogTableImpl table;
 
 	public Long getId() {
 		return id;
@@ -55,4 +62,12 @@ public class CatalogColumnImpl implements CatalogColumn {
 		this.dataType = dataType;
 	}
 
+	@Override
+	public CatalogTableImpl getTable() {
+		return table;
+	}
+	
+	public void setTable(CatalogTableImpl newTable) {
+		this.table = newTable;
+	}
 }

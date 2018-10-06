@@ -1,15 +1,21 @@
 package com.blazingdb.calcite.catalog.domain;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.Cascade;
 
 @Entity
 @Table(name = "blazing_catalog_tables")
@@ -22,9 +28,24 @@ public class CatalogTableImpl implements CatalogTable {
 
 	@Column(name = "name", nullable = false)
 	private String name;
+	
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "table")
+	@Cascade({ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+	@MapKey(name="name") //here this is the column name inside of CatalogColumn
+	private Map<String,CatalogColumnImpl> tableColumns;
 
-	@ManyToMany(mappedBy = "blazing_catalog_columns", targetEntity = CatalogColumnImpl.class)
-	private Set<CatalogColumn> columns;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "database_id")
+	private CatalogDatabaseImpl database;
+	
+	@Override
+	public CatalogDatabaseImpl getDatabase() {
+		return database;
+	}
+
+	public void setDatabase(CatalogDatabaseImpl database) {
+		this.database = database;
+	}
 
 	public Long getId() {
 		return this.id;
@@ -45,11 +66,17 @@ public class CatalogTableImpl implements CatalogTable {
 
 	@Override
 	public Set<CatalogColumn> getColumns() {
-		return this.columns;
+		Set<CatalogColumn> tempColumns = new HashSet<CatalogColumn>();
+		tempColumns.addAll(this.tableColumns.values());
+		return tempColumns;
 	}
 
-	public void setColumns(Set<CatalogColumn> columns) {
-		this.columns = columns;
+	public Map<String,CatalogColumnImpl> getTableColumns(){ //i think hibernate needs a getter of the private data type not sure about this
+		return tableColumns;
+	}
+	
+	public void setTableColumns(Map<String,CatalogColumnImpl> columns) {
+		this.tableColumns = columns;
 	}
 
 }

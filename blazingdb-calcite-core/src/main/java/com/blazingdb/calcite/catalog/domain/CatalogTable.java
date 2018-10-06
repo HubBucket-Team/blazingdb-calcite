@@ -8,4 +8,6 @@ public interface CatalogTable {
 
 	public Set<CatalogColumn> getColumns();
 
+	public CatalogDatabase getDatabase();
+
 }
