@@ -41,17 +41,23 @@ public class BlazingSchema implements Schema {
 	@Override
 	public Table getTable(String name) {
 		if (isDatabase()) {
+			System.out.println("was found to be a database!");
 			final CatalogTable catalogTable = this.catalogDatabase.getTable(name);
 			return new BlazingTable(catalogTable);
 		}
 
 		// TODO percy raise unsupported operation for schema
-
+		System.out.println("was NOT found to be a database!");
 		return null;
+	}
+	
+	public String getName() {
+		return this.catalogDatabase.getDatabaseName();
 	}
 
 	@Override
 	public Set<String> getTableNames() {
+		System.out.println("getting table names");
 		return this.catalogDatabase.getTableNames();
 	}
 

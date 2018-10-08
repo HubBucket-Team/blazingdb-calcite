@@ -1,13 +1,10 @@
 package com.blazingdb.calcite.catalog;
 
-import static org.testng.Assert.*;
-
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.tools.RelConversionException;
 import org.apache.calcite.tools.ValidationException;
@@ -17,34 +14,22 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
-
 import javax.naming.NamingException;
-import javax.sql.DataSource;
-
-import org.hibernate.Criteria;
-import org.hibernate.LazyInitializationException;
-import org.hibernate.Query;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.criterion.Example;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-
+import com.blazingdb.calcite.application.RelationalAlgebraGenerator;
 import com.blazingdb.calcite.catalog.domain.CatalogColumnDataType;
 import com.blazingdb.calcite.catalog.domain.CatalogColumnImpl;
-import com.blazingdb.calcite.catalog.domain.CatalogDatabase;
 import com.blazingdb.calcite.catalog.domain.CatalogDatabaseImpl;
 import com.blazingdb.calcite.catalog.domain.CatalogTable;
 import com.blazingdb.calcite.catalog.domain.CatalogTableImpl;
 import com.blazingdb.calcite.catalog.repository.DatabaseRepository;
 import com.blazingdb.calcite.plan.BlazingPlanner;
-
+import com.blazingdb.calcite.schema.BlazingSchema;
+import com.blazingdb.calcite.schema.BlazingTable;
+import org.apache.calcite.schema.Table;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
@@ -223,7 +208,44 @@ public class BlazingCatalogTest {
 		repo.dropDatabase(db);
 	}
 	
+	@Test()
+	public void generateSQLTest() throws Exception {
+		System.out.println("=============================== GENERATE RELATIONAL ALGEBRA TEST ====================================");
+
+		CatalogDatabaseImpl db = new CatalogDatabaseImpl("testdb");
+
+		repo.createDatabase(db);
+		dbId = db.getId();
 	
+		CatalogColumnImpl column1 = new CatalogColumnImpl("col1",CatalogColumnDataType.GDF_INT64);
+		CatalogColumnImpl column2 = new CatalogColumnImpl("col2",CatalogColumnDataType.GDF_INT32);
+	
+		List<CatalogColumnImpl> columns = new ArrayList<CatalogColumnImpl>();
+		columns.add(column1);
+		columns.add(column2);
+		
+		CatalogTableImpl table = new CatalogTableImpl("table1",db,columns);
+		
+		repo.createTable(table);
+	
+		
+		db = repo.getDatabase(dbId);
+		System.out.println("The db to delete id is " +  dbId + " it has" + db.getTables().size());
+		
+		BlazingSchema schema = new BlazingSchema(db);
+		Table tableTemp = schema.getTable("table1");
+		if(tableTemp == null) {
+			System.out.println("table NOT found");
+			throw new Exception();
+		}else {
+			System.out.println("table found");
+		}
+		RelationalAlgebraGenerator algebraGen = new RelationalAlgebraGenerator(schema);
+		
+		RelNode node = algebraGen.getRelationalAlgebra("select * from testdb.table1");
+		
+		//TODO: some kind of assertion that we got the reight relational algebra
+	}
 
 	@Test()
 	public void testLoadDataInFile()
