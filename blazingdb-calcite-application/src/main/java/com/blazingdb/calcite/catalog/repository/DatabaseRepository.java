@@ -1,5 +1,6 @@
 package com.blazingdb.calcite.catalog.repository;
 
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -41,6 +42,22 @@ public class DatabaseRepository {
 		}
 	}
 	
+	public CatalogDatabaseImpl getDatabase(Long dbId) {
+		Transaction transObj = null;
+		Session sessionObj = null;
+		try {
+			sessionObj = getSessionFactory().openSession();
+
+			CatalogDatabaseImpl db = (CatalogDatabaseImpl) sessionObj.load(CatalogDatabaseImpl.class, dbId);
+			Hibernate.initialize(db);
+			return db;
+		} catch (HibernateException exObj) {
+			exObj.printStackTrace(); 
+		} finally {
+			sessionObj.close(); 
+		}
+		return null;
+	}
 	
 	public void dropDatabase(CatalogDatabaseImpl database) {
 		Transaction transObj = null;
@@ -82,7 +99,7 @@ public class DatabaseRepository {
 			sessionObj.close(); 
 		}
 	}
-	public void dropDatabase(CatalogTableImpl table) {
+	public void dropTable(CatalogTableImpl table) {
 		Transaction transObj = null;
 		Session sessionObj = null;
 		try {

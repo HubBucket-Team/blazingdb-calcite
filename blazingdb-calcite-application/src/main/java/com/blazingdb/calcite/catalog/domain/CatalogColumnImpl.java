@@ -21,6 +21,15 @@ import javax.persistence.OneToOne;
 @Table(name = "blazing_catalog_columns")
 public class CatalogColumnImpl implements CatalogColumn {
 
+	public CatalogColumnImpl() {
+		
+	}
+	
+	public CatalogColumnImpl(String name, CatalogColumnDataType type) {
+		this.dataType = type;
+		this.name = name;
+	}
+	
 	@Id
 	@GeneratedValue
 	@Column(name = "id")
@@ -30,7 +39,7 @@ public class CatalogColumnImpl implements CatalogColumn {
 	private String name;
 
     @Enumerated
-    @Column(columnDefinition = "smallint")
+    @Column(name="data_type",columnDefinition = "smallint")
 	private CatalogColumnDataType dataType;
 	
 	@ManyToOne(fetch = FetchType.EAGER)

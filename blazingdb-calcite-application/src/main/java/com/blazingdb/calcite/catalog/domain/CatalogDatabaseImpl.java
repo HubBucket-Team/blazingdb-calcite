@@ -1,6 +1,7 @@
 package com.blazingdb.calcite.catalog.domain;
 
 import java.util.Set;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import javax.persistence.Entity;
@@ -8,6 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Cascade;
+
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -18,7 +20,7 @@ import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 
 @Entity
-@Table(name = "blazing_catalog_databases")
+@Table(name = "blazing_catalog_database")
 public class CatalogDatabaseImpl implements CatalogDatabase {
 
 	@Id
@@ -29,11 +31,12 @@ public class CatalogDatabaseImpl implements CatalogDatabase {
 	@Column(name = "name", nullable = false)
 	private String name;
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "database")
-	@Cascade({ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "database", orphanRemoval = true)
+	@Cascade({ org.hibernate.annotations.CascadeType.ALL})
 	@MapKey(name="name")
 	private Map<String,CatalogTableImpl> databaseTables;
 
+	/*
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "schema_id")
 	private CatalogSchemaImpl schema;
@@ -47,7 +50,15 @@ public class CatalogDatabaseImpl implements CatalogDatabase {
 		this.schema = schema;
 	}
 	
-	
+	*/
+
+	public CatalogDatabaseImpl() {
+		this.databaseTables = new HashMap<String,CatalogTableImpl>();		
+	}
+	public CatalogDatabaseImpl(String name) {
+		this.name = name;
+		this.databaseTables = new HashMap<String,CatalogTableImpl>();
+	}
 
 	public Long getId() {
 		return id;
@@ -83,7 +94,7 @@ public class CatalogDatabaseImpl implements CatalogDatabase {
 	// TODO percy move these to a services class
 	//TODO felipe thinks its ok to have this here
 	@Override
-	public CatalogTable getTable(String tableName) {
+	public CatalogTableImpl getTable(String tableName) {
 		// TODO Auto-generated method stub
 		return this.databaseTables.get(tableName);
 	}

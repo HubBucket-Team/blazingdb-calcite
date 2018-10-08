@@ -64,9 +64,9 @@
 			<column name="name" type="varchar(50)">
 				<constraints nullable="false" />
 			</column>
-			<column name="schema_id" type="BIGINT">
+	<!--		<column name="schema_id" type="BIGINT">
 				<constraints nullable="false" />
-			</column>
+			</column> -->
 		</createTable>
 
 		<addForeignKeyConstraint
@@ -75,6 +75,7 @@
 			referencedTableName="blazing_catalog_database"
 			referencedColumnNames="id" />
 
+	<!--  Dont think we need schemas 
 		<createTable tableName="blazing_catalog_schema">
 			<column name="id" type="BIGINT" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false" />
@@ -90,7 +91,7 @@
 			baseTableName="blazing_catalog_database" baseColumnNames="schema_id"
 			referencedTableName="blazing_catalog_schema"
 			referencedColumnNames="id" />
-
+-->
 
 
 	</changeSet>

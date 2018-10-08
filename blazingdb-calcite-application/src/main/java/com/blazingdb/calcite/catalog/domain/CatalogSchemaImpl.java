@@ -25,6 +25,7 @@ import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+//NOTE: not currenlty  mapped!
 @Entity
 @Table(name = "blazing_catalog_schemas")
 public class CatalogSchemaImpl implements CatalogSchema {

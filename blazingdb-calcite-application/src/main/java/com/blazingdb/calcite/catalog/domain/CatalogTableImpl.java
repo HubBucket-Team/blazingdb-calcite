@@ -1,8 +1,11 @@
 package com.blazingdb.calcite.catalog.domain;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,10 +20,26 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Cascade;
 
+
 @Entity
 @Table(name = "blazing_catalog_tables")
 public class CatalogTableImpl implements CatalogTable {
 
+	
+	public CatalogTableImpl() {
+		this.tableColumns = new HashMap<String,CatalogColumnImpl>();		
+	}
+	
+	public CatalogTableImpl(String name, CatalogDatabaseImpl db, List<CatalogColumnImpl> columns) {
+		this.name = name;
+		this.database = db;
+		this.tableColumns = new HashMap<String,CatalogColumnImpl>();
+		for(CatalogColumnImpl column : columns) {
+			column.setTable(this);
+			this.tableColumns.put(column.getColumnName(), column);
+		}
+	}
+	
 	@Id
 	@GeneratedValue
 	@Column(name = "id")
@@ -29,8 +48,8 @@ public class CatalogTableImpl implements CatalogTable {
 	@Column(name = "name", nullable = false)
 	private String name;
 	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "table")
-	@Cascade({ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "table", orphanRemoval = true)
+	@Cascade({ org.hibernate.annotations.CascadeType.ALL})
 	@MapKey(name="name") //here this is the column name inside of CatalogColumn
 	private Map<String,CatalogColumnImpl> tableColumns;
 
