@@ -32,7 +32,7 @@ public class CatalogDatabaseImpl implements CatalogDatabase {
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "database")
 	@Cascade({ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
 	@MapKey(name="name")
-	private Map<String,CatalogTable> databaseTables;
+	private Map<String,CatalogTableImpl> databaseTables;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "schema_id")
@@ -72,11 +72,11 @@ public class CatalogDatabaseImpl implements CatalogDatabase {
 		return tempTables;
 	}
 
-	public Map<String,CatalogTable> getDatabaseTables(){
+	public Map<String,CatalogTableImpl> getDatabaseTables(){
 		return this.databaseTables;
 	}
 	
-	public void setDatabaseTables(Map<String,CatalogTable> tables) {
+	public void setDatabaseTables(Map<String,CatalogTableImpl> tables) {
 		this.databaseTables = tables;
 	}
 

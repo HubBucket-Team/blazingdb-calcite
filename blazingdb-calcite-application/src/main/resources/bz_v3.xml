@@ -25,12 +25,7 @@
 			</column>
 		</createTable>
 
-		<addForeignKeyConstraint
-			constraintName="fk_blazing_catalog_columns_blazing_catalog_column_datatypes"
-			baseTableName="blazing_catalog_columns"
-			baseColumnNames="data_type_id"
-			referencedTableName="blazing_catalog_column_datatypes"
-			referencedColumnNames="name" />
+
 
 		<createTable tableName="blazing_catalog_tables">
 			<column name="id" type="BIGINT" autoIncrement="true">

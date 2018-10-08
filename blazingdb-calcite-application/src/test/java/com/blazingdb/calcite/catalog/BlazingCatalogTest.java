@@ -34,7 +34,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
-import com.blazingdb.calcite.catalog.domain.CatalogColumnDataTypeImpl;
+import com.blazingdb.calcite.catalog.domain.CatalogColumnDataType;
 import com.blazingdb.calcite.plan.BlazingPlanner;
 
 import liquibase.Contexts;
@@ -169,7 +169,7 @@ public class BlazingCatalogTest {
 
 		System.out.println("testSaveOperation begins ........ This is \"C\" of CRUD");
 
-		CatalogColumnDataTypeImpl type1 = new CatalogColumnDataTypeImpl("double");
+		CatalogColumnDataType type1 = CatalogColumnDataType.GDF_FLOAT64;
 
 		Session session = sessionFactory.openSession();
 		session.beginTransaction();

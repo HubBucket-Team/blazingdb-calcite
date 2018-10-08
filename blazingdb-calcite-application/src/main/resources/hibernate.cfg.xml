@@ -33,7 +33,11 @@
 		<!-- <property name="hibernate.search.default.directory_provider">filesystem</property> 
 			<property name="hibernate.search.default.indexBase">target/indexes</property> -->
 		<!-- <mapping package="com.blazingdb.calcite.catalog.domain" /> -->
-		<mapping class="com.blazingdb.calcite.catalog.domain.CatalogColumnDataTypeImpl" />
+		<mapping class="com.blazingdb.calcite.catalog.domain.CatalogColumnImpl" />
+		<mapping class="com.blazingdb.calcite.catalog.domain.CatalogTableImpl" />
+		<mapping class="com.blazingdb.calcite.catalog.domain.CatalogDatabaseImpl" />
+		<mapping class="com.blazingdb.calcite.catalog.domain.CatalogSchemaImpl" />
+		<mapping class="com.blazingdb.calcite.catalog.domain.CatalogColumnDataType" />
 
 	</session-factory>
 </hibernate-configuration>
