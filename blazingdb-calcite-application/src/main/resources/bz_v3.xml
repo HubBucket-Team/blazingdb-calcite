@@ -5,12 +5,8 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
 	<changeSet id="1"
-		author="Percy Camilo Triveño Aucahuasi - percy@blazingdb.com">
-		<createTable tableName="blazing_catalog_column_datatypes">
-			<column name="name" type="varchar(128)">
-				<constraints primaryKey="true" nullable="false" />
-			</column>
-		</createTable>
+		author="Percy Camilo Triveño Aucahuasi - percy@blazingdb.com, Felipe Aramburu felipe@blazingdb.com">
+
 
 
 
@@ -21,7 +17,7 @@
 			<column name="name" type="varchar(50)">
 				<constraints nullable="false" />
 			</column>
-			<column name="data_type_id" type="varchar(128)">
+			<column name="data_type" type="smallint">
 				<constraints nullable="false" />
 			</column>
 			<column name="table_id" type="BIGINT">

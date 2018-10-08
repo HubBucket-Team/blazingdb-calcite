@@ -9,6 +9,7 @@ import org.hibernate.cfg.Configuration;
 import com.blazingdb.calcite.catalog.domain.CatalogDatabaseImpl;
 import com.blazingdb.calcite.catalog.domain.CatalogSchema;
 import com.blazingdb.calcite.catalog.domain.CatalogSchemaImpl;
+import com.blazingdb.calcite.catalog.domain.CatalogTableImpl;
 
 public class DatabaseRepository {
 
@@ -62,5 +63,44 @@ public class DatabaseRepository {
 		}
 	}
 	
-	public void createTable(String tableName, List<String> columnNames, )
+	public void createTable(CatalogTableImpl table) {
+		Transaction transObj = null;
+		Session sessionObj = null;
+		try {
+			sessionObj = getSessionFactory().openSession();
+			transObj = sessionObj.beginTransaction();
+
+			sessionObj.persist(table);
+			
+			transObj.commit();
+		} catch (HibernateException exObj) {
+			if(transObj!=null){
+				transObj.rollback();
+			}
+			exObj.printStackTrace(); 
+		} finally {
+			sessionObj.close(); 
+		}
+	}
+	public void dropDatabase(CatalogTableImpl table) {
+		Transaction transObj = null;
+		Session sessionObj = null;
+		try {
+			sessionObj = getSessionFactory().openSession();
+			transObj = sessionObj.beginTransaction();
+
+			
+			sessionObj.delete(table);
+			
+			transObj.commit();
+		} catch (HibernateException exObj) {
+			if(transObj!=null){
+				transObj.rollback();
+			}
+			exObj.printStackTrace(); 
+		} finally {
+			sessionObj.close(); 
+		}
+	}
+	
 }

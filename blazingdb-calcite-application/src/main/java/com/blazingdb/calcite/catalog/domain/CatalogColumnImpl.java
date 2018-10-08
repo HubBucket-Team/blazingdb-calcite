@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Table;
 import javax.persistence.Column;
@@ -28,9 +29,9 @@ public class CatalogColumnImpl implements CatalogColumn {
 	@Column(name = "name", nullable = false)
 	private String name;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "data_type_id")
-	private CatalogColumnDataTypeImpl dataType;
+    @Enumerated
+    @Column(columnDefinition = "smallint")
+	private CatalogColumnDataType dataType;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "table_id")
@@ -54,11 +55,11 @@ public class CatalogColumnImpl implements CatalogColumn {
 	}
 
 	@Override
-	public CatalogColumnDataTypeImpl getColumnDataType() {
+	public CatalogColumnDataType getColumnDataType() {
 		return this.dataType;
 	}
 
-	public void setColumnDataType(CatalogColumnDataTypeImpl dataType) {
+	public void setColumnDataType(CatalogColumnDataType dataType) {
 		this.dataType = dataType;
 	}
 

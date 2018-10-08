@@ -6,6 +6,8 @@
 package com.blazingdb.calcite.schema;
 
 import com.blazingdb.calcite.catalog.domain.CatalogTable;
+import com.blazingdb.calcite.catalog.domain.CatalogColumn;
+import com.blazingdb.calcite.catalog.domain.CatalogColumnDataType;
 import com.blazingdb.calcite.sql.parser.BlazingSqlParser;
 import java.util.Collection;
 import java.util.HashSet;
@@ -24,13 +26,14 @@ import org.apache.calcite.schema.Statistics;
 import org.apache.calcite.schema.Table;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.util.ConversionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BlazingTable implements Table {
 
-	final static Logger MAPDLOGGER = LoggerFactory.getLogger(BlazingTable.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(BlazingTable.class);
 
 	private final CatalogTable catalogTable;
 
@@ -55,6 +58,9 @@ public class BlazingTable implements Table {
 		//
 		// builder.add(col_name, col_type);
 		// }
+		for(CatalogColumn column : catalogTable.getColumns()) {
+			builder.add(column.getColumnName(),convertToSqlType(column.getColumnDataType(),rdtf));
+		}
 		return builder.build();
 	}
 
@@ -68,6 +74,49 @@ public class BlazingTable implements Table {
 		return Schema.TableType.TABLE;
 	}
 
+	private RelDataType convertToSqlType(CatalogColumnDataType dataType,RelDataTypeFactory typeFactory) {
+		RelDataType temp = null;
+		switch(dataType) {
+		case GDF_INT8 :
+			temp = typeFactory.createSqlType(SqlTypeName.TINYINT);
+			break;
+		case GDF_INT16 :
+			temp = typeFactory.createSqlType(SqlTypeName.SMALLINT);
+			break;
+		case GDF_INT32 :
+			temp = typeFactory.createSqlType(SqlTypeName.INTEGER);
+			break;
+		case GDF_INT64 :
+			temp = typeFactory.createSqlType(SqlTypeName.BIGINT);
+			break; 
+		case GDF_FLOAT32 :
+			temp = typeFactory.createSqlType(SqlTypeName.FLOAT);
+			break;
+		case GDF_FLOAT64 :
+			temp = typeFactory.createSqlType(SqlTypeName.DOUBLE);
+			break;
+		case GDF_DATE32 :
+			temp = typeFactory.createSqlType(SqlTypeName.DATE);
+			break;
+		case GDF_DATE64 :
+			temp = typeFactory.createSqlType(SqlTypeName.DATE);
+			break;
+		case GDF_TIMESTAMP :
+			temp = typeFactory.createSqlType(SqlTypeName.DATE);
+			break;
+		case GDF_CATEGORY :
+			temp = null;
+			break;
+		case GDF_STRING:
+			temp = typeFactory.createSqlType(SqlTypeName.VARCHAR);
+			break;
+		default:
+			temp = null;
+		
+		
+		}
+		return temp;
+	}
 	// private RelDataType createType(TColumnType value, RelDataTypeFactory typeFactory) {
 	// RelDataType cType = getRelDataType(value.col_type.type, value.col_type.precision, value.col_type.scale,
 	// typeFactory);

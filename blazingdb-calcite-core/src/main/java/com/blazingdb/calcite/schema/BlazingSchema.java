@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 public class BlazingSchema implements Schema {
 
-	final static Logger MAPDLOGGER = LoggerFactory.getLogger(BlazingSchema.class);
+	final static Logger LOGGER = LoggerFactory.getLogger(BlazingSchema.class);
 
 	final private CatalogSchema catalogSchema;
 	final private CatalogDatabase catalogDatabase;
@@ -52,9 +52,7 @@ public class BlazingSchema implements Schema {
 
 	@Override
 	public Set<String> getTableNames() {
-		// Set<String> tableSet = metaConnect.getTables();
-		// return tableSet;
-		return null;
+		return this.catalogDatabase.getTableNames();
 	}
 
 	@Override
@@ -87,7 +85,7 @@ public class BlazingSchema implements Schema {
 
 	@Override
 	public boolean isMutable() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return true;
 	}
 
 	// void updateMetaData(String schema, String table) {
