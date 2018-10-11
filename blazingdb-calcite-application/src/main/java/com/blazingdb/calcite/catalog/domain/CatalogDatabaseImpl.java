@@ -14,8 +14,6 @@ import org.hibernate.annotations.Cascade;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 
@@ -105,6 +103,18 @@ public class CatalogDatabaseImpl implements CatalogDatabase {
 		Set<String> tableNames = new LinkedHashSet<String>();
 		tableNames.addAll(this.databaseTables.keySet());
 		return tableNames;
+	}
+	public void addTable(CatalogTableImpl table) {
+		// TODO Auto-generated method stub
+		this.databaseTables.put(table.getTableName(), table);
+	}
+	public void removeTable(CatalogTableImpl table) {
+		this.databaseTables.remove(table.getTableName());
+		
+	}
+	public void removeTable(String tableName) {
+		this.databaseTables.remove(tableName);
+		
 	}
 
 }

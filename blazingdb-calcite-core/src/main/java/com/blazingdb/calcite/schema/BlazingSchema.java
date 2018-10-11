@@ -41,7 +41,7 @@ public class BlazingSchema implements Schema {
 	@Override
 	public Table getTable(String name) {
 		if (isDatabase()) {
-			System.out.println("was found to be a database!");
+
 			final CatalogTable catalogTable = this.catalogDatabase.getTable(name);
 			return new BlazingTable(catalogTable);
 		}

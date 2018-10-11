@@ -23,6 +23,12 @@
 	</properties>
 
 	<dependencies>
+	<dependency>
+         <groupId>com.blazingdb</groupId>
+         <artifactId>blazingdb-protocol</artifactId>
+         <version>1.0-SNAPSHOT</version>
+         
+      </dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
@@ -48,15 +54,12 @@
 		</dependency>
 		<!-- Database Backends -->
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>1.4.192</version>
+			    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <version>1.4.197</version>
+			<scope>runtime</scope>
 		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.40</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
@@ -68,21 +71,56 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>3.6.3.Final</version>
+		</dependency>
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
 			<version>3.6.2</version>
+			
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
+		<plugin>
+		   <groupId>org.liquibase</groupId>
+		   <artifactId>liquibase-maven-plugin</artifactId>
+		   <version>3.6.2</version>
+		   <configuration>                  
+			  <propertyFile>src/main/resources/properties/liquibase.properties</propertyFile>
+			     <propertyFileWillOverride>true</propertyFileWillOverride>
+
+		        <changeLogFile>src/main/resources/liquibase-bz-master.xml</changeLogFile>
+		        <driver>org.h2.Driver</driver>
+		   </configuration>                
+		   <executions>
+			 <execution>
+			   <phase>process-resources</phase>                                                                  
+			   <goals>
+				 <goal>update</goal>
+			   </goals>
+			 </execution>
+		   </executions>
+		   <dependencies>
+		   <dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.197</version>
+			<scope>runtime</scope>
+		</dependency></dependencies>
+		</plugin> 	
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-					<finalName>ParquetGenerator</finalName>
+					<finalName>BlazingCalcite</finalName>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -99,7 +137,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.blazingdb.application.UnixServer</mainClass>
+									<mainClass>com.blazingdb.calcite.application.UnixServer</mainClass>
 								</transformer>
 							</transformers>
 							<filters>

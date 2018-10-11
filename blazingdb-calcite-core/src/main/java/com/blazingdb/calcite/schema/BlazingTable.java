@@ -8,7 +8,7 @@ package com.blazingdb.calcite.schema;
 import com.blazingdb.calcite.catalog.domain.CatalogTable;
 import com.blazingdb.calcite.catalog.domain.CatalogColumn;
 import com.blazingdb.calcite.catalog.domain.CatalogColumnDataType;
-import com.blazingdb.calcite.sql.parser.BlazingSqlParser;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;

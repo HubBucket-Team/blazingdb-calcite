@@ -80,4 +80,8 @@ public class CatalogColumnImpl implements CatalogColumn {
 	public void setTable(CatalogTableImpl newTable) {
 		this.table = newTable;
 	}
+
+	public void setColumnDataType(String type) {
+		this.dataType = CatalogColumnDataType.fromString(type);
+	}
 }

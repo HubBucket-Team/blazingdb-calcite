@@ -16,113 +16,99 @@
 
 package com.blazingdb.calcite.application;
 
-import jnr.enxio.channels.NativeSelectorProvider;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import jnr.unixsocket.UnixServerSocket;
-import jnr.unixsocket.UnixServerSocketChannel;
-import jnr.unixsocket.UnixSocketAddress;
-import jnr.unixsocket.UnixSocketChannel;
+
+import org.apache.calcite.plan.RelOptUtil;
+
+import com.blazingdb.calcite.catalog.connection.CatalogService;
+import com.blazingdb.calcite.catalog.connection.CatalogServiceImpl;
+import com.blazingdb.calcite.schema.BlazingSchema;
+import com.blazingdb.protocol.IService;
+import com.blazingdb.protocol.UnixService;
+import com.blazingdb.protocol.message.RequestMessage;
+import com.blazingdb.protocol.message.ResponseErrorMessage;
+import com.blazingdb.protocol.message.ResponseMessage;
+import com.blazingdb.protocol.message.calcite.DDLCreateTableRequestMessage;
+import com.blazingdb.protocol.message.calcite.DDLDropTableRequestMessage;
+import com.blazingdb.protocol.message.calcite.DDLRequestMessage;
+import com.blazingdb.protocol.message.calcite.DDLResponseMessage;
+import com.blazingdb.protocol.message.calcite.DMLRequestMessage;
+import com.blazingdb.protocol.message.calcite.DMLResponseMessage;
+
+import blazingdb.protocol.Status;
+import blazingdb.protocol.calcite.MessageType;
 
 public class UnixServer {
 
+	
+	
 	public static void main(String[] args) throws IOException {
-		java.io.File path = new java.io.File("/tmp/fubar.sock");
-		path.deleteOnExit();
-		UnixSocketAddress address = new UnixSocketAddress(path);
-		UnixServerSocketChannel channel = UnixServerSocketChannel.open();
+		
 
-		try {
-			Selector sel = NativeSelectorProvider.getInstance().openSelector();
-			channel.configureBlocking(false);
-			channel.socket().bind(address);
-			channel.register(sel, SelectionKey.OP_ACCEPT, new ServerActor(channel, sel));
 
-			while (sel.select() > 0) {
-				Set<SelectionKey> keys = sel.selectedKeys();
-				Iterator<SelectionKey> iterator = keys.iterator();
-				boolean running = false;
-				boolean cancelled = false;
-				while (iterator.hasNext()) {
-					SelectionKey k = iterator.next();
-					Actor a = (Actor) k.attachment();
-					if (a.rxready()) {
-						running = true;
-					} else {
-						k.cancel();
-						cancelled = true;
+		ApplicationContext.init(); //any api call initializes it actually
+        File unixSocketFile = new File("/tmp/calcite.socket");
+        unixSocketFile.deleteOnExit();
+
+        IService calciteService  = new IService() {
+            @Override
+            public ByteBuffer process(ByteBuffer buffer) {
+                RequestMessage requestMessage = new RequestMessage(buffer);
+                if(requestMessage.getHeaderType() == MessageType.DML) {
+                    DMLRequestMessage requestPayload = new DMLRequestMessage(requestMessage.getPayloadBuffer());
+                    ResponseMessage response = null;
+                    System.out.println("DML: " + requestPayload.getQuery());
+                    if (requestPayload.getQuery().contains("select")) {
+                        String logicalPlan  = RelOptUtil.toString(ApplicationContext.getRelationalAlgebraGenerator().getRelationalAlgebra(requestPayload.getQuery()));
+                        DMLResponseMessage responsePayload = new DMLResponseMessage(logicalPlan);
+                        response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
+                    } else {
+                        ResponseErrorMessage error = new ResponseErrorMessage("error: it is not a DML query");
+                        response = new ResponseMessage(Status.Error, error.getBufferData());
+                    }
+                    return response.getBufferData();
+                }
+                else if(requestMessage.getHeaderType() == MessageType.DDL) {
+                	//TODO: this is not an acgtual message we want to implement
+                    DDLRequestMessage requestPayload = new DDLRequestMessage(requestMessage.getPayloadBuffer());
+                    ResponseMessage response = null;
+                    System.out.println("DDL: " + requestPayload.getQuery());
+
+                    if (requestPayload.getQuery().contains("create") || requestPayload.getQuery().contains("drop")){
+                        DDLResponseMessage responsePayload = new DDLResponseMessage();
+                        response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
+                    } else {
+                        ResponseErrorMessage error = new ResponseErrorMessage("error: it is not a DDL query");
+                        response = new ResponseMessage(Status.Error, error.getBufferData());
+                    }
+                    return response.getBufferData();
+                }else if(requestMessage.getHeaderType() == MessageType.DDL_CREATE_TABLE) {
+                	DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(requestMessage.getPayloadBuffer());
+                	try {
+                		ApplicationContext.getCatalogService().createTable(message);
+                		//I am unsure at this point if we have to update the schema or not but for safety I do it here
+                		//need to see what hibernate moves around :)
+                		ApplicationContext.updateContext();
+                	}catch(Exception e){
+                		System.out.println("error creating table");
+                	}
+                }else if(requestMessage.getHeaderType() == MessageType.DDL_DROP_TABLE) {
+                	DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(requestMessage.getPayloadBuffer());
+                	try {
+						ApplicationContext.getCatalogService().dropTable(message);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					iterator.remove();
-				}
-				if (!running && cancelled) {
-					System.out.println("No Actors Running any more");
-					break;
-				}
-			}
-		} catch (IOException ex) {
-			Logger.getLogger(UnixServerSocket.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		System.out.println("UnixServer EXIT");
-	}
-
-	static interface Actor {
-		public boolean rxready();
-	}
-
-	static final class ServerActor implements Actor {
-		private final UnixServerSocketChannel channel;
-		private final Selector selector;
-
-		public ServerActor(UnixServerSocketChannel channel, Selector selector) {
-			this.channel = channel;
-			this.selector = selector;
-		}
-
-		public final boolean rxready() {
-			try {
-				UnixSocketChannel client = channel.accept();
-				client.configureBlocking(false);
-				client.register(selector, SelectionKey.OP_READ, new ClientActor(client));
-				return true;
-			} catch (IOException ex) {
-				return false;
-			}
-		}
-	}
-
-	static final class ClientActor implements Actor {
-		private final UnixSocketChannel channel;
-
-		public ClientActor(UnixSocketChannel channel) {
-			this.channel = channel;
-		}
-
-		public final boolean rxready() {
-			try {
-				ByteBuffer buf = ByteBuffer.allocate(1024);
-				int n = channel.read(buf);
-				UnixSocketAddress remote = channel.getRemoteSocketAddress();
-				System.out.printf("Read in %d bytes from %s\n", n, remote);
-
-				if (n > 0) {
-					buf.flip();
-					channel.write(buf);
-					return true;
-				} else if (n < 0) {
-					return false;
-				}
-
-			} catch (IOException ex) {
-				ex.printStackTrace();
-				return false;
-			}
-			return true;
-		}
-	}
+                	ApplicationContext.updateContext();
+                }
+                return null;
+            }
+        };
+        UnixService service = new UnixService(calciteService);
+        service.bind(unixSocketFile);
+        new Thread(service).start();
+    }
 }

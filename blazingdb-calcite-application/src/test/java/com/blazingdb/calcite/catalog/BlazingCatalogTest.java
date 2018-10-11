@@ -26,9 +26,9 @@ import com.blazingdb.calcite.catalog.domain.CatalogDatabaseImpl;
 import com.blazingdb.calcite.catalog.domain.CatalogTable;
 import com.blazingdb.calcite.catalog.domain.CatalogTableImpl;
 import com.blazingdb.calcite.catalog.repository.DatabaseRepository;
-import com.blazingdb.calcite.plan.BlazingPlanner;
+
 import com.blazingdb.calcite.schema.BlazingSchema;
-import com.blazingdb.calcite.schema.BlazingTable;
+
 import org.apache.calcite.schema.Table;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
@@ -44,14 +44,12 @@ import liquibase.resource.ResourceAccessor;
 
 public class BlazingCatalogTest {
 
-	private BlazingPlanner blazingCalcite;
+
 	private static SessionFactory sessionFactory = null;
 
 	private static final String LIQUIBASE_CHANGELOG = "liquibase.changelog";
 	private static final String LIQUIBASE_DATASOURCE = "liquibase.datasource";
-	private static final String LIQUIBASE_PARAMETER = "liquibase.parameter";
-	private static final String LIQUIBASE_CONTEXTS = "liquibase.contexts";
-	private static final String LIQUIBASE_LABELS = "liquibase.labels";
+
 
 	private String dataSourceName;
 	private String changeLogFile;
@@ -144,7 +142,7 @@ public class BlazingCatalogTest {
 
 	@BeforeMethod
 	public void setUp() throws Exception {
-		this.executeUpdate();
+		//this.executeUpdate();
 		repo = new DatabaseRepository();
 		sessionFactory = new Configuration().configure().buildSessionFactory();
 
@@ -192,8 +190,9 @@ public class BlazingCatalogTest {
 		
 		CatalogTableImpl table = new CatalogTableImpl("table-1",db,columns);
 		
-		repo.createTable(table);
-	
+		//repo.createTable(table);
+		db.addTable(table);
+		repo.updateDatabase(db);
 		
 		db = repo.getDatabase(dbId);
 		System.out.println("The db to delete id is " +  dbId + " it has" + db.getTables().size());
@@ -203,7 +202,10 @@ public class BlazingCatalogTest {
 			System.out.println("table name is " + temp.getTableName());
 		}
 		table = db.getTable("table-1");
-		repo.dropTable(table);
+		db.removeTable(table);
+		repo.updateDatabase(db);
+
+		
 		db = repo.getDatabase(dbId); //this updates the hibernate object 
 		repo.dropDatabase(db);
 	}
@@ -226,7 +228,8 @@ public class BlazingCatalogTest {
 		
 		CatalogTableImpl table = new CatalogTableImpl("table1",db,columns);
 		
-		repo.createTable(table);
+		db.addTable(table);
+		repo.updateDatabase(db);
 	
 		
 		db = repo.getDatabase(dbId);
@@ -242,8 +245,9 @@ public class BlazingCatalogTest {
 		}
 		RelationalAlgebraGenerator algebraGen = new RelationalAlgebraGenerator(schema);
 		
-		RelNode node = algebraGen.getRelationalAlgebra("select * from testdb.table1");
+		RelNode node = algebraGen.getRelationalAlgebra("select *, col1 * col2 from testdb.table1");
 		
+		repo.dropDatabase(db);
 		//TODO: some kind of assertion that we got the reight relational algebra
 	}
 

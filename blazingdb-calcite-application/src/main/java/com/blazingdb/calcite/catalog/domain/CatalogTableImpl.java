@@ -40,6 +40,19 @@ public class CatalogTableImpl implements CatalogTable {
 		}
 	}
 	
+	public CatalogTableImpl(String name, CatalogDatabaseImpl db, List<String> columnNames, List<String> columnTypes) {
+		this.name = name;
+		this.database = db;
+		this.tableColumns = new HashMap<String,CatalogColumnImpl>();
+		for(int i = 0; i < columnNames.size();i++) {
+			CatalogColumnImpl column = new CatalogColumnImpl();
+			column.setColumnDataType(columnTypes.get(i));
+			column.setTable(this);
+			column.setColumnName(columnNames.get(i));
+			this.tableColumns.put(column.getColumnName(), column);
+		}
+	}
+
 	@Id
 	@GeneratedValue
 	@Column(name = "id")
