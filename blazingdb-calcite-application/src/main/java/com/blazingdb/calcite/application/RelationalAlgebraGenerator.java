@@ -27,6 +27,7 @@ import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
+import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.util.ChainedSqlOperatorTable;
 import org.apache.calcite.tools.FrameworkConfig;
@@ -103,8 +104,8 @@ public class RelationalAlgebraGenerator {
 		}
 	}
 	
-	public RelNode getRelationalAlgebra(String sql) {
-			try {
+	public RelNode getRelationalAlgebra(String sql) throws Exception {
+			
 	    	
 	    	SqlNode tempNode = planner.parse(sql);
 	    	
@@ -145,12 +146,6 @@ public class RelationalAlgebraGenerator {
 	    	  .build(); */
 
 	    	    return node;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.out.println("Error occured type y to see output");
-			
-			e.printStackTrace();
-			return null;
-		}
+		
 	}
 }

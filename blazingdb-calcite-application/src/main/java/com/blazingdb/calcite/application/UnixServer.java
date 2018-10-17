@@ -69,7 +69,7 @@ public class UnixServer {
 					}catch (Exception e) {
 						//TODO: give something more meaningfu than this :)
 						
-						ResponseErrorMessage error = new ResponseErrorMessage("Improperly Formatted Query");
+						ResponseErrorMessage error = new ResponseErrorMessage("Improperly Formatted Query\n" + e.getStackTrace()[0]);
 						response = new ResponseMessage(Status.Error, error.getBufferData());
 					}
 					return response.getBufferData();
