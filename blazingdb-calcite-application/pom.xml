@@ -97,6 +97,7 @@
 
 		        <changeLogFile>src/main/resources/liquibase-bz-master.xml</changeLogFile>
 		        <driver>org.h2.Driver</driver>
+		        <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
 		   </configuration>                
 		   <executions>
 			 <execution>
