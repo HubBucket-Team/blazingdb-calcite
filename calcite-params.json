@@ -1,0 +1,13 @@
+
+{
+    "columnNames": [
+            "n_nationkey",
+            "n_name",
+            "n_regionkey",
+            "n_comments"
+    ],
+    "types":  ["GDF_INT32", "GDF_INT64", "GDF_INT8", "GDF_INT64"],
+    "name": "nation",
+    "dbName": "main",
+    "query": "select n_nationkey > 5 from main.nation"
+}

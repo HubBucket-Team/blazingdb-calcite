@@ -16,9 +16,14 @@
 
 package com.blazingdb.calcite.application;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 
 import org.apache.calcite.plan.RelOptUtil;
 
@@ -39,87 +44,53 @@ import com.blazingdb.protocol.message.calcite.DMLResponseMessage;
 
 import blazingdb.protocol.Status;
 import blazingdb.protocol.calcite.MessageType;
+import com.google.gson.*;
 
-public class UnixServer {
+ public class UnixServer {
 
-
-
+    class CalciteParams {
+        String[] columnNames;
+        String[] types;
+        String name;
+        String dbName;
+        String query;
+        public CalciteParams() {
+            // no-args constructor
+        }
+    }
 	public static void main(String[] args) throws IOException {
-
-
-
+        Gson gson = new Gson();
+        String json = "";
+        try {
+            Scanner sc = new Scanner(System.in);
+            while (sc.hasNext()) {
+                json += sc.nextLine();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        CalciteParams params = gson.fromJson(json, CalciteParams.class);
 		ApplicationContext.init(); //any api call initializes it actually
-		File unixSocketFile = new File("/tmp/calcite.socket");
-		unixSocketFile.deleteOnExit();
+        List<String> columnNames = Arrays.asList(params.columnNames);
+        List<String> types = Arrays.asList(params.types);
+        String name = params.name;
+        String dbName = params.dbName;
 
-		IService calciteService  = new IService() {
-			@Override
-			public ByteBuffer process(ByteBuffer buffer) {
-
-				RequestMessage requestMessage = new RequestMessage(buffer);
-				if(requestMessage.getHeaderType() == MessageType.DML) {
-					DMLRequestMessage requestPayload = new DMLRequestMessage(requestMessage.getPayloadBuffer());
-					ResponseMessage response = null;
-					System.out.println("DML: " + requestPayload.getQuery());
-
-					try {
-						String logicalPlan  = RelOptUtil.toString(ApplicationContext.getRelationalAlgebraGenerator().getRelationalAlgebra(requestPayload.getQuery()));
-						DMLResponseMessage responsePayload = new DMLResponseMessage(logicalPlan);
-						response = new ResponseMessage(Status.Success, responsePayload.getBufferData());		
-					}catch (Exception e) {
-						//TODO: give something more meaningfu than this :)
-						
-						ResponseErrorMessage error = new ResponseErrorMessage("Improperly Formatted Query\n" + e.getStackTrace()[0]);
-						response = new ResponseMessage(Status.Error, error.getBufferData());
-					}
-					return response.getBufferData();
-				}else if(requestMessage.getHeaderType() == MessageType.DDL_CREATE_TABLE) {
-					DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(requestMessage.getPayloadBuffer());
-					ResponseMessage response = null;
-					try {
-						ApplicationContext.getCatalogService().createTable(message);
-						//I am unsure at this point if we have to update the schema or not but for safety I do it here
-						//need to see what hibernate moves around :)
-						ApplicationContext.updateContext();
-						DDLResponseMessage responsePayload = new DDLResponseMessage();
-						response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
-					}catch(Exception e){
-						ResponseErrorMessage error = new ResponseErrorMessage("Could not create table");
-						response = new ResponseMessage(Status.Error, error.getBufferData());
-
-					}
-					return response.getBufferData();
-				}else if(requestMessage.getHeaderType() == MessageType.DDL_DROP_TABLE) {
-					ResponseMessage response = null;
-
-					DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(requestMessage.getPayloadBuffer());
-					try {
-						ApplicationContext.getCatalogService().dropTable(message);
-						ApplicationContext.updateContext();
-						DDLResponseMessage responsePayload = new DDLResponseMessage();
-						response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						ResponseErrorMessage error = new ResponseErrorMessage("Could not drop table");
-						response = new ResponseMessage(Status.Error, error.getBufferData());
-
-					}
-					return response.getBufferData();
-
-				}else {
-					ResponseMessage response = null;
-
-					ResponseErrorMessage error = new ResponseErrorMessage("unhandled request type");
-					response = new ResponseMessage(Status.Error, error.getBufferData());
-
-					return response.getBufferData();
-
-				}
-
-			}
-		};
-		UnixService service = new UnixService(calciteService);
-		service.bind(unixSocketFile);
-		new Thread(service).start();
-	}
+        DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(columnNames, types, name, dbName);
+        try {
+            ApplicationContext.getCatalogService().createTable(message);
+            ApplicationContext.updateContext();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String query = params.query;
+        DMLRequestMessage requestPayload = new DMLRequestMessage(query);
+        try {
+            String logicalPlan  = RelOptUtil.toString(ApplicationContext.getRelationalAlgebraGenerator().getRelationalAlgebra(requestPayload.getQuery()));
+            System.out.println("@JSON");
+            System.out.println(logicalPlan);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
