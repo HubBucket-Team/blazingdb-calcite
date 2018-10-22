@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.blazingdb.calcite.application;
+package com.blazingdb.calcite.cli;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import com.blazingdb.calcite.application.ApplicationContext;
 import org.apache.calcite.plan.RelOptUtil;
 
 import com.blazingdb.calcite.catalog.connection.CatalogService;
@@ -40,13 +41,9 @@ import com.blazingdb.protocol.message.calcite.DMLResponseMessage;
 import blazingdb.protocol.Status;
 import blazingdb.protocol.calcite.MessageType;
 
-public class UnixServer {
-
-
+public class Calcite {
 
     public static void main(String[] args) throws IOException {
-
-
 
         ApplicationContext.init(); //any api call initializes it actually
         File unixSocketFile = new File("/tmp/calcite.socket");
