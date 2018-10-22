@@ -100,7 +100,7 @@ public class UnixServer {
 						response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
-						ResponseErrorMessage error = new ResponseErrorMessage("Could not create table");
+						ResponseErrorMessage error = new ResponseErrorMessage("Could not drop table");
 						response = new ResponseMessage(Status.Error, error.getBufferData());
 
 					}
