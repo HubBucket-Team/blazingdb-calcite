@@ -15,25 +15,40 @@ import com.blazingdb.calcite.catalog.domain.CatalogSchemaImpl;
 import com.blazingdb.calcite.catalog.domain.CatalogTableImpl;
 
 public class DatabaseRepository {
-
+	/**
+	 * The hibernate session we are opening
+	 */
 	private Session sessionObj = null;
 	
+	/**
+	 * Constructor initializes the hibernate session
+	 */
 	public DatabaseRepository() {
 		sessionObj = getSessionFactory().openSession();
 	}
 	
+	/**
+	 * Closes the hibernate session
+	 */
 	  @Override
 	  public void finalize() {
 	   sessionObj.close();
 	  }
 	
+	  /**
+	   * Creates a SessionFactory
+	   * @return A session factory capable of opening sessions
+	   */
 	private static SessionFactory getSessionFactory() {
 		Configuration configuration = new Configuration().configure();
 		SessionFactory sessionFactory = configuration.buildSessionFactory();
 		return sessionFactory;
 	}
 	
-
+	/**
+	 * Persists a database using hibernate. Commits and flushes.
+	 * @param database The database to persist
+	 */
 	public void createDatabase(CatalogDatabaseImpl database) {
 		Transaction transObj = null;
 		try {
@@ -48,7 +63,11 @@ public class DatabaseRepository {
 			exObj.printStackTrace(); 
 		} 
 	}
-	
+	/**
+	 * Gets a database according to its id column.
+	 * @param dbId id of the database to be returned.
+	 * @return A database if it exists else null
+	 */
 	public CatalogDatabaseImpl getDatabase(Long dbId) {
 		Transaction transObj = null;
 		try {
@@ -60,7 +79,10 @@ public class DatabaseRepository {
 		} 
 		return null;
 	}
-	
+	/**
+	 * Deletes a database using hibernate. Commits and flushes.
+	 * @param database the database to be deleted
+	 */
 	public void dropDatabase(CatalogDatabaseImpl database) {
 		Transaction transObj = null;
 		try {
@@ -106,6 +128,11 @@ public class DatabaseRepository {
 		}
 	}
 */
+	/**
+	 * Gets a database by name.
+	 * @param dbName The name of the database to be retrieved
+	 * @return a database whose name matches the one provided
+	 */
 	public CatalogDatabaseImpl getDatabase(String dbName) {
 		
 		Transaction transObj = null;
