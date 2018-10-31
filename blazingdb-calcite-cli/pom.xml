@@ -10,7 +10,7 @@
 		<version>1.0.0.RC</version>
 	</parent>
 
-	<artifactId>blazingdb-calcite-application</artifactId>
+	<artifactId>blazingdb-calcite-cli</artifactId>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -23,6 +23,14 @@
 	</properties>
 
 	<dependencies>
+
+		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.5</version>
+			<scope>compile</scope>
+		</dependency>
 
 		<dependency>
          <groupId>com.blazingdb</groupId>
@@ -78,56 +86,24 @@
 			<artifactId>hibernate-c3p0</artifactId>
 			<version>3.6.3.Final</version>
 		</dependency>
-		<dependency>
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-core</artifactId>
-			<version>3.6.2</version>
-			
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.blazingdb</groupId>
+            <artifactId>blazingdb-calcite-application</artifactId>
+            <version>1.0.0.RC</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>
-		<plugin>
-		   <groupId>org.liquibase</groupId>
-		   <artifactId>liquibase-maven-plugin</artifactId>
-		   <version>3.6.2</version>
-		   <configuration>                  
-			  <propertyFile>src/main/resources/properties/liquibase.properties</propertyFile>
-			     <propertyFileWillOverride>true</propertyFileWillOverride>
 
-		        <changeLogFile>src/main/resources/liquibase-bz-master.xml</changeLogFile>
-		        <driver>org.h2.Driver</driver>
-		        <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-		   </configuration>                
-		   <executions>
-			 <execution>
-			   <phase>process-resources</phase>                                                                  
-			   <goals>
-				 <goal>update</goal>
-			   </goals>
-			 </execution>
-		   </executions>
-		   <dependencies>
-		   <dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>1.4.197</version>
-			<scope>runtime</scope>
-		</dependency></dependencies>
-		</plugin> 	
- <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.1</version>
-        
-      </plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-					<finalName>BlazingCalcite</finalName>
+					<finalName>BlazingCalciteCli</finalName>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -144,7 +120,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.blazingdb.calcite.application.UnixServer</mainClass>
+									<mainClass>com.blazingdb.calcite.cli.Generator</mainClass>
 								</transformer>
 							</transformers>
 							<filters>

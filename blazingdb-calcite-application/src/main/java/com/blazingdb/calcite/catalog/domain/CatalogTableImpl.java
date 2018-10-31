@@ -2,6 +2,7 @@ package com.blazingdb.calcite.catalog.domain;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -98,7 +99,7 @@ public class CatalogTableImpl implements CatalogTable {
 
 	@Override
 	public Set<CatalogColumn> getColumns() {
-		Set<CatalogColumn> tempColumns = new HashSet<CatalogColumn>();
+		Set<CatalogColumn> tempColumns = new LinkedHashSet<CatalogColumn>();
 		tempColumns.addAll(this.tableColumns.values());
 		return tempColumns;
 	}

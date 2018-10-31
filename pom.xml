@@ -30,6 +30,7 @@
 	<modules>
 		<module>blazingdb-calcite-core</module>
 		<module>blazingdb-calcite-application</module>
+		<module>blazingdb-calcite-cli</module>
 	</modules>
 
 	<repositories>
