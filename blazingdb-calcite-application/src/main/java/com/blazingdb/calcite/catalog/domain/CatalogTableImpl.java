@@ -1,12 +1,14 @@
 package com.blazingdb.calcite.catalog.domain;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,35 +23,34 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Cascade;
 
-
 @Entity
 @Table(name = "blazing_catalog_tables")
 public class CatalogTableImpl implements CatalogTable {
 
-	
 	public CatalogTableImpl() {
-		this.tableColumns = new HashMap<String,CatalogColumnImpl>();		
+		this.tableColumns = new HashMap<String, CatalogColumnImpl>();
 	}
-	
+
 	public CatalogTableImpl(String name, CatalogDatabaseImpl db, List<CatalogColumnImpl> columns) {
 		this.name = name;
 		this.database = db;
-		this.tableColumns = new HashMap<String,CatalogColumnImpl>();
-		for(CatalogColumnImpl column : columns) {
+		this.tableColumns = new HashMap<String, CatalogColumnImpl>();
+		for (CatalogColumnImpl column : columns) {
 			column.setTable(this);
 			this.tableColumns.put(column.getColumnName(), column);
 		}
 	}
-	
+
 	public CatalogTableImpl(String name, CatalogDatabaseImpl db, List<String> columnNames, List<String> columnTypes) {
 		this.name = name;
 		this.database = db;
-		this.tableColumns = new HashMap<String,CatalogColumnImpl>();
-		for(int i = 0; i < columnNames.size();i++) {
+		this.tableColumns = new HashMap<String, CatalogColumnImpl>();
+		for (int i = 0; i < columnNames.size(); i++) {
 			CatalogColumnImpl column = new CatalogColumnImpl();
 			column.setColumnDataType(columnTypes.get(i));
 			column.setTable(this);
 			column.setColumnName(columnNames.get(i));
+			column.setOrderValue(i);
 			this.tableColumns.put(column.getColumnName(), column);
 		}
 	}
@@ -61,16 +62,16 @@ public class CatalogTableImpl implements CatalogTable {
 
 	@Column(name = "name", nullable = false)
 	private String name;
-	
+
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "table", orphanRemoval = true)
-	@Cascade({ org.hibernate.annotations.CascadeType.ALL})
-	@MapKey(name="name") //here this is the column name inside of CatalogColumn
-	private Map<String,CatalogColumnImpl> tableColumns;
+	@Cascade({ org.hibernate.annotations.CascadeType.ALL })
+	@MapKey(name = "name") // here this is the column name inside of CatalogColumn
+	private Map<String, CatalogColumnImpl> tableColumns;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "database_id")
 	private CatalogDatabaseImpl database;
-	
+
 	@Override
 	public CatalogDatabaseImpl getDatabase() {
 		return database;
@@ -99,16 +100,28 @@ public class CatalogTableImpl implements CatalogTable {
 
 	@Override
 	public Set<CatalogColumn> getColumns() {
+		List<CatalogColumnImpl> cols = new ArrayList<CatalogColumnImpl>();
+
+		for (CatalogColumnImpl col : this.tableColumns.values()) {
+			cols.add(col);
+		}
+		Collections.sort(cols);
+
 		Set<CatalogColumn> tempColumns = new LinkedHashSet<CatalogColumn>();
-		tempColumns.addAll(this.tableColumns.values());
+
+		for (CatalogColumnImpl col : cols) {
+			tempColumns.add(col);
+		}
+
 		return tempColumns;
 	}
 
-	public Map<String,CatalogColumnImpl> getTableColumns(){ //i think hibernate needs a getter of the private data type not sure about this
+	public Map<String, CatalogColumnImpl> getTableColumns() { // i think hibernate needs a getter of the private data
+																// type not sure about this
 		return tableColumns;
 	}
-	
-	public void setTableColumns(Map<String,CatalogColumnImpl> columns) {
+
+	public void setTableColumns(Map<String, CatalogColumnImpl> columns) {
 		this.tableColumns = columns;
 	}
 

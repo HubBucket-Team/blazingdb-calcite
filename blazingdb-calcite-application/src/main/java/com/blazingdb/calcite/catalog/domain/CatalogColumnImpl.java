@@ -19,17 +19,18 @@ import javax.persistence.OneToOne;
 
 @Entity
 @Table(name = "blazing_catalog_columns")
-public class CatalogColumnImpl implements CatalogColumn {
+public class CatalogColumnImpl implements CatalogColumn, Comparable {
 
 	public CatalogColumnImpl() {
-		
+
 	}
-	
-	public CatalogColumnImpl(String name, CatalogColumnDataType type) {
+
+	public CatalogColumnImpl(String name, CatalogColumnDataType type, int orderValue) {
 		this.dataType = type;
 		this.name = name;
+		this.orderValue = orderValue;
 	}
-	
+
 	@Id
 	@GeneratedValue
 	@Column(name = "id")
@@ -38,10 +39,13 @@ public class CatalogColumnImpl implements CatalogColumn {
 	@Column(name = "name", nullable = false)
 	private String name;
 
-    @Enumerated
-    @Column(name="data_type",columnDefinition = "smallint")
+	@Enumerated
+	@Column(name = "data_type", columnDefinition = "smallint")
 	private CatalogColumnDataType dataType;
-	
+
+	@Column(name = "order_value", nullable = false)
+	private int orderValue;
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "table_id")
 	private CatalogTableImpl table;
@@ -76,7 +80,7 @@ public class CatalogColumnImpl implements CatalogColumn {
 	public CatalogTableImpl getTable() {
 		return table;
 	}
-	
+
 	public void setTable(CatalogTableImpl newTable) {
 		this.table = newTable;
 	}
@@ -84,4 +88,20 @@ public class CatalogColumnImpl implements CatalogColumn {
 	public void setColumnDataType(String type) {
 		this.dataType = CatalogColumnDataType.fromString(type);
 	}
+
+	public int getOrderValue() {
+		return orderValue;
+	}
+
+	public void setOrderValue(int orderValue) {
+		this.orderValue = orderValue;
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		Integer self = new Integer(this.orderValue);
+		Integer other = new Integer(((CatalogColumnImpl) o).getOrderValue());
+		return self.compareTo(other);
+	}
+
 }
