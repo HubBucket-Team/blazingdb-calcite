@@ -3,12 +3,14 @@ package com.blazingdb.calcite.application;
 import com.blazingdb.calcite.catalog.connection.CatalogServiceImpl;
 import com.blazingdb.calcite.catalog.domain.CatalogDatabaseImpl;
 import com.blazingdb.calcite.schema.BlazingSchema;
-
+//TODO: Hibernate should allow us to be able to update and persist things on the fly
+// without having to reload everything. We had a bug with this so now are refreshing 
+// the schema from the data source each time ddl is run
 /**
- * <h1>Where all the state goes to party!</h1>
+ * <h1>Stores state of the application.</h1>
  * This is the class which stores the state of the application. It has a single {@link #schema}
  * for now. It also is what has access to the {@link #catalogService} which is used for persistence
- * as well as the {@link #relationalAlgebraGenerator}
+ * as well as the {@link #relationalAlgebraGenerator} for converting sql to a {@see org.apache.calcite.rel.RelNode} 
  * 
  *
  * @author  Felipe Aramburu
@@ -95,7 +97,8 @@ public class ApplicationContext {
 
 	/**
 	 * Refreshes the schema after ddl has occurred. The application context needs to reload
-	 * every time we update the ddl right now.
+	 * every time we update the ddl right now. Synchronizes access to avoid two threads doing this at once.
+	 * 
 	 */
 	private synchronized void updateSchema() {
 		schema = new BlazingSchema(catalogService.getDatabase("main"));
@@ -103,6 +106,9 @@ public class ApplicationContext {
 
 	}
 
+	/**
+	 * The public api for update the context. Calls the synchronized method {@link #updateSchema()}
+	 */
 	public static void updateContext() {
 		// TODO Auto-generated method stub
 		init();

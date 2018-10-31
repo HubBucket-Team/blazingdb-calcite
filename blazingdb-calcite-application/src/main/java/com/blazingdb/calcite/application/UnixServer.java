@@ -39,7 +39,12 @@ import com.blazingdb.protocol.message.calcite.DMLResponseMessage;
 
 import blazingdb.protocol.Status;
 import blazingdb.protocol.calcite.MessageType;
-
+/**
+ * Class which holds main function. Listens in on a unix domain socket
+ * for protocol buffer requests and then processes these requests. 
+ * @author felipe
+ *
+ */
 public class UnixServer {
 
 
