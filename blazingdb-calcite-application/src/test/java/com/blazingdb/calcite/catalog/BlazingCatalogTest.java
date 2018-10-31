@@ -213,7 +213,9 @@ public class BlazingCatalogTest {
 	@Test()
 	public void generateSQLTest() throws Exception {
 		System.out.println("=============================== GENERATE RELATIONAL ALGEBRA TEST ====================================");
-
+		final long startTime = System.currentTimeMillis();
+		
+		
 		CatalogDatabaseImpl db = new CatalogDatabaseImpl("testdb");
 
 		repo.createDatabase(db);
@@ -231,8 +233,11 @@ public class BlazingCatalogTest {
 		db.addTable(table);
 		repo.updateDatabase(db);
 	
-		
+		final long endTime = System.currentTimeMillis();
+
+
 		db = repo.getDatabase(dbId);
+		System.out.println("Total execution time: " + (endTime - startTime) );
 		System.out.println("The db to delete id is " +  dbId + " it has" + db.getTables().size());
 		
 		BlazingSchema schema = new BlazingSchema(db);
