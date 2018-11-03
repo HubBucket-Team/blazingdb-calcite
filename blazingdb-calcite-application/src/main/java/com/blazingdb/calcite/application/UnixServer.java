@@ -19,8 +19,13 @@ package com.blazingdb.calcite.application;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.naming.NamingException;
 
 import org.apache.calcite.plan.RelOptUtil;
+import org.apache.commons.dbcp.BasicDataSource;
 
 import com.blazingdb.calcite.catalog.connection.CatalogService;
 import com.blazingdb.calcite.catalog.connection.CatalogServiceImpl;
@@ -39,18 +44,122 @@ import com.blazingdb.protocol.message.calcite.DMLResponseMessage;
 
 import blazingdb.protocol.Status;
 import blazingdb.protocol.calcite.MessageType;
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 /**
  * Class which holds main function. Listens in on a unix domain socket
  * for protocol buffer requests and then processes these requests. 
  * @author felipe
  *
  */
+
+
+
+
+
 public class UnixServer {
 
+	private static void executeUpdate() throws NamingException, SQLException, LiquibaseException, InstantiationException,
+	IllegalAccessException, ClassNotFoundException {
+// setDataSource((String) servletValueContainer.getValue(LIQUIBASE_DATASOURCE));
+
+ final String LIQUIBASE_CHANGELOG = "liquibase.changelog";
+final String LIQUIBASE_DATASOURCE = "liquibase.datasource";
 
 
+String dataSourceName;
+String changeLogFile;
+String contexts;
+String labels;
+
+dataSourceName = "bz3";
+
+
+
+// setChangeLogFile((String) servletValueContainer.getValue(LIQUIBASE_CHANGELOG));
+changeLogFile = "liquibase-bz-master.xml";
+
+
+// setContexts((String) servletValueContainer.getValue(LIQUIBASE_CONTEXTS));
+contexts = "";
+// setLabels((String) servletValueContainer.getValue(LIQUIBASE_LABELS));
+
+labels = "";
+
+// defaultSchema = StringUtil.trimToNull((String)
+// servletValueContainer.getValue(LIQUIBASE_SCHEMA_DEFAULT));
+// defaultSchema =
+
+Connection connection = null;
+Database database = null;
+try {
+	// DriverManager.registerDriver((Driver) Class.forName("com.mysql.jdbc.Driver").newInstance());
+	// String url = "jdbc:mysql://localhost:3306/bz3";
+	// connection = DriverManager.getConnection(url);
+
+	
+	
+	
+	BasicDataSource dataSource = new BasicDataSource();
+	dataSource.setDriverClassName("org.h2.Driver");
+	dataSource.setUsername("blazing");
+	dataSource.setPassword("blazing");
+	dataSource.setUrl("jdbc:h2:/blazingsql/bz3;INIT=CREATE SCHEMA IF NOT EXISTS bz3;");
+	dataSource.setMaxActive(10);
+	dataSource.setMaxIdle(5);
+	dataSource.setInitialSize(5);
+	dataSource.setValidationQuery("SELECT 1");
+
+	// MySQLData dataSource = new JdbcDataSource(); // (DataSource) ic.lookup(dataSourceName);
+	// dataSource.setURL("jdbc:mysql://localhost:3306/bz3");
+	// dataSource.setUser("blazing");
+	// dataSource.setPassword("blazing");
+	connection = dataSource.getConnection();
+
+	Thread currentThread = Thread.currentThread();
+	ClassLoader contextClassLoader = currentThread.getContextClassLoader();
+	ResourceAccessor threadClFO = new ClassLoaderResourceAccessor(contextClassLoader);
+
+	ResourceAccessor clFO = new ClassLoaderResourceAccessor();
+	ResourceAccessor fsFO = new FileSystemResourceAccessor();
+
+	database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+	database.setDefaultSchemaName(dataSourceName);
+	Liquibase liquibase = new Liquibase(changeLogFile,
+			new CompositeResourceAccessor(clFO, fsFO, threadClFO), database);
+
+	// @SuppressWarnings("unchecked")
+	// StringTokenizer initParameters = new StringTokenizer(""); // servletContext.getInitParameterNames();
+	// while (initParameters.hasMoreElements()) {
+	// String name = initParameters.nextElement().trim();
+	// if (name.startsWith(LIQUIBASE_PARAMETER + ".")) {
+	// // liquibase.setChangeLogParameter(name.substring(LIQUIBASE_PARAMETER.length() + 1),
+	// // servletValueContainer.getValue(name));
+	// }
+	// }
+
+	liquibase.update(new Contexts(contexts), new LabelExpression(labels));
+} finally {
+	if (database != null) {
+		database.close();
+	} else if (connection != null) {
+		connection.close();
+	}
+}
+}
+
+
+	
     public static void main(String[] args) throws IOException {
-
 
 
         ApplicationContext.init(); //any api call initializes it actually
