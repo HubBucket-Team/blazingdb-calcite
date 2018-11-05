@@ -40,6 +40,8 @@ import com.blazingdb.protocol.message.calcite.DMLResponseMessage;
 import blazingdb.protocol.Status;
 import blazingdb.protocol.calcite.MessageType;
 
+import com.blazingdb.calcite.application.Chrono.Chronometer;
+
 public class UnixServer {
 
 
@@ -55,6 +57,7 @@ public class UnixServer {
         IService calciteService  = new IService() {
             @Override
             public ByteBuffer process(ByteBuffer buffer) {
+								Chronometer chronometer = Chronometer.makeStarted();
 
                 RequestMessage requestMessage = new RequestMessage(buffer);
                 if(requestMessage.getHeaderType() == MessageType.DML) {
@@ -64,7 +67,7 @@ public class UnixServer {
 
                     try {
                         String logicalPlan  = RelOptUtil.toString(ApplicationContext.getRelationalAlgebraGenerator().getRelationalAlgebra(requestPayload.getQuery()));
-                        DMLResponseMessage responsePayload = new DMLResponseMessage(logicalPlan);
+                        DMLResponseMessage responsePayload = new DMLResponseMessage(logicalPlan, chronometer.elapsed());
                         response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
                     }catch (Exception e) {
                         //TODO: give something more meaningfu than this :)
@@ -81,7 +84,7 @@ public class UnixServer {
                         //I am unsure at this point if we have to update the schema or not but for safety I do it here
                         //need to see what hibernate moves around :)
                         ApplicationContext.updateContext();
-                        DDLResponseMessage responsePayload = new DDLResponseMessage();
+                        DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed());
                         response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
                     }catch(Exception e){
                         ResponseErrorMessage error = new ResponseErrorMessage("Could not create table");
@@ -96,7 +99,7 @@ public class UnixServer {
                     try {
                         ApplicationContext.getCatalogService().dropTable(message);
                         ApplicationContext.updateContext();
-                        DDLResponseMessage responsePayload = new DDLResponseMessage();
+                        DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed());
                         response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
                     } catch (Exception e) {
                         // TODO Auto-generated catch block

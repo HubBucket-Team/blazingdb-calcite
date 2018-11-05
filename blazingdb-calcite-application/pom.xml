@@ -60,7 +60,7 @@
     <version>1.4.197</version>
 			<scope>runtime</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
@@ -72,7 +72,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-c3p0</artifactId>
@@ -82,7 +82,7 @@
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
 			<version>3.6.2</version>
-			
+
 		</dependency>
 	</dependencies>
 
@@ -92,17 +92,17 @@
 		   <groupId>org.liquibase</groupId>
 		   <artifactId>liquibase-maven-plugin</artifactId>
 		   <version>3.6.2</version>
-		   <configuration>                  
+		   <configuration>
 			  <propertyFile>src/main/resources/properties/liquibase.properties</propertyFile>
 			     <propertyFileWillOverride>true</propertyFileWillOverride>
 
 		        <changeLogFile>src/main/resources/liquibase-bz-master.xml</changeLogFile>
 		        <driver>org.h2.Driver</driver>
 		        <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-		   </configuration>                
+		   </configuration>
 		   <executions>
 			 <execution>
-			   <phase>process-resources</phase>                                                                  
+			   <phase>process-resources</phase>
 			   <goals>
 				 <goal>update</goal>
 			   </goals>
@@ -115,7 +115,7 @@
 			<version>1.4.197</version>
 			<scope>runtime</scope>
 		</dependency></dependencies>
-		</plugin> 	
+		</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
