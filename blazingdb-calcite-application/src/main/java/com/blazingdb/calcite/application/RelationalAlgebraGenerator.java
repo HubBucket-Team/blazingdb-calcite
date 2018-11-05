@@ -18,10 +18,13 @@ import org.apache.calcite.plan.hep.HepProgramBuilder;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.rules.FilterJoinRule;
+import org.apache.calcite.rel.rules.FilterMergeRule;
 import org.apache.calcite.rel.rules.FilterProjectTransposeRule;
 import org.apache.calcite.rel.rules.JoinExtractFilterRule;
 import org.apache.calcite.rel.rules.JoinPushExpressionsRule;
 import org.apache.calcite.rel.rules.ProjectMergeRule;
+import org.apache.calcite.rel.rules.ReduceDecimalsRule;
+import org.apache.calcite.rel.rules.ReduceExpressionsRule;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlNode;
@@ -109,13 +112,12 @@ public class RelationalAlgebraGenerator {
 	        
 
 //these were the rules i found in the foo code from BlazingSQLParser			
-	        program = new HepProgramBuilder()
-	        		.addRuleInstance(FilterJoinRule.FILTER_ON_JOIN)
-	        		.addRuleInstance(FilterJoinRule.JOIN)
-	        		.addRuleInstance(JoinPushExpressionsRule.INSTANCE)
-	        		.addRuleInstance(JoinExtractFilterRule.INSTANCE)
-	        		.addRuleInstance(ProjectMergeRule.INSTANCE)
-	        		.addRuleInstance(FilterProjectTransposeRule.INSTANCE)
+	        program = new HepProgramBuilder()	        		
+					.addRuleInstance(FilterProjectTransposeRule.INSTANCE)
+					.addRuleInstance(FilterJoinRule.JoinConditionPushRule.FILTER_ON_JOIN)
+					.addRuleInstance(ProjectMergeRule.INSTANCE)
+					.addRuleInstance(FilterMergeRule.INSTANCE)
+	        		
 	        		//.addRuleInstance(SubQueryRemoveRule.)
 	                .build();
 	        
