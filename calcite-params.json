@@ -1,13 +1,7 @@
-
 {
-    "columnNames": [
-            "n_nationkey",
-            "n_name",
-            "n_regionkey",
-            "n_comments"
-    ],
-    "types":  ["GDF_INT32", "GDF_INT64", "GDF_INT8", "GDF_INT64"],
-    "name": "nation",
-    "dbName": "main",
-    "query": "select n_nationkey > 5 from main.nation"
+  "columnNames": ["id", "age"],
+  "types": ["GDF_INT8", "GDF_INT8"],
+  "name": "emps",
+  "dbName": "main",
+  "query": "select * from main.emps"
 }

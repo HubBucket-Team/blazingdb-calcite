@@ -2,6 +2,7 @@ package com.blazingdb.calcite.cli;
 
 import com.blazingdb.calcite.application.ApplicationContext;
 import com.blazingdb.protocol.message.calcite.DDLCreateTableRequestMessage;
+import com.blazingdb.protocol.message.calcite.DDLDropTableRequestMessage;
 import com.blazingdb.protocol.message.calcite.DMLRequestMessage;
 import com.google.gson.Gson;
 import org.apache.calcite.plan.RelOptUtil;
@@ -41,16 +42,23 @@ public class Generator {
         String name = params.name;
         String dbName = params.dbName;
 
-        DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(columnNames, types, name, dbName);
         try {
+            DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(name, dbName);
+            ApplicationContext.getCatalogService().dropTable(message);
+            ApplicationContext.updateContext();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(columnNames, types, name, dbName);
             ApplicationContext.getCatalogService().createTable(message);
             ApplicationContext.updateContext();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String query = params.query;
-        DMLRequestMessage requestPayload = new DMLRequestMessage(query);
         try {
+            String query = params.query;
+            DMLRequestMessage requestPayload = new DMLRequestMessage(query);
             String logicalPlan  = RelOptUtil.toString(ApplicationContext.getRelationalAlgebraGenerator().getRelationalAlgebra(requestPayload.getQuery()));
             System.out.println("@JSON");
             System.out.println(logicalPlan);
