@@ -22,6 +22,7 @@ import org.apache.calcite.rel.rules.FilterMergeRule;
 import org.apache.calcite.rel.rules.FilterProjectTransposeRule;
 import org.apache.calcite.rel.rules.JoinExtractFilterRule;
 import org.apache.calcite.rel.rules.JoinPushExpressionsRule;
+import org.apache.calcite.rel.rules.ProjectJoinTransposeRule;
 import org.apache.calcite.rel.rules.ProjectMergeRule;
 import org.apache.calcite.rel.rules.ReduceDecimalsRule;
 import org.apache.calcite.rel.rules.ReduceExpressionsRule;
@@ -117,7 +118,7 @@ public class RelationalAlgebraGenerator {
 					.addRuleInstance(FilterJoinRule.JoinConditionPushRule.FILTER_ON_JOIN)
 					.addRuleInstance(ProjectMergeRule.INSTANCE)
 					.addRuleInstance(FilterMergeRule.INSTANCE)
-	        		
+					.addRuleInstance(ProjectJoinTransposeRule.INSTANCE)
 	        		//.addRuleInstance(SubQueryRemoveRule.)
 	                .build();
 	        
