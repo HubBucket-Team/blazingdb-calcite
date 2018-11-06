@@ -81,7 +81,7 @@ String changeLogFile;
 String contexts;
 String labels;
 
-dataSourceName = "bz3";
+
 
 
 
@@ -113,7 +113,7 @@ try {
 	dataSource.setDriverClassName("org.h2.Driver");
 	dataSource.setUsername("blazing");
 	dataSource.setPassword("blazing");
-	dataSource.setUrl("jdbc:h2:/blazingsql/bz3;INIT=CREATE SCHEMA IF NOT EXISTS bz3;");
+	dataSource.setUrl("jdbc:h2:/blazingsql/bz3");
 	dataSource.setMaxActive(10);
 	dataSource.setMaxIdle(5);
 	dataSource.setInitialSize(5);
@@ -133,7 +133,7 @@ try {
 	ResourceAccessor fsFO = new FileSystemResourceAccessor();
 
 	database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-	database.setDefaultSchemaName(dataSourceName);
+
 	Liquibase liquibase = new Liquibase(changeLogFile,
 			new CompositeResourceAccessor(clFO, fsFO, threadClFO), database);
 
@@ -161,7 +161,13 @@ try {
 	
     public static void main(String[] args) throws IOException {
 
+    	try {
+    		executeUpdate();
+    	}catch(Exception e) {
+        	 e.printStackTrace();
+    	}
 
+    	
         ApplicationContext.init(); //any api call initializes it actually
         File unixSocketFile = new File("/tmp/calcite.socket");
         unixSocketFile.deleteOnExit();
