@@ -22,9 +22,6 @@ import java.nio.ByteBuffer;
 
 import org.apache.calcite.plan.RelOptUtil;
 
-import com.blazingdb.calcite.catalog.connection.CatalogService;
-import com.blazingdb.calcite.catalog.connection.CatalogServiceImpl;
-import com.blazingdb.calcite.schema.BlazingSchema;
 import com.blazingdb.protocol.IService;
 import com.blazingdb.protocol.UnixService;
 import com.blazingdb.protocol.message.RequestMessage;
@@ -32,13 +29,14 @@ import com.blazingdb.protocol.message.ResponseErrorMessage;
 import com.blazingdb.protocol.message.ResponseMessage;
 import com.blazingdb.protocol.message.calcite.DDLCreateTableRequestMessage;
 import com.blazingdb.protocol.message.calcite.DDLDropTableRequestMessage;
-import com.blazingdb.protocol.message.calcite.DDLRequestMessage;
 import com.blazingdb.protocol.message.calcite.DDLResponseMessage;
 import com.blazingdb.protocol.message.calcite.DMLRequestMessage;
 import com.blazingdb.protocol.message.calcite.DMLResponseMessage;
 
 import blazingdb.protocol.Status;
 import blazingdb.protocol.calcite.MessageType;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import com.blazingdb.calcite.application.Chrono.Chronometer;
 
@@ -84,7 +82,7 @@ public class UnixServer {
                         //I am unsure at this point if we have to update the schema or not but for safety I do it here
                         //need to see what hibernate moves around :)
                         ApplicationContext.updateContext();
-                        DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed());
+                        DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
                         response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
                     }catch(Exception e){
                         ResponseErrorMessage error = new ResponseErrorMessage("Could not create table");
@@ -99,7 +97,7 @@ public class UnixServer {
                     try {
                         ApplicationContext.getCatalogService().dropTable(message);
                         ApplicationContext.updateContext();
-                        DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed());
+                        DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
                         response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
