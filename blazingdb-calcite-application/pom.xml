@@ -116,7 +116,15 @@
 			<scope>runtime</scope>
 		</dependency></dependencies>
 		</plugin>
+ <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.0.1</version>
+        <configuration>
+        <destDir>../docs</destDir>
+        </configuration>
 
+      </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>

@@ -26,6 +26,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 //NOTE: not currenlty  mapped!
+/**
+ * This class is not currently being used.
+ * @author felipe
+ *
+ */
 @Entity
 @Table(name = "blazing_catalog_schemas")
 public class CatalogSchemaImpl implements CatalogSchema {

@@ -32,3 +32,9 @@ jdbc.url=jdbc:h2:/opt/blazing/workbench/data
 jdbc.username=blazing
 jdbc.password=blazing
 ```
+
+### Maven Targets
+```shell-script
+mvn clean install #builds the target jar
+mvn javadoc:jar #generates java docs in target/apidocs
+```

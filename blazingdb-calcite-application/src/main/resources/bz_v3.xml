@@ -23,6 +23,9 @@
 			<column name="table_id" type="BIGINT">
 				<constraints nullable="false" />
 			</column>
+			<column name="order_value" type="INTEGER">
+				<constraints nullable="false" />
+			</column>
 		</createTable>
 
 

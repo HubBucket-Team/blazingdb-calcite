@@ -18,10 +18,14 @@ import org.apache.calcite.plan.hep.HepProgramBuilder;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.rules.FilterJoinRule;
+import org.apache.calcite.rel.rules.FilterMergeRule;
 import org.apache.calcite.rel.rules.FilterProjectTransposeRule;
 import org.apache.calcite.rel.rules.JoinExtractFilterRule;
 import org.apache.calcite.rel.rules.JoinPushExpressionsRule;
+import org.apache.calcite.rel.rules.ProjectJoinTransposeRule;
 import org.apache.calcite.rel.rules.ProjectMergeRule;
+import org.apache.calcite.rel.rules.ReduceDecimalsRule;
+import org.apache.calcite.rel.rules.ReduceExpressionsRule;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlNode;
@@ -37,13 +41,39 @@ import org.apache.calcite.tools.RelBuilder;
 import com.blazingdb.calcite.schema.BlazingSchema;
 
 
+
+/**
+* <h1>Generate Relational Algebra</h1>
+* The purpose of this class is to hold the planner, the program, and the configuration for reuse 
+* based on a schema that is provided. It can then take sql and convert it to relational algebra.
+* 
+*
+* @author  Felipe Aramburu
+* @version 1.0
+* @since   2018-10-31
+*/
 public class RelationalAlgebraGenerator {
 
-
+	/**
+	 * Planner that converts sql to relational algebra.
+	 */
 	private Planner planner;
+	/**
+	 * Program which takes relational algebra and optimizes it
+	 */
 	private HepProgram program;
+	/**
+	 * Stores the context for the program hep planner. E.G. it stores the schema.
+	 */
 	private FrameworkConfig config;
 	
+	/**
+	 * Constructor for the relational algebra generator class. It will take the schema store it in the  {@link #config} and 
+	 * then set up the  {@link #program} for optimizing and the  {@link #planner} for parsing.
+	 * 
+	 * @param newSchema This is the schema which we will be using to validate our query against.
+	 * 					This gets stored in the {@link #config}
+	 */
 	public RelationalAlgebraGenerator(BlazingSchema newSchema) {
 		try {
 			Class.forName("org.apache.calcite.jdbc.Driver");
@@ -83,13 +113,12 @@ public class RelationalAlgebraGenerator {
 	        
 
 //these were the rules i found in the foo code from BlazingSQLParser			
-	        program = new HepProgramBuilder()
-	        		.addRuleInstance(FilterJoinRule.FILTER_ON_JOIN)
-	        		.addRuleInstance(FilterJoinRule.JOIN)
-	        		.addRuleInstance(JoinPushExpressionsRule.INSTANCE)
-	        		.addRuleInstance(JoinExtractFilterRule.INSTANCE)
-	        		.addRuleInstance(ProjectMergeRule.INSTANCE)
-	        		.addRuleInstance(FilterProjectTransposeRule.INSTANCE)
+	        program = new HepProgramBuilder()	        		
+					.addRuleInstance(FilterProjectTransposeRule.INSTANCE)
+					.addRuleInstance(FilterJoinRule.JoinConditionPushRule.FILTER_ON_JOIN)
+					.addRuleInstance(ProjectMergeRule.INSTANCE)
+					.addRuleInstance(FilterMergeRule.INSTANCE)
+					.addRuleInstance(ProjectJoinTransposeRule.INSTANCE)
 	        		//.addRuleInstance(SubQueryRemoveRule.)
 	                .build();
 	        
@@ -104,6 +133,15 @@ public class RelationalAlgebraGenerator {
 		}
 	}
 	
+	/**
+	 * Takes a sql statement and converts it into an optimized relational algebra node. The result of this function is
+	 * a logical plan that has been optimized using a rule based optimizer.
+	 * 
+	 * @param sql a string sql query that is to be parsed, converted into relational algebra, then optimized
+	 * @return a RelNode which contains the relational algebra tree generated from the sql statement provided after 
+	 * 			an optimization step has been completed.
+	 * @throws Exception
+	 */
 	public RelNode getRelationalAlgebra(String sql) throws Exception {
 			
 	    	

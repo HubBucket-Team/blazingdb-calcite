@@ -181,8 +181,8 @@ public class BlazingCatalogTest {
 		repo.createDatabase(db);
 		dbId = db.getId();
 	
-		CatalogColumnImpl column1 = new CatalogColumnImpl("col-1",CatalogColumnDataType.GDF_INT64);
-		CatalogColumnImpl column2 = new CatalogColumnImpl("col-2",CatalogColumnDataType.GDF_INT32);
+		CatalogColumnImpl column1 = new CatalogColumnImpl("col-1",CatalogColumnDataType.GDF_INT64, 1);
+		CatalogColumnImpl column2 = new CatalogColumnImpl("col-2",CatalogColumnDataType.GDF_INT32, 2);
 	
 		List<CatalogColumnImpl> columns = new ArrayList<CatalogColumnImpl>();
 		columns.add(column1);
@@ -213,14 +213,16 @@ public class BlazingCatalogTest {
 	@Test()
 	public void generateSQLTest() throws Exception {
 		System.out.println("=============================== GENERATE RELATIONAL ALGEBRA TEST ====================================");
-
+		final long startTime = System.currentTimeMillis();
+		
+		
 		CatalogDatabaseImpl db = new CatalogDatabaseImpl("testdb");
 
 		repo.createDatabase(db);
 		dbId = db.getId();
 	
-		CatalogColumnImpl column1 = new CatalogColumnImpl("col1",CatalogColumnDataType.GDF_INT64);
-		CatalogColumnImpl column2 = new CatalogColumnImpl("col2",CatalogColumnDataType.GDF_INT32);
+		CatalogColumnImpl column1 = new CatalogColumnImpl("col1",CatalogColumnDataType.GDF_INT64, 1);
+		CatalogColumnImpl column2 = new CatalogColumnImpl("col2",CatalogColumnDataType.GDF_INT32, 2);
 	
 		List<CatalogColumnImpl> columns = new ArrayList<CatalogColumnImpl>();
 		columns.add(column1);
@@ -231,8 +233,11 @@ public class BlazingCatalogTest {
 		db.addTable(table);
 		repo.updateDatabase(db);
 	
-		
+		final long endTime = System.currentTimeMillis();
+
+
 		db = repo.getDatabase(dbId);
+		System.out.println("Total execution time: " + (endTime - startTime) );
 		System.out.println("The db to delete id is " +  dbId + " it has" + db.getTables().size());
 		
 		BlazingSchema schema = new BlazingSchema(db);
