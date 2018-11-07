@@ -40,13 +40,12 @@ public class Generator {
         }
         CalciteParams params = gson.fromJson(json, CalciteParams.class);
         ApplicationContext.init(); //any api call initializes it actually
-        System.out.println("REGISTER-TABLES");
+        System.out.println("REGISTERING-TABLES");
         for(Table table : params.tables) {
             List<String> columnNames = Arrays.asList(table.columnNames);
             List<String> types = Arrays.asList(table.columnTypes);
             String name = table.tableName;
             String dbName = table.dbName;
-            System.out.println(name);
             try {
                 {
                     DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(name, dbName);
@@ -62,7 +61,7 @@ public class Generator {
                 e.printStackTrace();
             }
         }
-        System.out.println("LOGICAL-PLAN");
+        System.out.println("GETTING LOGICAL-PLAN");
         try {
             String query = params.query;
             DMLRequestMessage requestPayload = new DMLRequestMessage(query);
