@@ -1,13 +1,14 @@
-
 {
-    "columnNames": [
-            "n_nationkey",
-            "n_name",
-            "n_regionkey",
-            "n_comments"
-    ],
-    "types":  ["GDF_INT32", "GDF_INT64", "GDF_INT8", "GDF_INT64"],
-    "name": "nation",
-    "dbName": "main",
-    "query": "select n_nationkey > 5 from main.nation"
+	"query": "select nation.n_nationkey, region.r_regionkey from main.nation inner join main.region on region.r_regionkey = nation.n_nationkey",
+	"tables": [{
+		"dbName": "main",
+		"tableName": "nation",
+		"columnNames": ["n_nationkey","n_name","n_regionkey","n_comment"],
+		"columnTypes": ["GDF_INT32","GDF_INT64","GDF_INT32","GDF_INT64"]
+	},{
+		"dbName": "main",
+		"tableName": "region",
+		"columnNames": ["r_regionkey","r_name","r_comment"],
+		"columnTypes": ["GDF_INT64","GDF_INT64","GDF_INT64"]
+	}]
 }
