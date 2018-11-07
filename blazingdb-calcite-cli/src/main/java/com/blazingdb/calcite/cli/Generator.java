@@ -13,11 +13,14 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Generator {
-    class CalciteParams {
+    class Table {
         String[] columnNames;
-        String[] types;
-        String name;
+        String[] columnTypes;
+        String tableName;
         String dbName;
+    }
+    class CalciteParams {
+        List<Table> tables;
         String query;
         public CalciteParams() {
             // no-args constructor
@@ -37,25 +40,29 @@ public class Generator {
         }
         CalciteParams params = gson.fromJson(json, CalciteParams.class);
         ApplicationContext.init(); //any api call initializes it actually
-        List<String> columnNames = Arrays.asList(params.columnNames);
-        List<String> types = Arrays.asList(params.types);
-        String name = params.name;
-        String dbName = params.dbName;
-
-        try {
-            DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(name, dbName);
-            ApplicationContext.getCatalogService().dropTable(message);
-            ApplicationContext.updateContext();
-        } catch (Exception e) {
-            e.printStackTrace();
+        System.out.println("REGISTER-TABLES");
+        for(Table table : params.tables) {
+            List<String> columnNames = Arrays.asList(table.columnNames);
+            List<String> types = Arrays.asList(table.columnTypes);
+            String name = table.tableName;
+            String dbName = table.dbName;
+            System.out.println(name);
+            try {
+                {
+                    DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(name, dbName);
+                    ApplicationContext.getCatalogService().dropTable(message);
+                    ApplicationContext.updateContext();
+                }
+                {
+                    DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(columnNames, types, name, dbName);
+                    ApplicationContext.getCatalogService().createTable(message);
+                    ApplicationContext.updateContext();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        try {
-            DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(columnNames, types, name, dbName);
-            ApplicationContext.getCatalogService().createTable(message);
-            ApplicationContext.updateContext();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        System.out.println("LOGICAL-PLAN");
         try {
             String query = params.query;
             DMLRequestMessage requestPayload = new DMLRequestMessage(query);
