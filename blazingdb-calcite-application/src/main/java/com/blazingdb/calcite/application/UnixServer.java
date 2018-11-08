@@ -53,7 +53,7 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 /**
  * Class which holds main function. Listens in on a unix domain socket
- * for protocol buffer requests and then processes these requests. 
+ * for protocol buffer requests and then processes these requests.
  * @author felipe
  *
  */
@@ -106,9 +106,9 @@ try {
 	// String url = "jdbc:mysql://localhost:3306/bz3";
 	// connection = DriverManager.getConnection(url);
 
-	
-	
-	
+
+
+
 	BasicDataSource dataSource = new BasicDataSource();
 	dataSource.setDriverClassName("org.h2.Driver");
 	dataSource.setUsername("blazing");
@@ -158,7 +158,7 @@ try {
 }
 
 
-	
+
     public static void main(String[] args) throws IOException {
 
     	try {
@@ -167,7 +167,7 @@ try {
         	 e.printStackTrace();
     	}
 
-    	
+
         ApplicationContext.init(); //any api call initializes it actually
         File unixSocketFile = new File("/tmp/calcite.socket");
         unixSocketFile.deleteOnExit();
@@ -185,7 +185,7 @@ try {
 
                     try {
                         String logicalPlan  = RelOptUtil.toString(ApplicationContext.getRelationalAlgebraGenerator().getRelationalAlgebra(requestPayload.getQuery()));
-                        DMLResponseMessage responsePayload = new DMLResponseMessage(logicalPlan, chronometer.elapsed());
+                        DMLResponseMessage responsePayload = new DMLResponseMessage(logicalPlan, chronometer.elapsed(MILLISECONDS));
                         response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
                     }catch (Exception e) {
                         //TODO: give something more meaningfu than this :)
