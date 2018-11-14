@@ -27,9 +27,6 @@ import javax.naming.NamingException;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.commons.dbcp.BasicDataSource;
 
-import com.blazingdb.calcite.catalog.connection.CatalogService;
-import com.blazingdb.calcite.catalog.connection.CatalogServiceImpl;
-import com.blazingdb.calcite.schema.BlazingSchema;
 import com.blazingdb.protocol.IService;
 import com.blazingdb.protocol.UnixService;
 import com.blazingdb.protocol.message.RequestMessage;
@@ -37,7 +34,6 @@ import com.blazingdb.protocol.message.ResponseErrorMessage;
 import com.blazingdb.protocol.message.ResponseMessage;
 import com.blazingdb.protocol.message.calcite.DDLCreateTableRequestMessage;
 import com.blazingdb.protocol.message.calcite.DDLDropTableRequestMessage;
-import com.blazingdb.protocol.message.calcite.DDLRequestMessage;
 import com.blazingdb.protocol.message.calcite.DDLResponseMessage;
 import com.blazingdb.protocol.message.calcite.DMLRequestMessage;
 import com.blazingdb.protocol.message.calcite.DMLResponseMessage;
@@ -57,7 +53,7 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 /**
  * Class which holds main function. Listens in on a unix domain socket
- * for protocol buffer requests and then processes these requests. 
+ * for protocol buffer requests and then processes these requests.
  * @author felipe
  *
  */
@@ -65,6 +61,10 @@ import liquibase.resource.ResourceAccessor;
 
 
 
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
+import com.blazingdb.calcite.application.Chrono.Chronometer;
 
 public class UnixServer {
 
@@ -106,9 +106,9 @@ try {
 	// String url = "jdbc:mysql://localhost:3306/bz3";
 	// connection = DriverManager.getConnection(url);
 
-	
-	
-	
+
+
+
 	BasicDataSource dataSource = new BasicDataSource();
 	dataSource.setDriverClassName("org.h2.Driver");
 	dataSource.setUsername("blazing");
@@ -158,7 +158,7 @@ try {
 }
 
 
-	
+
     public static void main(String[] args) throws IOException {
 
     	try {
@@ -167,7 +167,7 @@ try {
         	 e.printStackTrace();
     	}
 
-    	
+
         ApplicationContext.init(); //any api call initializes it actually
         File unixSocketFile = new File("/tmp/calcite.socket");
         unixSocketFile.deleteOnExit();
@@ -175,6 +175,7 @@ try {
         IService calciteService  = new IService() {
             @Override
             public ByteBuffer process(ByteBuffer buffer) {
+								Chronometer chronometer = Chronometer.makeStarted();
 
                 RequestMessage requestMessage = new RequestMessage(buffer);
                 if(requestMessage.getHeaderType() == MessageType.DML) {
@@ -184,7 +185,7 @@ try {
 
                     try {
                         String logicalPlan  = RelOptUtil.toString(ApplicationContext.getRelationalAlgebraGenerator().getRelationalAlgebra(requestPayload.getQuery()));
-                        DMLResponseMessage responsePayload = new DMLResponseMessage(logicalPlan);
+                        DMLResponseMessage responsePayload = new DMLResponseMessage(logicalPlan, chronometer.elapsed(MILLISECONDS));
                         response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
                     }catch (Exception e) {
                         //TODO: give something more meaningfu than this :)
@@ -201,7 +202,7 @@ try {
                         //I am unsure at this point if we have to update the schema or not but for safety I do it here
                         //need to see what hibernate moves around :)
                         ApplicationContext.updateContext();
-                        DDLResponseMessage responsePayload = new DDLResponseMessage();
+                        DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
                         response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
                     }catch(Exception e){
                         ResponseErrorMessage error = new ResponseErrorMessage("Could not create table");
@@ -216,7 +217,7 @@ try {
                     try {
                         ApplicationContext.getCatalogService().dropTable(message);
                         ApplicationContext.updateContext();
-                        DDLResponseMessage responsePayload = new DDLResponseMessage();
+                        DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
                         response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
