@@ -1,16 +1,15 @@
 package com.blazingdb.calcite.application;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
-import com.blazingdb.calcite.catalog.connection.CatalogServiceImpl;
-import com.blazingdb.calcite.catalog.domain.CatalogDatabaseImpl;
-
-import com.blazingdb.calcite.schema.BlazingSchema;
-
-import com.blazingdb.protocol.message.calcite.DDLCreateTableRequestMessage;
-import com.blazingdb.protocol.message.calcite.DDLDropTableRequestMessage;
-
-import java.util.ArrayList;
+import org.apache.calcite.adapter.java.ReflectiveSchema;
+import org.apache.calcite.schema.SchemaPlus;
+import org.apache.calcite.sql.parser.SqlParseException;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.tools.FrameworkConfig;
+import org.apache.calcite.tools.Frameworks;
+import org.apache.calcite.tools.ValidationException;
+import org.apache.calcite.tools.RelConversionException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -18,53 +17,37 @@ import org.junit.Test;
 
 public class RelationalAlgebraGeneratorTest {
 
-  private CatalogServiceImpl catalogService;
-  private CatalogDatabaseImpl catalogDatabase;
-
-  private BlazingSchema blazingSchema;
-
   private RelationalAlgebraGenerator relationalAlgebraGenerator;
 
   @Before
   public void SetUp() {
-    catalogDatabase = new CatalogDatabaseImpl("main");
+    final SchemaPlus rootSchema = Frameworks.createRootSchema(true);
 
-    catalogService = new CatalogServiceImpl();
-    catalogService.createDatabase(catalogDatabase);
+    final FrameworkConfig config =
+        Frameworks.newConfigBuilder()
+            .parserConfig(SqlParser.Config.DEFAULT)
+            .defaultSchema(rootSchema.add(
+                "people", new ReflectiveSchema(new PeopleSchema())))
+            .build();
 
-    ArrayList<String> columnNames = new ArrayList<String>();
-		columnNames.add("name");
-		columnNames.add("age");
-    ArrayList<String> typeNames = new ArrayList<String>();
-		typeNames.add("STRING");
-		typeNames.add("UNSIGNED SHORT INT");
-    DDLCreateTableRequestMessage ddlCreateTableRequestMessage =
-        new DDLCreateTableRequestMessage(columnNames, typeNames, "people",
-                                         "main");
-
-		try {
-			catalogService.createTable(ddlCreateTableRequestMessage);
-		} catch(Exception e) {
-			System.out.println("Error creating table");
-		}
-
-    blazingSchema = new BlazingSchema(catalogDatabase);
-
-    relationalAlgebraGenerator = new RelationalAlgebraGenerator(blazingSchema);
+    relationalAlgebraGenerator = new RelationalAlgebraGenerator(config);
   }
 
-	@After
-	public void TearDown() {
-		DDLDropTableRequestMessage ddlDropTableRequestMessage = new DDLDropTableRequestMessage("people", "main");
-		try {
-			catalogService.dropTable(ddlDropTableRequestMessage);
-		} catch(Exception e) {
-			System.out.println("Error dropping table");
-		}
-	}
+  @After
+  public void TearDown() {
+    this.relationalAlgebraGenerator = null;
+  }
 
   @Test
-  public void invalidSyntax() throws Exception {
-    relationalAlgebraGenerator.getRelationalAlgebra("select * from people limit 1");
+  public void invalidSyntax() {
+    try {
+      relationalAlgebraGenerator.getRelationalAlgebra("select * from heroes");
+    } catch (SqlParseException e) {
+      fail("parsing");
+    } catch (ValidationException e) {
+      fail("validating");
+    } catch (RelConversionException e) {
+      fail("internal sql to relational conversion");
+    }
   }
 }

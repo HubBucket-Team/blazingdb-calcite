@@ -1,8 +1,7 @@
 package com.blazingdb.calcite.application;
 
 public final class PeopleSchema {
-
-  public final Person[] people = {new Person("Ironman", 12),
+  public final Person[] HEROES = {new Person("Ironman", 12),
                                   new Person("Batman", 10)};
 
   public static class Person {
