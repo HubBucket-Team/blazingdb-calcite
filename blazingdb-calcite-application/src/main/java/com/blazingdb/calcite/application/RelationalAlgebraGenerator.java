@@ -131,9 +131,11 @@ public class RelationalAlgebraGenerator {
 	}
 
   /** Direct constructor for testing */
-  public RelationalAlgebraGenerator(FrameworkConfig frameworkConfig) {
+  public RelationalAlgebraGenerator(FrameworkConfig frameworkConfig,
+                                    HepProgram hepProgram) {
     this.config = frameworkConfig;
     this.planner = Frameworks.getPlanner(frameworkConfig);
+    this.program = hepProgram;
   }
 
   /**

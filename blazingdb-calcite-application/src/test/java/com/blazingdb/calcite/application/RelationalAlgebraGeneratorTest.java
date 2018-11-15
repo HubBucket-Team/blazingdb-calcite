@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import org.apache.calcite.adapter.java.ReflectiveSchema;
+import org.apache.calcite.plan.hep.HepProgramBuilder;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.tools.FrameworkConfig;
@@ -31,7 +32,8 @@ public class RelationalAlgebraGeneratorTest {
                 "people", new ReflectiveSchema(new PeopleSchema())))
             .build();
 
-    relationalAlgebraGenerator = new RelationalAlgebraGenerator(config);
+    relationalAlgebraGenerator =
+        new RelationalAlgebraGenerator(config, new HepProgramBuilder().build());
   }
 
   @After
