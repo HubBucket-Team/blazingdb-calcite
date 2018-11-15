@@ -137,17 +137,25 @@ public class RelationalAlgebraGenerator {
   }
 
   /**
-	 * Takes a sql statement and converts it into an optimized relational algebra node. The result of this function is
-	 * a logical plan that has been optimized using a rule based optimizer.
-	 *
-	 * @param sql a string sql query that is to be parsed, converted into relational algebra, then optimized
-	 * @return a RelNode which contains the relational algebra tree generated from the sql statement provided after
-	 * 			an optimization step has been completed.
-	 * @throws SqlParseException, ValidationException, RelConversionException
-	 */
+   * Takes a sql statement and converts it into an optimized relational algebra
+   * node. The result of this function is a logical plan that has been optimized
+   * using a rule based optimizer.
+   *
+   * @param sql a string sql query that is to be parsed, converted into
+   *     relational algebra, then optimized
+   * @return a RelNode which contains the relational algebra tree generated from
+   *     the sql statement provided after
+   * 			an optimization step has been completed.
+   * @throws SqlSyntaxException, ValidationException, RelConversionException
+   */
   public RelNode getRelationalAlgebra(String sql)
-      throws SqlParseException, ValidationException, RelConversionException {
-    SqlNode tempNode = planner.parse(sql);
+      throws SqlSyntaxException, ValidationException, RelConversionException {
+    SqlNode tempNode;
+    try {
+      tempNode = planner.parse(sql);
+    } catch (SqlParseException e) {
+      throw new SqlSyntaxException(sql, e);
+    }
 
     SqlNode validatedSqlNode = planner.validate(tempNode);
 
