@@ -55,12 +55,30 @@ public class RelationalAlgebraGeneratorTest {
   }
 
   @Test
-  public void invalidSelect() {
+  public void invalidSelectOnWhere() {
     try {
       relationalAlgebraGenerator.getRelationalAlgebra(
           "select * from heroes whera age=1");
     } catch (SqlSyntaxException e) {
-      assertThat(e.toString(), containsString("line 1, column 28"));
+      assertThat(e.toString(),
+                 containsString("Encountered \"age\" at line 1, column 28."));
+      return;
+    } catch (ValidationException e) {
+      fail("validating");
+    } catch (RelConversionException e) {
+      fail("internal sql to relational conversion");
+    }
+    fail("Unreachable");
+  }
+
+  @Test
+  public void invalidSelectOnFrom() {
+    try {
+      relationalAlgebraGenerator.getRelationalAlgebra(
+          "select *\n  fram heroes\n  whera age=1\n  limit 1");
+    } catch (SqlSyntaxException e) {
+      assertThat(e.toString(),
+                 containsString("Encountered \"heroes\" at line 2, column 8."));
       return;
     } catch (ValidationException e) {
       fail("validating");

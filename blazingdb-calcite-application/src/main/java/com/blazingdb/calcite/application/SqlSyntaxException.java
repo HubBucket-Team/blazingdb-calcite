@@ -21,23 +21,30 @@ public class SqlSyntaxException extends Exception {
 
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("SqlSyntaxException:\n\n");
+    builder.append("SqlSyntaxException\n\n");
 
     List<String> queryLines = Arrays.asList(queryString.split("\n"));
+    SqlParserPos pos = sqlParseException.getPos();
 
-    builder.append(queryLines.get(0));
+    for (int i = 0; i < pos.getLineNum(); i++) {
+      builder.append(queryLines.get(i));
+      builder.append('\n');
+    }
+
+    for (int i = 1; i < pos.getColumnNum(); i++) {
+      builder.append(' ');
+    }
+    for (int i = pos.getColumnNum(); i <= pos.getEndColumnNum(); i++) {
+      builder.append('^');
+    }
+    builder.append('\n');
+
+    for (int i = pos.getEndLineNum(); i < queryLines.size(); i++) {
+      builder.append(queryLines.get(i));
+      builder.append('\n');
+    }
 
     builder.append('\n');
-    SqlParserPos pos = sqlParseException.getPos();
-    for (int i = 1; i < pos.getColumnNum(); i++) {
-      builder.append(" ");
-    }
-
-    for (int i = pos.getColumnNum(); i <= pos.getEndColumnNum(); i++) {
-      builder.append("^");
-    }
-
-    builder.append("\n\n");
     builder.append(sqlParseException.getMessage());
 
     return builder.toString();

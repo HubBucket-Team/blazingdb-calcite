@@ -188,11 +188,11 @@ try {
                         DMLResponseMessage responsePayload = new DMLResponseMessage(logicalPlan, chronometer.elapsed(MILLISECONDS));
                         response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
                     } catch (SqlSyntaxException e) {
-                        ResponseErrorMessage error =
+                      ResponseErrorMessage error =
                           new ResponseErrorMessage(e.toString());
-                        response =
-                          new ResponseMessage(Status.Error, error.getBufferData());
-		                } catch (Exception e) {
+                      response = new ResponseMessage(Status.Error,
+                                                     error.getBufferData());
+                    } catch (Exception e) {
                         //TODO: give something more meaningfu than this :)
 
                         ResponseErrorMessage error = new ResponseErrorMessage("Improperly Formatted Query\n" + e.getStackTrace()[0]);
