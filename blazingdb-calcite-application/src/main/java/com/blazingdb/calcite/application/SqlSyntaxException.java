@@ -26,11 +26,13 @@ public class SqlSyntaxException extends Exception {
     List<String> queryLines = Arrays.asList(queryString.split("\n"));
     SqlParserPos pos = sqlParseException.getPos();
 
+    // append unaffected lines
     for (int i = 0; i < pos.getLineNum(); i++) {
       builder.append(queryLines.get(i));
       builder.append('\n');
     }
 
+    // append lines with syntax error
     for (int i = 1; i < pos.getColumnNum(); i++) {
       builder.append(' ');
     }
@@ -39,6 +41,7 @@ public class SqlSyntaxException extends Exception {
     }
     builder.append('\n');
 
+    // append rest of lines
     for (int i = pos.getEndLineNum(); i < queryLines.size(); i++) {
       builder.append(queryLines.get(i));
       builder.append('\n');
