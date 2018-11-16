@@ -16,10 +16,26 @@ import org.apache.calcite.tools.ValidationException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
+import java.util.Arrays;
+import java.util.Collection;
+
+@RunWith(Parameterized.class)
 public class RelationalAlgebraGeneratorTest {
 
   private RelationalAlgebraGenerator relationalAlgebraGenerator;
+
+  private final String queryString;
+  private final String expectedMessage;
+
+  public RelationalAlgebraGeneratorTest(final String queryString,
+                                        final String expectedMessage) {
+    this.queryString = queryString;
+    this.expectedMessage = expectedMessage;
+  }
 
   @Before
   public void SetUp() {
@@ -41,50 +57,30 @@ public class RelationalAlgebraGeneratorTest {
     this.relationalAlgebraGenerator = null;
   }
 
-  @Test
-  public void validSyntax() {
-    try {
-      relationalAlgebraGenerator.getRelationalAlgebra("select * from heroes");
-    } catch (SqlSyntaxException e) {
-      fail("parsing");
-    } catch (ValidationException e) {
-      fail("validating");
-    } catch (RelConversionException e) {
-      fail("internal sql to relational conversion");
-    }
+  @Parameters
+  public static Collection<Object[]> data() {
+    return Arrays.asList(new Object[][] {
+        {"select * from heroes whera age=1",
+         "Encountered \"age\" at line 1, column 28."},
+        {"select *\n  fram heroes\n  whera age=1\n  limit 1",
+         "Encountered \"heroes\" at line 2, column 8."},
+    });
+  }
+
+  @Test(expected = SqlSyntaxException.class)
+  public void throwSqlSyntaxException()
+      throws SqlSyntaxException, ValidationException, RelConversionException {
+    relationalAlgebraGenerator.getRelationalAlgebra(this.queryString);
   }
 
   @Test
-  public void invalidSelectOnWhere() {
+  public void hasStartErrorPositionInMessage()
+      throws SqlSyntaxException, ValidationException, RelConversionException {
     try {
-      relationalAlgebraGenerator.getRelationalAlgebra(
-          "select * from heroes whera age=1");
+      relationalAlgebraGenerator.getRelationalAlgebra(this.queryString);
+      fail();
     } catch (SqlSyntaxException e) {
-      assertThat(e.toString(),
-                 containsString("Encountered \"age\" at line 1, column 28."));
-      return;
-    } catch (ValidationException e) {
-      fail("validating");
-    } catch (RelConversionException e) {
-      fail("internal sql to relational conversion");
+      assertThat(e.toString(), containsString(this.expectedMessage));
     }
-    fail("Unreachable");
-  }
-
-  @Test
-  public void invalidSelectOnFrom() {
-    try {
-      relationalAlgebraGenerator.getRelationalAlgebra(
-          "select *\n  fram heroes\n  whera age=1\n  limit 1");
-    } catch (SqlSyntaxException e) {
-      assertThat(e.toString(),
-                 containsString("Encountered \"heroes\" at line 2, column 8."));
-      return;
-    } catch (ValidationException e) {
-      fail("validating");
-    } catch (RelConversionException e) {
-      fail("internal sql to relational conversion");
-    }
-    fail("Unreachable");
   }
 }

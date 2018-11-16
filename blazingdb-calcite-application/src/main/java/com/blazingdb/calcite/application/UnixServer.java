@@ -184,19 +184,25 @@ try {
                     System.out.println("DML: " + requestPayload.getQuery());
 
                     try {
-                        String logicalPlan  = RelOptUtil.toString(ApplicationContext.getRelationalAlgebraGenerator().getRelationalAlgebra(requestPayload.getQuery()));
-                        DMLResponseMessage responsePayload = new DMLResponseMessage(logicalPlan, chronometer.elapsed(MILLISECONDS));
-                        response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
+                      String logicalPlan = RelOptUtil.toString(
+                          ApplicationContext.getRelationalAlgebraGenerator()
+                              .getRelationalAlgebra(requestPayload.getQuery()));
+                      DMLResponseMessage responsePayload =
+                          new DMLResponseMessage(
+                              logicalPlan, chronometer.elapsed(MILLISECONDS));
+                      response = new ResponseMessage(
+                          Status.Success, responsePayload.getBufferData());
                     } catch (SqlSyntaxException e) {
                       ResponseErrorMessage error =
-                          new ResponseErrorMessage(e.toString());
+                          new ResponseErrorMessage(e.getMessage());
                       response = new ResponseMessage(Status.Error,
                                                      error.getBufferData());
                     } catch (Exception e) {
-                        //TODO: give something more meaningfu than this :)
-
-                        ResponseErrorMessage error = new ResponseErrorMessage("Improperly Formatted Query\n" + e.getStackTrace()[0]);
-                        response = new ResponseMessage(Status.Error, error.getBufferData());
+                      ResponseErrorMessage error = new ResponseErrorMessage(
+                          "Improperly Formatted Query\n" +
+                          e.getStackTrace()[0]);
+                      response = new ResponseMessage(Status.Error,
+                                                     error.getBufferData());
                     }
                     return response.getBufferData();
                 }else if(requestMessage.getHeaderType() == MessageType.DDL_CREATE_TABLE) {

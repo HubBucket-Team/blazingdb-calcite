@@ -9,17 +9,13 @@ import java.util.List;
 public class SqlSyntaxException extends Exception {
   private static final long serialVersionUID = -1689099602920569510L;
 
-  private final String queryString;
-  private final SqlParseException sqlParseException;
-
   public SqlSyntaxException(final String queryString,
                             final SqlParseException sqlParseException) {
-    super();
-    this.queryString = queryString;
-    this.sqlParseException = sqlParseException;
+    super(description(queryString, sqlParseException));
   }
 
-  public String toString() {
+  private static String description(final String queryString,
+                                    final SqlParseException sqlParseException) {
     StringBuilder builder = new StringBuilder();
     builder.append("SqlSyntaxException\n\n");
 

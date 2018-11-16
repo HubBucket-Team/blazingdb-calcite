@@ -130,7 +130,7 @@ public class RelationalAlgebraGenerator {
 		}
 	}
 
-  /** Direct constructor for testing */
+  /** Direct constructor for testing purposes */
   public RelationalAlgebraGenerator(FrameworkConfig frameworkConfig,
                                     HepProgram hepProgram) {
     this.config = frameworkConfig;
