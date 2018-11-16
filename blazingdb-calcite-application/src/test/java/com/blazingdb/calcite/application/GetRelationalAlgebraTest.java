@@ -13,32 +13,20 @@ import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.tools.RelConversionException;
 import org.apache.calcite.tools.ValidationException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-
-import java.util.Arrays;
-import java.util.Collection;
-
-@RunWith(Parameterized.class)
-public class RelationalAlgebraGeneratorTest {
+public class GetRelationalAlgebraTest {
 
   private RelationalAlgebraGenerator relationalAlgebraGenerator;
 
   private final String queryString;
   private final String expectedMessage;
 
-  public RelationalAlgebraGeneratorTest(final String queryString,
-                                        final String expectedMessage) {
-    this.queryString = queryString;
+  protected GetRelationalAlgebraTest(final String queryString,
+                                     final String expectedMessage) {
+    this.queryString     = queryString;
     this.expectedMessage = expectedMessage;
   }
 
-  @Before
-  public void SetUp() {
+  protected void SetUp() {
     final SchemaPlus rootSchema = Frameworks.createRootSchema(true);
 
     final FrameworkConfig config =
@@ -52,29 +40,14 @@ public class RelationalAlgebraGeneratorTest {
         new RelationalAlgebraGenerator(config, new HepProgramBuilder().build());
   }
 
-  @After
-  public void TearDown() {
-    this.relationalAlgebraGenerator = null;
-  }
+  protected void TearDown() { this.relationalAlgebraGenerator = null; }
 
-  @Parameters
-  public static Collection<Object[]> data() {
-    return Arrays.asList(new Object[][] {
-        {"select * from heroes whera age=1",
-         "Encountered \"age\" at line 1, column 28."},
-        {"select *\n  fram heroes\n  whera age=1\n  limit 1",
-         "Encountered \"heroes\" at line 2, column 8."},
-    });
-  }
-
-  @Test(expected = SqlSyntaxException.class)
-  public void throwSqlSyntaxException()
+  protected void throwSqlSyntaxException()
       throws SqlSyntaxException, ValidationException, RelConversionException {
     relationalAlgebraGenerator.getRelationalAlgebra(this.queryString);
   }
 
-  @Test
-  public void hasStartErrorPositionInMessage()
+  protected void hasStartErrorPositionInMessage()
       throws SqlSyntaxException, ValidationException, RelConversionException {
     try {
       relationalAlgebraGenerator.getRelationalAlgebra(this.queryString);
