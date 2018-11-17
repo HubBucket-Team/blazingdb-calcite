@@ -11,9 +11,8 @@ import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.tools.RelConversionException;
-import org.apache.calcite.tools.ValidationException;
 
-public class GetRelationalAlgebraTest {
+public abstract class GetRelationalAlgebraTest {
 
   private RelationalAlgebraGenerator relationalAlgebraGenerator;
 
@@ -42,18 +41,28 @@ public class GetRelationalAlgebraTest {
 
   protected void TearDown() { this.relationalAlgebraGenerator = null; }
 
-  protected void throwSqlSyntaxException()
-      throws SqlSyntaxException, ValidationException, RelConversionException {
+  protected void throwSqlException() throws SqlSyntaxException,
+                                            SqlValidationException,
+                                            RelConversionException {
     relationalAlgebraGenerator.getRelationalAlgebra(this.queryString);
   }
 
-  protected void hasStartErrorPositionInMessage()
-      throws SqlSyntaxException, ValidationException, RelConversionException {
+  protected abstract void hasStartErrorPositionInMessage()
+      throws SqlSyntaxException, SqlValidationException, RelConversionException;
+
+  protected <T extends Throwable> void
+  hasStartErrorPositionInMessage(Class<T> exceptionClass)
+      throws SqlSyntaxException, SqlValidationException,
+             RelConversionException {
     try {
       relationalAlgebraGenerator.getRelationalAlgebra(this.queryString);
       fail();
-    } catch (SqlSyntaxException e) {
-      assertThat(e.toString(), containsString(this.expectedMessage));
+    } catch (Exception e) {
+      if (e.getClass().equals(exceptionClass)) {
+        assertThat(e.toString(), containsString(this.expectedMessage));
+      } else {
+        fail();
+      }
     }
   }
 }
