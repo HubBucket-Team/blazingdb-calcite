@@ -197,6 +197,11 @@ try {
                           new ResponseErrorMessage(e.getMessage());
                       response = new ResponseMessage(Status.Error,
                                                      error.getBufferData());
+                    } catch (SqlValidationException e) {
+                      ResponseErrorMessage error =
+                          new ResponseErrorMessage(e.getMessage());
+                      response = new ResponseMessage(Status.Error,
+                                                     error.getBufferData());
                     } catch (Exception e) {
                       ResponseErrorMessage error = new ResponseErrorMessage(
                           "Improperly Formatted Query\n" +
