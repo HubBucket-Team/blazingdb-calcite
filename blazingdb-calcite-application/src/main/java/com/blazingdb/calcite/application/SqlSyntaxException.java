@@ -4,6 +4,7 @@ import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParserPos;
 
 public class SqlSyntaxException extends SqlException {
+
   private static final long serialVersionUID = -1689099602920569510L;
 
   public SqlSyntaxException(final String queryString,
@@ -13,10 +14,10 @@ public class SqlSyntaxException extends SqlException {
 
   private static String description(final String queryString,
                                     final SqlParseException sqlParseException) {
-    StringBuilder builder = new StringBuilder();
+    final StringBuilder builder = new StringBuilder();
     builder.append("SqlSyntaxException\n\n");
 
-    SqlParserPos pos = sqlParseException.getPos();
+    final SqlParserPos pos = sqlParseException.getPos();
     SqlException.pointInQueryString(builder,
                                     queryString,
                                     new SqlPosition(pos.getLineNum(),

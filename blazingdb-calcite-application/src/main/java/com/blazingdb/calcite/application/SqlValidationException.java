@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SqlValidationException extends SqlException {
+
   private static final long serialVersionUID = -429299379494895888L;
 
   public SqlValidationException(final String queryString,
@@ -14,20 +15,20 @@ public class SqlValidationException extends SqlException {
   }
 
   private static Pattern pattern = Pattern.compile(
-      "From line (\\d+), column (\\d+) to line (\\d+), column (\\d+): (.*)");
+      "From line (\\d+), column (\\d+) to line (\\d+), column (\\d+): .*");
 
   private static String description(final String queryString,
                                     final String message) {
-    Matcher       matcher = pattern.matcher(message);
-    StringBuilder builder = new StringBuilder();
+    final Matcher matcher       = pattern.matcher(message);
+    final StringBuilder builder = new StringBuilder();
 
     matcher.find();
 
-    int    lineNum      = Integer.parseInt(matcher.group(1));
-    int    columnNum    = Integer.parseInt(matcher.group(2));
-    int    endLineNum   = Integer.parseInt(matcher.group(3));
-    int    endColumnNum = Integer.parseInt(matcher.group(4));
-    String cause        = matcher.group(0);
+    final int lineNum      = Integer.parseInt(matcher.group(1));
+    final int columnNum    = Integer.parseInt(matcher.group(2));
+    final int endLineNum   = Integer.parseInt(matcher.group(3));
+    final int endColumnNum = Integer.parseInt(matcher.group(4));
+    final String cause     = matcher.group(0);
 
     builder.append("SqlValidationException\n\n");
 

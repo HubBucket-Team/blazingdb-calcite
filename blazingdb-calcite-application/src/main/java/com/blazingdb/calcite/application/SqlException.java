@@ -12,7 +12,7 @@ public class SqlException extends Exception {
   public static void pointInQueryString(final StringBuilder builder,
                                         final String queryString,
                                         final SqlPosition sqlPosition) {
-    List<String> queryLines = Arrays.asList(queryString.split("\n"));
+    final List<String> queryLines = Arrays.asList(queryString.split("\n"));
 
     // append unaffected lines
     for (int i = 0; i < sqlPosition.getLineNum(); i++) {
