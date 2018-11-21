@@ -29,6 +29,7 @@ final class ProjectNode
 
   @Override
   public Iterator<Pair<String, Integer>> iterator() {
+    // TODO(gcca): Don't build List. Go directly to make the iterator.
     List<Pair<String, Integer>> list = new ArrayList<Pair<String, Integer>>();
     for (int i = 0; i < columnNames.size(); i++) { list.add(get(i)); }
     return list.iterator();
@@ -36,9 +37,12 @@ final class ProjectNode
 
   @Override
   public String toString() {
-    return "ProjectNode : " +
-        IntStream.range(0, columnNames.size())
-            .mapToObj(i -> columnNames.get(i) + "=" + columnValues.get(i))
-            .collect(Collectors.joining(", "));
+    return "ProjectNode : " + IntStream.range(0, columnNames.size())
+                                  .mapToObj(i
+                                            -> new StringBuilder()
+                                                   .append(columnNames.get(i))
+                                                   .append('=')
+                                                   .append(columnValues.get(i)))
+                                  .collect(Collectors.joining(", "));
   }
 }
