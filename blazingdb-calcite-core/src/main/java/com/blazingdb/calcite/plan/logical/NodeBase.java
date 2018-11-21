@@ -11,9 +11,16 @@ public abstract class NodeBase implements Node {
 
   public NodeBase() { children = new ArrayList<Node>(); }
 
-  public void addChild(final Node child) { children.add(child); }
+  @Override
+  public Node addChild(final Node child) {
+    children.add(child);
+    return this;
+  }
 
-  public Collection<Node> getChildren() { return children; }
+  @Override
+  public Collection<Node> getChildren() {
+    return children;
+  }
 
   public abstract String toString();
 }

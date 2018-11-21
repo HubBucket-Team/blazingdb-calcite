@@ -1,6 +1,6 @@
 package com.blazingdb.calcite.plan.logical;
 
-public class FilterNode extends NodeBase {
+final class FilterNode extends NodeBase {
 
   private static final long serialVersionUID = -3015864347938693253L;
 

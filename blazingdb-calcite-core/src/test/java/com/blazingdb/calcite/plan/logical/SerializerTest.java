@@ -3,6 +3,7 @@ package com.blazingdb.calcite.plan.logical;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.calcite.adapter.java.ReflectiveSchema;
+import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlNode;
@@ -15,7 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class SerializerTest {
+public final class SerializerTest {
 
   private Planner planner;
 
@@ -40,9 +41,10 @@ public class SerializerTest {
 
   @Test
   public void test() throws Exception {
-    final String queryString = "(select name from heroes where age = 1)"
-                               + " union"
-                               + "(select name from heroes group by name)";
+    final String queryString =
+        "(select age, name from heroes where age = 1)"
+        + " union"
+        + "(select age, name from heroes group by name, age)";
 
     SqlNode node = planner.parse(queryString);
     node         = planner.validate(node);
@@ -57,11 +59,11 @@ public class SerializerTest {
     assertEquals(nodeStringSerializer.toString(),
                  "RootNode\n"
                      + "  UnionNode : all = false\n"
-                     + "    ProjectNode : $0\n"
+                     + "    ProjectNode : AGE=1, NAME=0\n"
                      + "      FilterNode : =(CAST($1):INTEGER NOT NULL, 1)\n"
                      + "        TableScanNode : path = people.HEROES\n"
-                     + "    AggregateNode : groups 0\n"
-                     + "      ProjectNode : $0\n"
+                     + "    ProjectNode : AGE=1, NAME=0\n"
+                     + "      AggregateNode : groups 0, 1\n"
                      + "        TableScanNode : path = people.HEROES\n");
   }
 }

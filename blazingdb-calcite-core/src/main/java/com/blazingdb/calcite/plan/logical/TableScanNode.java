@@ -2,7 +2,7 @@ package com.blazingdb.calcite.plan.logical;
 
 import java.util.List;
 
-public class TableScanNode extends NodeBase {
+final class TableScanNode extends NodeBase {
 
   private static final long serialVersionUID = -3038840524700102053L;
 
@@ -19,6 +19,7 @@ public class TableScanNode extends NodeBase {
     return tableIdentifier.get(tableIdentifier.size() - 1);
   }
 
+  @Override
   public String toString() {
     return "TableScanNode : path = " + String.join(".", getTablePath());
   }

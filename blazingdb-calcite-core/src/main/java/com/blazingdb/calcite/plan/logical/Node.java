@@ -5,6 +5,6 @@ import java.util.Collection;
 import java.io.Serializable;
 
 public interface Node extends Serializable {
-  public void             addChild(final Node child);
-  public Collection<Node> getChildren();
+  Node             addChild(final Node child);
+  Collection<Node> getChildren();
 }

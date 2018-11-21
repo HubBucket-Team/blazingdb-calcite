@@ -1,6 +1,6 @@
 package com.blazingdb.calcite.plan.logical;
 
-public class UnionNode extends NodeBase {
+final class UnionNode extends NodeBase {
 
   private static final long serialVersionUID = 6727925829569575851L;
 
@@ -8,5 +8,8 @@ public class UnionNode extends NodeBase {
 
   public UnionNode(final boolean all) { this.all = all; }
 
-  public String toString() { return "UnionNode : all = " + all; }
+  @Override
+  public String toString() {
+    return "UnionNode : all = " + all;
+  }
 }

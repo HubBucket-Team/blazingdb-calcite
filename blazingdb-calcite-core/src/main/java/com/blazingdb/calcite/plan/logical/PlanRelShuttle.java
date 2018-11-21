@@ -17,7 +17,6 @@ import org.apache.calcite.rel.logical.LogicalProject;
 import org.apache.calcite.rel.logical.LogicalSort;
 import org.apache.calcite.rel.logical.LogicalUnion;
 import org.apache.calcite.rel.logical.LogicalValues;
-import org.apache.calcite.rex.RexNode;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -28,83 +27,77 @@ final class PlanRelShuttle implements RelShuttle {
 
   protected final Deque<RelNode> relNodeStack = new ArrayDeque<>();
   protected final Deque<Node> nodeStack       = new ArrayDeque<>();
-  private Node                rootNode        = null;
-
-  final static class RootNode extends NodeBase {
+  private final Node rootNode                 = new NodeBase() {
     private static final long serialVersionUID = 2100115430813863826L;
     public String             toString() { return "RootNode"; }
   };
 
-  public PlanRelShuttle() {
-    rootNode = new RootNode();
-    nodeStack.push(rootNode);
-  }
+  public PlanRelShuttle() { nodeStack.push(rootNode); }
 
-  public RelNode visit(LogicalAggregate aggregate) {
+  public RelNode visit(LogicalAggregate logicalAggregate) {
     AggregateNode aggregateNode =
-        new AggregateNode(aggregate.getGroupSet().asList());
+        new AggregateNode(logicalAggregate.getGroupSet().asList());
     processCurrentNodeWith(aggregateNode);
-    return applyToChild(aggregate, 0, aggregate.getInput());
+    return applyToChild(logicalAggregate, 0, logicalAggregate.getInput());
   }
 
-  public RelNode visit(LogicalMatch match) {
-    return applyToChild(match, 0, match.getInput());
+  public RelNode visit(LogicalMatch logicalMatch) {
+    return applyToChild(logicalMatch, 0, logicalMatch.getInput());
   }
 
-  public RelNode visit(TableScan scan) {
+  public RelNode visit(TableScan tableScan) {
     TableScanNode tableScanNode =
-        new TableScanNode(scan.getTable().getQualifiedName());
+        new TableScanNode(tableScan.getTable().getQualifiedName());
     processCurrentNodeWith(tableScanNode);
-    return scan;
+    return tableScan;
   }
 
-  public RelNode visit(TableFunctionScan scan) {
-    return traverseChildrenOf(scan);
+  public RelNode visit(TableFunctionScan tableFunctionScan) {
+    return traverseChildrenOf(tableFunctionScan);
   }
 
-  public RelNode visit(LogicalValues values) { return values; }
+  public RelNode visit(LogicalValues logicalValues) { return logicalValues; }
 
-  public RelNode visit(LogicalFilter filter) {
-    FilterNode filterNode = new FilterNode(filter.getCondition().toString());
+  public RelNode visit(LogicalFilter logicalFilter) {
+    FilterNode filterNode =
+        new FilterNode(logicalFilter.getCondition().toString());
     processCurrentNodeWith(filterNode);
-    return applyToChild(filter, 0, filter.getInput());
+    return applyToChild(logicalFilter, 0, logicalFilter.getInput());
   }
 
-  public RelNode visit(LogicalProject project) {
-    StringBuilder b = new StringBuilder();
-    b.append("name = ");
-    for (RexNode r : project.getChildExps()) {
-      b.append(r.toString());
-      b.append("  ");
-    }
-    ProjectNode projectNode =
-        new ProjectNode(project.getChildExps().get(0).toString());
-    processCurrentNodeWith(projectNode);
-    return applyToChild(project, 0, project.getInput());
+  public RelNode visit(LogicalProject logicalProject) {
+    processCurrentNodeWith(new ProjectNodeBuilder(logicalProject).build());
+    return applyToChild(logicalProject, 0, logicalProject.getInput());
   }
 
-  public RelNode visit(LogicalJoin join) { return traverseChildrenOf(join); }
-
-  public RelNode visit(LogicalCorrelate correlate) {
-    return traverseChildrenOf(correlate);
+  public RelNode visit(LogicalJoin logicalJoin) {
+    return traverseChildrenOf(logicalJoin);
   }
 
-  public RelNode visit(LogicalUnion union) {
-    UnionNode unionNode = new UnionNode(union.all);
+  public RelNode visit(LogicalCorrelate logicalCorrelate) {
+    return traverseChildrenOf(logicalCorrelate);
+  }
+
+  public RelNode visit(LogicalUnion logicalUnion) {
+    UnionNode unionNode = new UnionNode(logicalUnion.all);
     processCurrentNodeWith(unionNode);
-    return traverseChildrenOf(union);
+    return traverseChildrenOf(logicalUnion);
   }
 
-  public RelNode visit(LogicalIntersect intersect) {
-    return traverseChildrenOf(intersect);
+  public RelNode visit(LogicalIntersect logicalIntersect) {
+    return traverseChildrenOf(logicalIntersect);
   }
 
-  public RelNode visit(LogicalMinus minus) { return traverseChildrenOf(minus); }
+  public RelNode visit(LogicalMinus logicalMinus) {
+    return traverseChildrenOf(logicalMinus);
+  }
 
-  public RelNode visit(LogicalSort sort) { return traverseChildrenOf(sort); }
+  public RelNode visit(LogicalSort logicalSort) {
+    return traverseChildrenOf(logicalSort);
+  }
 
-  public RelNode visit(LogicalExchange exchange) {
-    return traverseChildrenOf(exchange);
+  public RelNode visit(LogicalExchange logicalExchange) {
+    return traverseChildrenOf(logicalExchange);
   }
 
   public RelNode visit(RelNode other) { return traverseChildrenOf(other); }

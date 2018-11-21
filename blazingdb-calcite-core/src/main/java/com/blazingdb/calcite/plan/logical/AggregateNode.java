@@ -1,8 +1,9 @@
 package com.blazingdb.calcite.plan.logical;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class AggregateNode extends NodeBase {
+final class AggregateNode extends NodeBase {
 
   private static final long serialVersionUID = -4193184474436884856L;
 
@@ -10,5 +11,9 @@ public class AggregateNode extends NodeBase {
 
   public AggregateNode(final List<Integer> groups) { this.groups = groups; }
 
-  public String toString() { return "AggregateNode : groups " + groups.get(0); }
+  @Override
+  public String toString() {
+    return "AggregateNode : groups " +
+        groups.stream().map(Object::toString).collect(Collectors.joining(", "));
+  }
 }

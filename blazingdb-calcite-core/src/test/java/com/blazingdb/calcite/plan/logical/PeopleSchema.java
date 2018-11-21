@@ -5,8 +5,8 @@ public final class PeopleSchema {
                                   new Person("Batman", 10)};
   public static class Person {
     public final String NAME;
-    public final int    AGE;
-    public Person(final String NAME, final int AGE) {
+    public final Integer AGE;
+    public Person(final String NAME, final Integer AGE) {
       this.NAME = NAME;
       this.AGE  = AGE;
     }
