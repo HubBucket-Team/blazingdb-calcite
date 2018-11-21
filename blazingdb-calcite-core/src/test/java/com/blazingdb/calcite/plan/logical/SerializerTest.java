@@ -49,12 +49,12 @@ public class SerializerTest {
 
     RelNode relNode = planner.rel(node).project();
 
-    PlanRelShuttle visitor = new PlanRelShuttle();
-    relNode.accept(visitor);
-    StringBuilder builder = new StringBuilder();
-    appendTo(builder, visitor.getRootNode());
+    PlanRelShuttle planRelShuttle = new PlanRelShuttle();
+    relNode.accept(planRelShuttle);
 
-    assertEquals(builder.toString(),
+    NodeStringSerializer nodeStringSerializer =
+        new NodeStringSerializer(planRelShuttle.getRootNode());
+    assertEquals(nodeStringSerializer.toString(),
                  "RootNode\n"
                      + "  UnionNode : all = false\n"
                      + "    ProjectNode : $0\n"
@@ -62,21 +62,6 @@ public class SerializerTest {
                      + "        TableScanNode : path = people.HEROES\n"
                      + "    AggregateNode : groups 0\n"
                      + "      ProjectNode : $0\n"
-                     + "        TableScanNode : path = people.HEROES");
-  }
-
-  private void appendTo(final StringBuilder builder, final Node node) {
-    appendTo(builder, node, "");
-  }
-
-  private void appendTo(final StringBuilder builder,
-                        final Node node,
-                        final String indentation) {
-    builder.append(indentation);
-    builder.append(node);
-    for (final Node child : node.getChildren()) {
-      builder.append('\n');
-      appendTo(builder, child, indentation + "  ");
-    }
+                     + "        TableScanNode : path = people.HEROES\n");
   }
 }

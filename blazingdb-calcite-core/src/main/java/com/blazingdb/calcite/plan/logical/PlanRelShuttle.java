@@ -26,9 +26,9 @@ import java.util.List;
 
 final class PlanRelShuttle implements RelShuttle {
 
-  protected final Deque<RelNode> stack  = new ArrayDeque<>();
-  protected final Deque<Node> nodeStack = new ArrayDeque<>();
-  private Node                rootNode  = null;
+  protected final Deque<RelNode> relNodeStack = new ArrayDeque<>();
+  protected final Deque<Node> nodeStack       = new ArrayDeque<>();
+  private Node                rootNode        = null;
 
   final static class RootNode extends NodeBase {
     private static final long serialVersionUID = 2100115430813863826L;
@@ -118,7 +118,7 @@ final class PlanRelShuttle implements RelShuttle {
 
   protected RelNode
   applyToChild(RelNode parentRelNode, int i, RelNode childRelNode) {
-    stack.push(parentRelNode);
+    relNodeStack.push(parentRelNode);
     try {
       RelNode otherChildRelNode = childRelNode.accept(this);
       nodeStack.pop();
@@ -128,7 +128,7 @@ final class PlanRelShuttle implements RelShuttle {
         return parentRelNode.copy(parentRelNode.getTraitSet(), inputs);
       }
       return parentRelNode;
-    } finally { stack.pop(); }
+    } finally { relNodeStack.pop(); }
   }
 
   protected RelNode traverseChildrenOf(RelNode relNode) {
