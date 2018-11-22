@@ -63,7 +63,7 @@ public final class SerializerTest {
                      + "      FilterNode : =(CAST($1):INTEGER NOT NULL, 1)\n"
                      + "        TableScanNode : path = people.HEROES\n"
                      + "    ProjectNode : AGE=1, NAME=0\n"
-                     + "      AggregateNode : groups 0, 1\n"
+                     + "      AggregateNode : groups = 0, 1\n"
                      + "        TableScanNode : path = people.HEROES\n");
   }
 }

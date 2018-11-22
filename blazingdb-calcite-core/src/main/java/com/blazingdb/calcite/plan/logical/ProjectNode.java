@@ -37,12 +37,12 @@ final class ProjectNode
 
   @Override
   public String toString() {
-    return "ProjectNode : " + IntStream.range(0, columnNames.size())
-                                  .mapToObj(i
-                                            -> new StringBuilder()
-                                                   .append(columnNames.get(i))
-                                                   .append('=')
-                                                   .append(columnValues.get(i)))
-                                  .collect(Collectors.joining(", "));
+    return "Project : " + IntStream.range(0, columnNames.size())
+                              .mapToObj(i
+                                        -> new StringBuilder()
+                                               .append(columnNames.get(i))
+                                               .append('=')
+                                               .append(columnValues.get(i)))
+                              .collect(Collectors.joining(", "));
   }
 }

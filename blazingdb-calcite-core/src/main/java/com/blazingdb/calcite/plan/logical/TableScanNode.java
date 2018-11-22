@@ -21,6 +21,6 @@ final class TableScanNode extends NodeBase {
 
   @Override
   public String toString() {
-    return "TableScanNode : path = " + String.join(".", getTablePath());
+    return "TableScan : path = " + String.join(".", getTablePath());
   }
 }

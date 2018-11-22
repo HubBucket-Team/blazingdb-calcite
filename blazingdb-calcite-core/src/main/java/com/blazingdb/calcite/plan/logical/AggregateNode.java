@@ -13,7 +13,7 @@ final class AggregateNode extends NodeBase {
 
   @Override
   public String toString() {
-    return "AggregateNode : groups " +
+    return "Aggregate : groups = " +
         groups.stream().map(Object::toString).collect(Collectors.joining(", "));
   }
 }

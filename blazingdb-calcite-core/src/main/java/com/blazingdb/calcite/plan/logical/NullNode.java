@@ -6,10 +6,12 @@ final class NullNode implements Node {
 
   private static final long serialVersionUID = -6547955683169355149L;
 
+  @Override
   public Node addChild(final Node node) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public Collection<Node> getChildren() {
     throw new UnsupportedOperationException();
   }

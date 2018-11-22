@@ -10,6 +10,6 @@ final class UnionNode extends NodeBase {
 
   @Override
   public String toString() {
-    return "UnionNode : all = " + all;
+    return "Union : all = " + all;
   }
 }

@@ -1,6 +1,6 @@
-package com.blazingdb.calcite.plan.logical;
+package com.blazingdb.calcite.plan.logical.expressions;
 
-final class NodeStringSerializer {
+public final class ExpressionStringSerializer {
 
   private static final Integer INDENTATION_LEVEL     = 2;
   private static final char    INDENTATION_CHARACTER = ' ';
@@ -8,27 +8,23 @@ final class NodeStringSerializer {
   final StringBuilder stringBuilder           = new StringBuilder();
   Integer             currentIndentationLevel = 0;
 
-  public NodeStringSerializer(final Node node) {
+  public ExpressionStringSerializer(final Expression node) {
     appendStringRepresentation(node);
   }
 
   public String toString() { return stringBuilder.toString(); }
 
-  private void appendStringRepresentation(final Node node) {
+  private void appendStringRepresentation(final Expression node) {
     stringBuilderAppend(node);
     currentIndentationLevel += INDENTATION_LEVEL;
     node.getChildren().stream().forEach(this::appendStringRepresentation);
     currentIndentationLevel -= INDENTATION_LEVEL;
   }
 
-  private void stringBuilderAppend(final Node node) {
+  private void stringBuilderAppend(final Expression node) {
     int counter = currentIndentationLevel + 1;
     while (0 != --counter) { stringBuilder.append(INDENTATION_CHARACTER); }
-    stringBuilder.append(node.toString().replace(
-        "\n",
-        ("\n" +
-         new String(new char[currentIndentationLevel]).replace('\0', ' ') +
-         "  |")));
+    stringBuilder.append(node);
     stringBuilder.append('\n');
   }
 }

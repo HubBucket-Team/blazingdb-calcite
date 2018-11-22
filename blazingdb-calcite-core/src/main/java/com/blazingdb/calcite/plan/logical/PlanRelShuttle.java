@@ -29,7 +29,10 @@ final class PlanRelShuttle implements RelShuttle {
   protected final Deque<Node> nodeStack       = new ArrayDeque<>();
   private final Node rootNode                 = new NodeBase() {
     private static final long serialVersionUID = 2100115430813863826L;
-    public String             toString() { return "RootNode"; }
+    @Override
+    public String toString() {
+      return "Root";
+    }
   };
 
   public PlanRelShuttle() { nodeStack.push(rootNode); }
@@ -59,14 +62,17 @@ final class PlanRelShuttle implements RelShuttle {
   public RelNode visit(LogicalValues logicalValues) { return logicalValues; }
 
   public RelNode visit(LogicalFilter logicalFilter) {
-    FilterNode filterNode =
-        new FilterNode(logicalFilter.getCondition().toString());
+    FilterNode filterNode = new FilterNodeBuilder(logicalFilter).build();
     processCurrentNodeWith(filterNode);
     return applyToChild(logicalFilter, 0, logicalFilter.getInput());
   }
 
   public RelNode visit(LogicalProject logicalProject) {
-    processCurrentNodeWith(new ProjectNodeBuilder(logicalProject).build());
+    try {
+      processCurrentNodeWith(new ProjectNodeBuilder(logicalProject).build());
+    } catch (ProjectNodeBuilder.NoRexInputRefInLogicalFilterException e) {
+      // TODO(gcca): insert bad node to check tree validity
+    }
     return applyToChild(logicalProject, 0, logicalProject.getInput());
   }
 
@@ -109,8 +115,8 @@ final class PlanRelShuttle implements RelShuttle {
     nodeStack.push(node);
   }
 
-  protected RelNode
-  applyToChild(RelNode parentRelNode, int i, RelNode childRelNode) {
+  protected RelNode applyToChild(final RelNode parentRelNode, final int i,
+                                 final RelNode childRelNode) {
     relNodeStack.push(parentRelNode);
     try {
       RelNode otherChildRelNode = childRelNode.accept(this);
@@ -125,7 +131,7 @@ final class PlanRelShuttle implements RelShuttle {
   }
 
   protected RelNode traverseChildrenOf(RelNode relNode) {
-    for (Ord<RelNode> input : Ord.zip(relNode.getInputs())) {
+    for (final Ord<RelNode> input : Ord.zip(relNode.getInputs())) {
       relNode = applyToChild(relNode, input.i, input.e);
     }
     return relNode;
