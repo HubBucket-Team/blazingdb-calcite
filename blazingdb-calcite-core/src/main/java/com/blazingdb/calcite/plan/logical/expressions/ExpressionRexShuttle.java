@@ -35,18 +35,22 @@ public final class ExpressionRexShuttle extends RexShuttle {
   public ExpressionRexShuttle() { expressionStack.push(rootExpressionNode); }
 
   public RexNode visitCall(RexCall rexCall) {
+    Expression expression = null;
+
     if (SqlKind.EQUALS.equals(rexCall.getKind())) {
-      EqualsExpression equalsNode = new EqualsExpression();
-      expressionStack.peek().addChild(equalsNode);
-      expressionStack.push(equalsNode);
+      expression = new EqualsExpression();
     } else if (SqlKind.CAST.equals(rexCall.getKind())) {
-      CastExpression castNode = new CastExpression();
-      expressionStack.peek().addChild(castNode);
-      expressionStack.push(castNode);
+      expression = new CastExpression();
     } else {
-      System.out.println("UNREACHEABLE");
+      // TODO(gcca): insert bad node to check tree validity
     }
 
+    if (null == expression) {
+      // TODO(gcca): idem and merge code
+    }
+
+    expressionStack.peek().addInput(expression);
+    expressionStack.push(expression);
     for (final RexNode rexNode : rexCall.getOperands()) {
       rexNode.accept(this);
     }
@@ -55,45 +59,45 @@ public final class ExpressionRexShuttle extends RexShuttle {
   }
 
   public RexNode visitCorrelVariable(RexCorrelVariable rexCorrelVariable) {
-    return null;
+    return rexCorrelVariable;
   }
 
   public RexNode visitDynamicParam(RexDynamicParam rexDynamicParam) {
-    return null;
+    return rexDynamicParam;
   }
 
   public RexNode visitFieldAccess(RexFieldAccess rexFieldAccess) {
-    return null;
+    return rexFieldAccess;
   }
 
   public RexNode visitInputRef(RexInputRef rexInputRef) {
-    expressionStack.peek().addChild(
+    expressionStack.peek().addInput(
         new IntegerExpression(rexInputRef.getIndex()));
     return rexInputRef;
   }
 
   public RexNode visitLiteral(RexLiteral rexLiteral) {
-    expressionStack.peek().addChild(
+    expressionStack.peek().addInput(
         new IntegerExpression(((BigDecimal) rexLiteral.getValue()).intValue()));
     return rexLiteral;
   }
 
-  public RexNode visitLocalRef(RexLocalRef rexLocalRef) { return null; }
+  public RexNode visitLocalRef(RexLocalRef rexLocalRef) { return rexLocalRef; }
 
-  public RexNode visitOver(RexOver rexOver) { return null; }
+  public RexNode visitOver(RexOver rexOver) { return rexOver; }
 
-  public RexNode visitRangeRef(RexRangeRef rexRangeRef) { return null; }
+  public RexNode visitRangeRef(RexRangeRef rexRangeRef) { return rexRangeRef; }
 
-  public RexNode visitSubQuery(RexSubQuery rexSubQuery) { return null; }
+  public RexNode visitSubQuery(RexSubQuery rexSubQuery) { return rexSubQuery; }
 
   @Override
   public RexNode visitPatternFieldRef(RexPatternFieldRef rexPatternFieldRef) {
-    return null;
+    return rexPatternFieldRef;
   }
 
   @Override
   public RexNode visitTableInputRef(RexTableInputRef rexTableInputRef) {
-    return null;
+    return rexTableInputRef;
   }
 
   public Expression getExpressionRootNode() { return rootExpressionNode; }

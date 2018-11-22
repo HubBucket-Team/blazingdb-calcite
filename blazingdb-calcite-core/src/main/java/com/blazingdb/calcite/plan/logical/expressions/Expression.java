@@ -5,6 +5,6 @@ import java.util.Collection;
 import java.io.Serializable;
 
 public interface Expression extends Serializable {
-  Expression             addChild(final Expression expression);
-  Collection<Expression> getChildren();
+  Expression             addInput(final Expression expression);
+  Collection<Expression> getInputs();
 }

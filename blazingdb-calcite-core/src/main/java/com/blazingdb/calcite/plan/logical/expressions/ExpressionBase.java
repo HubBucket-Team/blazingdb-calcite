@@ -7,19 +7,19 @@ abstract class ExpressionBase implements Expression {
 
   private static final long serialVersionUID = -7559406120476755398L;
 
-  private Collection<Expression> children;
+  private Collection<Expression> inputs;
 
-  public ExpressionBase() { children = new ArrayList<Expression>(); }
+  public ExpressionBase() { inputs = new ArrayList<Expression>(); }
 
   @Override
-  public Expression addChild(final Expression expressionNode) {
-    children.add(expressionNode);
+  public Expression addInput(final Expression expressionNode) {
+    inputs.add(expressionNode);
     return this;
   }
 
   @Override
-  public Collection<Expression> getChildren() {
-    return children;
+  public Collection<Expression> getInputs() {
+    return inputs;
   }
 
   public abstract String toString();

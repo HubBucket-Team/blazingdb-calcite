@@ -57,13 +57,18 @@ public final class SerializerTest {
     NodeStringSerializer nodeStringSerializer =
         new NodeStringSerializer(planRelShuttle.getRootNode());
     assertEquals(nodeStringSerializer.toString(),
-                 "RootNode\n"
-                     + "  UnionNode : all = false\n"
-                     + "    ProjectNode : AGE=1, NAME=0\n"
-                     + "      FilterNode : =(CAST($1):INTEGER NOT NULL, 1)\n"
-                     + "        TableScanNode : path = people.HEROES\n"
-                     + "    ProjectNode : AGE=1, NAME=0\n"
-                     + "      AggregateNode : groups = 0, 1\n"
-                     + "        TableScanNode : path = people.HEROES\n");
+                 "Root\n"
+                     + "  Union : all = false\n"
+                     + "    Project : AGE=1, NAME=0\n"
+                     + "      Filter : Root\n"
+                     + "        |  Equals\n"
+                     + "        |    Cast\n"
+                     + "        |      Integer: 1\n"
+                     + "        |    Integer: 1\n"
+                     + "        |\n"
+                     + "        TableScan : path = people.HEROES\n"
+                     + "    Project : AGE=1, NAME=0\n"
+                     + "      Aggregate : groups = 0, 1\n"
+                     + "        TableScan : path = people.HEROES\n");
   }
 }

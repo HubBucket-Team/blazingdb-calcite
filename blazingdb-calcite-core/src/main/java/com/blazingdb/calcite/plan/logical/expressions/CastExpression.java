@@ -9,12 +9,12 @@ final class CastExpression extends BinaryOperationExpression {
   private static final long serialVersionUID = -7099715056954440929L;
 
   public Expression getValue() {
-    return ((List<Expression>) getChildren()).get(0);
+    return ((List<Expression>) getInputs()).get(0);
   }
 
   @Override
   public String toString() {
-    Validate.isTrue((1 == getChildren().size()), "a child is required");
+    Validate.isTrue((1 == getInputs().size()), "a input is required");
     return "Cast";
   }
 }

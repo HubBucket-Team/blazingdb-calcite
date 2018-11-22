@@ -17,7 +17,7 @@ public final class ExpressionStringSerializer {
   private void appendStringRepresentation(final Expression node) {
     stringBuilderAppend(node);
     currentIndentationLevel += INDENTATION_LEVEL;
-    node.getChildren().stream().forEach(this::appendStringRepresentation);
+    node.getInputs().stream().forEach(this::appendStringRepresentation);
     currentIndentationLevel -= INDENTATION_LEVEL;
   }
 

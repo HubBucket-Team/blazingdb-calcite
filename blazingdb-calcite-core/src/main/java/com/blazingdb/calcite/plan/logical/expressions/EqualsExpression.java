@@ -11,7 +11,7 @@ final class EqualsExpression extends BinaryOperationExpression {
   private List<Expression> indexedChildren;
 
   public EqualsExpression() {
-    indexedChildren = (List<Expression>) getChildren();
+    indexedChildren = (List<Expression>) getInputs();
   }
 
   public Expression leftElementNode() { return indexedChildren.get(0); }
@@ -20,8 +20,7 @@ final class EqualsExpression extends BinaryOperationExpression {
 
   @Override
   public String toString() {
-    Validate.isTrue((2 == getChildren().size()),
-                    "two expression children are required");
+    Validate.isTrue((2 == getInputs().size()), "two inputs are required");
     return "Equals";
   }
 }
