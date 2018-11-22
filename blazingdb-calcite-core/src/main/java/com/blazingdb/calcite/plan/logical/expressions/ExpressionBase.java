@@ -2,12 +2,13 @@ package com.blazingdb.calcite.plan.logical.expressions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 abstract class ExpressionBase implements Expression {
 
   private static final long serialVersionUID = -7559406120476755398L;
 
-  private Collection<Expression> inputs;
+  private List<Expression> inputs;
 
   public ExpressionBase() { inputs = new ArrayList<Expression>(); }
 
@@ -20,6 +21,10 @@ abstract class ExpressionBase implements Expression {
   @Override
   public Collection<Expression> getInputs() {
     return inputs;
+  }
+
+  public Expression getInput(final int index) throws IndexOutOfBoundsException {
+    return inputs.get(index);
   }
 
   public abstract String toString();

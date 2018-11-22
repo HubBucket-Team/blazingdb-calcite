@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 
 public final class ExpressionRexShuttle extends RexShuttle {
 
+  protected final Deque<RexNode> rexNodeStack       = new ArrayDeque<>();
   protected final Deque<Expression> expressionStack = new ArrayDeque<>();
   protected final Expression rootExpressionNode     = new ExpressionBase() {
     private static final long serialVersionUID = -2624084985199375515L;
@@ -51,10 +52,7 @@ public final class ExpressionRexShuttle extends RexShuttle {
 
     expressionStack.peek().addInput(expression);
     expressionStack.push(expression);
-    for (final RexNode rexNode : rexCall.getOperands()) {
-      rexNode.accept(this);
-    }
-    expressionStack.pop();
+    traverseOperandsOf(rexCall);
     return rexCall;
   }
 
@@ -101,4 +99,21 @@ public final class ExpressionRexShuttle extends RexShuttle {
   }
 
   public Expression getExpressionRootNode() { return rootExpressionNode; }
+
+  protected RexNode applyToInput(final RexNode rexNode) {
+    rexNodeStack.push(rexNode);
+    try {
+      RexNode otherChildRexNode = rexNode.accept(this);
+      if (!otherChildRexNode.equals(rexNode)) { return otherChildRexNode; }
+      return rexNode;
+    } finally { rexNodeStack.pop(); }
+  }
+
+  protected RexNode traverseOperandsOf(RexNode rexNode) {
+    for (final RexNode operand : ((RexCall) rexNode).getOperands()) {
+      rexNode = applyToInput(operand);
+    }
+    expressionStack.pop();
+    return rexNode;
+  }
 }
