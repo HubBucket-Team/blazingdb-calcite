@@ -14,7 +14,6 @@ import org.apache.calcite.rex.RexRangeRef;
 import org.apache.calcite.rex.RexShuttle;
 import org.apache.calcite.rex.RexSubQuery;
 import org.apache.calcite.rex.RexTableInputRef;
-import org.apache.calcite.sql.SqlKind;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -36,24 +35,14 @@ public final class ExpressionRexShuttle extends RexShuttle {
   public ExpressionRexShuttle() { expressionStack.push(rootExpressionNode); }
 
   public RexNode visitCall(RexCall rexCall) {
-    Expression expression = null;
-
-    if (SqlKind.EQUALS.equals(rexCall.getKind())) {
-      expression = new EqualsExpression();
-    } else if (SqlKind.CAST.equals(rexCall.getKind())) {
-      expression = new CastExpression();
-    } else {
-      // TODO(gcca): insert bad node to check tree validity
-    }
-
-    if (null == expression) {
-      // TODO(gcca): idem and merge code
-    }
-
-    expressionStack.peek().addInput(expression);
-    expressionStack.push(expression);
-    traverseOperandsOf(rexCall);
-    return rexCall;
+    try {
+      final Expression expression =
+          new FunctionExpressionBuilder(rexCall).build().get();
+      expressionStack.peek().addInput(expression);
+      expressionStack.push(expression);
+      traverseOperandsOf(rexCall);
+      return rexCall;
+    } catch (ExpressionBuilder.ExpressionBuildingException e) { return null; }
   }
 
   public RexNode visitCorrelVariable(RexCorrelVariable rexCorrelVariable) {

@@ -16,8 +16,5 @@ final class NullNode implements Node {
     throw new UnsupportedOperationException();
   }
 
-  @Override
-  public String toString() {
-    return "NullNode";
-  }
+  public String toString() { return "NullNode"; }
 }
