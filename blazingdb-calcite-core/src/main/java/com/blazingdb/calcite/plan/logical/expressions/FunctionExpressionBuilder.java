@@ -51,6 +51,8 @@ final class FunctionExpressionBuilder implements ExpressionBuilder {
         FunctionExpressionBuilder::makeEqualsExpression;
     rexCallToExpressionMaps[SqlKind.CAST.ordinal()] =
         FunctionExpressionBuilder::makeCastExpression;
+    rexCallToExpressionMaps[SqlKind.OR.ordinal()] =
+        FunctionExpressionBuilder::makeOrExpression;
   }
 
   private static EqualsExpression makeEqualsExpression(final RexCall rexCall) {
@@ -70,5 +72,9 @@ final class FunctionExpressionBuilder implements ExpressionBuilder {
     }
 
     throw new AssertionError("Unexpected sql type name");
+  }
+
+  private static OrExpression makeOrExpression(final RexCall rexCall) {
+    return new OrExpression();
   }
 }
