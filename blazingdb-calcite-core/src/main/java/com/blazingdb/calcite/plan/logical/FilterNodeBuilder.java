@@ -20,7 +20,7 @@ final class FilterNodeBuilder implements NodeBuilder {
     logicalFilter.accept(expressionRexShuttle);
 
     FilterNode filterNode =
-        new FilterNode(expressionRexShuttle.getExpressionRootNode());
+        new FilterNode(expressionRexShuttle.getRootExpression());
 
     return filterNode;
   }

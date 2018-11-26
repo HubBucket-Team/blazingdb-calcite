@@ -21,7 +21,6 @@ public final class SerializerTest {
 
   @Before
   public void SetUp() {
-
     final SchemaPlus rootSchema = Frameworks.createRootSchema(true);
     final FrameworkConfig config =
         Frameworks.newConfigBuilder()

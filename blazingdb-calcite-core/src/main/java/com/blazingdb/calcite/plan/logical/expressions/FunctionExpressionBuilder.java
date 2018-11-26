@@ -2,9 +2,11 @@ package com.blazingdb.calcite.plan.logical.expressions;
 
 import org.apache.calcite.rex.RexCall;
 import org.apache.calcite.sql.SqlKind;
+import org.apache.calcite.sql.type.BasicSqlType;
+import org.apache.calcite.sql.type.SqlTypeName;
 
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 final class FunctionExpressionBuilder implements ExpressionBuilder {
 
@@ -17,7 +19,7 @@ final class FunctionExpressionBuilder implements ExpressionBuilder {
   public Optional<Expression> build()
       throws ExpressionBuilder.ExpressionBuildingException {
     return Optional.of(
-        (Expression) suppliers[rexCall.getKind().ordinal()].get());
+        rexCallToExpressionMaps[rexCall.getKind().ordinal()].apply(rexCall));
   }
 
   final class SqlKindFunctionBuildingException
@@ -36,11 +38,37 @@ final class FunctionExpressionBuilder implements ExpressionBuilder {
     }
   }
 
-  private static final Supplier<?>[] suppliers =
-      new Supplier<?>[ SqlKind.values().length ];
+  // TODO(gcca): Arrays.asList instead for mapping all kinds
+  @FunctionalInterface
+  private interface RexCallToExpressionMap
+      extends Function<RexCall, Expression> {}
+
+  private static final RexCallToExpressionMap[] rexCallToExpressionMaps =
+      new RexCallToExpressionMap[SqlKind.values().length];
 
   static {
-    suppliers[SqlKind.EQUALS.ordinal()] = () -> new EqualsExpression();
-    suppliers[SqlKind.CAST.ordinal()]   = () -> new CastExpression();
+    rexCallToExpressionMaps[SqlKind.EQUALS.ordinal()] =
+        FunctionExpressionBuilder::makeEqualsExpression;
+    rexCallToExpressionMaps[SqlKind.CAST.ordinal()] =
+        FunctionExpressionBuilder::makeCastExpression;
+  }
+
+  private static EqualsExpression makeEqualsExpression(final RexCall rexCall) {
+    return new EqualsExpression();
+  }
+
+  private static CastExpression makeCastExpression(final RexCall rexCall) {
+    BasicSqlType basicSqlType = (BasicSqlType) rexCall.getType();
+    SqlTypeName  sqlTypeName  = basicSqlType.getSqlTypeName();
+
+    if (sqlTypeName.equals(SqlTypeName.INTEGER)) {
+      return new CastExpression(Integer.class);
+    }
+
+    if (sqlTypeName.equals(SqlTypeName.DOUBLE)) {
+      return new CastExpression(Double.class);
+    }
+
+    throw new AssertionError("Unexpected sql type name");
   }
 }

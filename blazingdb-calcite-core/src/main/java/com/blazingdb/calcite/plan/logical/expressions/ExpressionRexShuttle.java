@@ -24,7 +24,7 @@ public final class ExpressionRexShuttle extends RexShuttle {
 
   protected final Deque<RexNode> rexNodeStack       = new ArrayDeque<>();
   protected final Deque<Expression> expressionStack = new ArrayDeque<>();
-  protected final Expression rootExpressionNode     = new ExpressionBase() {
+  protected final Expression rootExpression         = new ExpressionBase() {
     private static final long serialVersionUID = -2624084985199375515L;
     @Override
     public String toString() {
@@ -32,7 +32,7 @@ public final class ExpressionRexShuttle extends RexShuttle {
     }
   };
 
-  public ExpressionRexShuttle() { expressionStack.push(rootExpressionNode); }
+  public ExpressionRexShuttle() { expressionStack.push(rootExpression); }
 
   public RexNode visitCall(RexCall rexCall) {
     try {
@@ -87,7 +87,7 @@ public final class ExpressionRexShuttle extends RexShuttle {
     return rexTableInputRef;
   }
 
-  public Expression getExpressionRootNode() { return rootExpressionNode; }
+  public Expression getRootExpression() { return rootExpression; }
 
   protected RexNode applyToInput(final RexNode rexNode) {
     rexNodeStack.push(rexNode);
