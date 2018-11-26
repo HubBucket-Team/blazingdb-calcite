@@ -19,6 +19,6 @@ final class CastExpression extends ExpressionBase {
   @Override
   public String toString() {
     Validate.isTrue((1 == getInputs().size()), "a input is required");
-    return "Cast";
+    return "Cast: TARGET=" + target.getSimpleName();
   }
 }

@@ -59,7 +59,7 @@ public final class SerializerTest {
                      + "    Project : AGE=1, NAME=0\n"
                      + "      Filter : Root\n"
                      + "        |  Equals\n"
-                     + "        |    Cast\n"
+                     + "        |    Cast: TARGET=Integer\n"
                      + "        |      Reference: INDEX=$1\n"
                      + "        |    Integer: 1\n"
                      + "        |\n"
