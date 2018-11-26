@@ -18,8 +18,6 @@ import org.apache.calcite.rex.RexTableInputRef;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import java.math.BigDecimal;
-
 public final class ExpressionRexShuttle extends RexShuttle {
 
   protected final Deque<RexNode> rexNodeStack       = new ArrayDeque<>();
@@ -64,8 +62,9 @@ public final class ExpressionRexShuttle extends RexShuttle {
   }
 
   public RexNode visitLiteral(RexLiteral rexLiteral) {
+    // TODO(gcca): apply typed literal builder
     expressionStack.peek().addInput(
-        new IntegerExpression(((BigDecimal) rexLiteral.getValue()).intValue()));
+        new LiteralExpression(rexLiteral.toString(), rexLiteral.getValue()));
     return rexLiteral;
   }
 

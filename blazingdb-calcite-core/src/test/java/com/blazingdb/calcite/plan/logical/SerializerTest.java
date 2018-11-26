@@ -61,7 +61,7 @@ public final class SerializerTest {
                      + "        |  Equals\n"
                      + "        |    Cast: TARGET=Integer\n"
                      + "        |      Reference: INDEX=$1\n"
-                     + "        |    Integer: 1\n"
+                     + "        |    Literal: DIGEST=1\n"
                      + "        |\n"
                      + "        TableScan : path = people.HEROES\n"
                      + "    Project : AGE=1, NAME=0\n"
