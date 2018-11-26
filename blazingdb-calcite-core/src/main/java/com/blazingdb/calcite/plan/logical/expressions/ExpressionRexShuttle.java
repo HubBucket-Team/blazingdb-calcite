@@ -59,7 +59,7 @@ public final class ExpressionRexShuttle extends RexShuttle {
 
   public RexNode visitInputRef(RexInputRef rexInputRef) {
     expressionStack.peek().addInput(
-        new IntegerExpression(rexInputRef.getIndex()));
+        new ReferenceExpression(rexInputRef.getIndex()));
     return rexInputRef;
   }
 

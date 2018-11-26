@@ -6,15 +6,15 @@ final class CastExpression extends ExpressionBase {
 
   private static final long serialVersionUID = -7099715056954440929L;
 
-  private Class<? extends Number> targetCast;
+  private final Class<? extends Number> target;
 
-  public CastExpression() {}
-
-  public CastExpression(final Class<? extends Number> targetCast) {
-    this.targetCast = targetCast;
+  public CastExpression(final Class<? extends Number> target) {
+    this.target = target;
   }
 
   public Expression getValue() { return getInput(0); }
+
+  public Class<? extends Number> getTarget() { return target; }
 
   @Override
   public String toString() {
