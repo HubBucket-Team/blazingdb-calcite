@@ -16,6 +16,7 @@ final class LiteralExpression extends ExpressionBase {
   public String getDigest() { return digest; }
 
   public <T extends Comparable<T>> T getValueAs(Class<T> clazz) {
+    // TODO(gcca): checked compilation for valid literal values (optional)
     return clazz.cast(value);
   }
 
