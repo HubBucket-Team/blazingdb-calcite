@@ -14,10 +14,25 @@ import org.apache.calcite.tools.Planner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
+import java.util.Arrays;
+import java.util.Collection;
+
+@RunWith(Parameterized.class)
 public final class SerializerTest {
 
   private Planner planner;
+
+  private final String queryString;
+  private final String expectedResult;
+
+  public SerializerTest(final String queryString, final String expectedResult) {
+    this.queryString    = queryString;
+    this.expectedResult = expectedResult;
+  }
 
   @Before
   public void SetUp() {
@@ -37,13 +52,30 @@ public final class SerializerTest {
     planner = null;
   }
 
+  @Parameters
+  public static Collection<Object[]> data() {
+    return Arrays.asList(new Object[][] {
+        {"(select age, name from heroes where age = 1)"
+             + " union"
+             + "(select age, name from heroes group by name, age)",
+         "Root\n"
+             + "  Union : all = false\n"
+             + "    Project : AGE=1, NAME=0\n"
+             + "      Filter : Root\n"
+             + "        |  Equals\n"
+             + "        |    Cast: TARGET=Integer\n"
+             + "        |      Reference: INDEX=$1\n"
+             + "        |    Literal: DIGEST=1\n"
+             + "        |\n"
+             + "        TableScan : path = people.HEROES\n"
+             + "    Project : AGE=1, NAME=0\n"
+             + "      Aggregate : groups = 0, 1\n"
+             + "        TableScan : path = people.HEROES\n"},
+    });
+  }
+
   @Test
   public void test() throws Exception {
-    final String queryString =
-        "(select age, name from heroes where age = 1)"
-        + " union"
-        + "(select age, name from heroes group by name, age)";
-
     SqlNode node = planner.parse(queryString);
     node         = planner.validate(node);
 
@@ -54,19 +86,6 @@ public final class SerializerTest {
 
     NodeStringSerializer nodeStringSerializer =
         new NodeStringSerializer(planRelShuttle.getRootNode());
-    assertEquals("Root\n"
-                     + "  Union : all = false\n"
-                     + "    Project : AGE=1, NAME=0\n"
-                     + "      Filter : Root\n"
-                     + "        |  Equals\n"
-                     + "        |    Cast: TARGET=Integer\n"
-                     + "        |      Reference: INDEX=$1\n"
-                     + "        |    Literal: DIGEST=1\n"
-                     + "        |\n"
-                     + "        TableScan : path = people.HEROES\n"
-                     + "    Project : AGE=1, NAME=0\n"
-                     + "      Aggregate : groups = 0, 1\n"
-                     + "        TableScan : path = people.HEROES\n",
-                 nodeStringSerializer.toString());
+    assertEquals(expectedResult, nodeStringSerializer.toString());
   }
 }
