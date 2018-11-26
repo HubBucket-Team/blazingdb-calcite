@@ -6,6 +6,6 @@ final class OrExpression extends BooleanExpression {
 
   @Override
   public String toString() {
-    return "OrExpression";
+    return "Or";
   }
 }

@@ -71,19 +71,24 @@ public final class SerializerTest {
              + "    Project : AGE=1, NAME=0\n"
              + "      Aggregate : groups = 0, 1\n"
              + "        TableScan : path = people.HEROES\n"},
-        {"select * from heroes where age = 2 or age = 0",
+        {"select * from heroes where age = 2 or age = 0 and age = 4",
          "Root\n"
              + "  Project : NAME=0, AGE=1\n"
              + "    Filter : Root\n"
-             + "      |  OrExpression\n"
+             + "      |  Or\n"
              + "      |    Equals\n"
              + "      |      Cast: TARGET=Integer\n"
              + "      |        Reference: INDEX=$1\n"
              + "      |      Literal: DIGEST=2\n"
-             + "      |    Equals\n"
-             + "      |      Cast: TARGET=Integer\n"
-             + "      |        Reference: INDEX=$1\n"
-             + "      |      Literal: DIGEST=0\n"
+             + "      |    And\n"
+             + "      |      Equals\n"
+             + "      |        Cast: TARGET=Integer\n"
+             + "      |          Reference: INDEX=$1\n"
+             + "      |        Literal: DIGEST=0\n"
+             + "      |      Equals\n"
+             + "      |        Cast: TARGET=Integer\n"
+             + "      |          Reference: INDEX=$1\n"
+             + "      |        Literal: DIGEST=4\n"
              + "      |\n"
              + "      TableScan : path = people.HEROES\n"},
     });

@@ -6,6 +6,6 @@ class BooleanExpression extends ExpressionBase {
 
   @Override
   public String toString() {
-    return "BooleanExpression";
+    return "Boolean";
   }
 }

@@ -53,6 +53,8 @@ final class FunctionExpressionBuilder implements ExpressionBuilder {
         FunctionExpressionBuilder::makeCastExpression;
     rexCallToExpressionMaps[SqlKind.OR.ordinal()] =
         FunctionExpressionBuilder::makeOrExpression;
+    rexCallToExpressionMaps[SqlKind.AND.ordinal()] =
+        FunctionExpressionBuilder::makeAndExpression;
   }
 
   private static EqualsExpression makeEqualsExpression(final RexCall rexCall) {
@@ -76,5 +78,9 @@ final class FunctionExpressionBuilder implements ExpressionBuilder {
 
   private static OrExpression makeOrExpression(final RexCall rexCall) {
     return new OrExpression();
+  }
+
+  private static AndExpression makeAndExpression(final RexCall rexCall) {
+    return new AndExpression();
   }
 }
