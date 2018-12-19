@@ -16,17 +16,15 @@
 
 package com.blazingdb.calcite.application;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.sql.Connection;
-import java.sql.SQLException;
+/**
+ * Class which holds main function. Listens in on a unix domain socket
+ * for protocol buffer requests and then processes these requests.
+ * @author felipe
+ *
+ */
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import javax.naming.NamingException;
-
-import org.apache.calcite.plan.RelOptUtil;
-import org.apache.commons.dbcp.BasicDataSource;
-
+import com.blazingdb.calcite.application.Chrono.Chronometer;
 import com.blazingdb.protocol.IService;
 import com.blazingdb.protocol.UnixService;
 import com.blazingdb.protocol.message.RequestMessage;
@@ -37,6 +35,25 @@ import com.blazingdb.protocol.message.calcite.DDLDropTableRequestMessage;
 import com.blazingdb.protocol.message.calcite.DDLResponseMessage;
 import com.blazingdb.protocol.message.calcite.DMLRequestMessage;
 import com.blazingdb.protocol.message.calcite.DMLResponseMessage;
+
+import org.apache.calcite.plan.RelOptUtil;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.dbcp.BasicDataSource;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import java.nio.ByteBuffer;
+
+import java.io.File;
+import java.io.IOException;
+import javax.naming.NamingException;
 
 import blazingdb.protocol.Status;
 import blazingdb.protocol.calcite.MessageType;
@@ -51,24 +68,10 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-/**
- * Class which holds main function. Listens in on a unix domain socket
- * for protocol buffer requests and then processes these requests.
- * @author felipe
- *
- */
-
-
-
-
-
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
-import com.blazingdb.calcite.application.Chrono.Chronometer;
 
 public class UnixServer {
 
-	private static void executeUpdate() throws NamingException, SQLException, LiquibaseException, InstantiationException,
+	private static void executeUpdate(final String dataDirectory) throws NamingException, SQLException, LiquibaseException, InstantiationException,
 	IllegalAccessException, ClassNotFoundException {
 // setDataSource((String) servletValueContainer.getValue(LIQUIBASE_DATASOURCE));
 
@@ -113,7 +116,7 @@ try {
 	dataSource.setDriverClassName("org.h2.Driver");
 	dataSource.setUsername("blazing");
 	dataSource.setPassword("blazing");
-	dataSource.setUrl("jdbc:h2:/blazingsql/bz3");
+	dataSource.setUrl("jdbc:h2:" + dataDirectory + "/bz3");
 	dataSource.setMaxActive(10);
 	dataSource.setMaxIdle(5);
 	dataSource.setInitialSize(5);
@@ -161,8 +164,10 @@ try {
 
     public static void main(String[] args) throws IOException {
 
+        final CalciteApplicationOptions calciteApplicationOptions = parseArguments(args);
+
     	try {
-    		executeUpdate();
+    		executeUpdate(calciteApplicationOptions.dataDirectory());
     	}catch(Exception e) {
         	 e.printStackTrace();
     	}
@@ -258,5 +263,52 @@ try {
         UnixService service = new UnixService(calciteService);
         service.bind(unixSocketFile);
         new Thread(service).start();
+    }
+
+    private static CalciteApplicationOptions
+    parseArguments(String[] arguments) {
+        final Options options = new Options();
+
+        final String dataDirectoryDefaultValue = "/blazingsql";
+        final Option dataDirectoryOption =
+            Option.builder("d")
+                .required(false)
+                .longOpt("data_directory")
+                .hasArg()
+                .argName("PATH")
+                .desc("Path to data directory where calcite put"
+                      + " the metastore files")
+                .build();
+        options.addOption(dataDirectoryOption);
+
+        try {
+            final CommandLineParser commandLineParser = new DefaultParser();
+            final CommandLine commandLine =
+                commandLineParser.parse(options, arguments);
+
+            CalciteApplicationOptions calciteApplicationOptions =
+                new CalciteApplicationOptions(
+                    commandLine.getOptionValue(dataDirectoryOption.getLongOpt(),
+                                               dataDirectoryDefaultValue));
+
+            return calciteApplicationOptions;
+        } catch (ParseException e) {
+            System.out.println(e);
+            final HelpFormatter helpFormatter = new HelpFormatter();
+            helpFormatter.printHelp("CalciteApplication", options);
+            System.exit(1);
+            return null;
+        }
+    }
+
+    private static class CalciteApplicationOptions {
+
+        private final String dataDirectory;
+
+        public CalciteApplicationOptions(final String dataDirectory) {
+            this.dataDirectory = dataDirectory;
+        }
+
+        public String dataDirectory() { return dataDirectory; }
     }
 }
