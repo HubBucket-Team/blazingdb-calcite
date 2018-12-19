@@ -1,40 +1,15 @@
-# WebView (BlazingDB workbench)
+# BlazingDB Calcite
 
-- This artifact is the bridge between the connectors and the engine (Simplicity)
-- This artifact has some JSP views to manage and use the engine (Simplicity)
+## How to run Calcite Application
 
-## Usage without Tomcat
+To launch calcite-application with default arguments just run
 
-```shell-script
-export BLAZINGDB_DRIVER_SETTINGS=/path/to/driver.properties
-java -jar blazing-workbench.jar
-```
+> $ java -jar /path/to/BlazingCalcite.jar
 
-## driver.properties samples
-### For MySQL
+To set the data directory where store metadata about the database, we use
 
-```shell-script
-blazing.host=localhost
-blazing.port=8890
-jdbc.driverClassName=com.mysql.jdbc.Driver
-jdbc.url=jdbc:mysql://localhost:3306/blazing
-jdbc.username=blazing
-jdbc.password=blazing
-```
+> $ java -jar /path/to/BlazingCalcite.jar --data_directory=/path/to/data
 
-### For H2
+To get help about the command line parameters
 
-```shell-script
-blazing.host=localhost
-blazing.port=8890
-jdbc.driverClassName=org.h2.Driver
-jdbc.url=jdbc:h2:/opt/blazing/workbench/data
-jdbc.username=blazing
-jdbc.password=blazing
-```
-
-### Maven Targets
-```shell-script
-mvn clean install #builds the target jar
-mvn javadoc:jar #generates java docs in target/apidocs
-```
+> $ java -jar /path/to/BlazingCalcite.jar --help
