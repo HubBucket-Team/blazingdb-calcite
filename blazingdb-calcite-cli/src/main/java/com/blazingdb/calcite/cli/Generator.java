@@ -28,6 +28,7 @@ public class Generator {
     }
 
     public static void main(String[] args){
+    	final String dataDirectory = "/blazingsql";
         Gson gson = new Gson();
         String json = "";
         try {
@@ -39,7 +40,7 @@ public class Generator {
             e.printStackTrace();
         }
         CalciteParams params = gson.fromJson(json, CalciteParams.class);
-        ApplicationContext.init(); //any api call initializes it actually
+        ApplicationContext.init(dataDirectory); //any api call initializes it actually
         System.out.println("REGISTERING-TABLES");
         for(Table table : params.tables) {
             List<String> columnNames = Arrays.asList(table.columnNames);
@@ -49,13 +50,13 @@ public class Generator {
             try {
                 {
                     DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(name, dbName);
-                    ApplicationContext.getCatalogService().dropTable(message);
-                    ApplicationContext.updateContext();
+                    ApplicationContext.getCatalogService(dataDirectory).dropTable(message);
+                    ApplicationContext.updateContext(dataDirectory);
                 }
                 {
                     DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(columnNames, types, name, dbName);
-                    ApplicationContext.getCatalogService().createTable(message);
-                    ApplicationContext.updateContext();
+                    ApplicationContext.getCatalogService(dataDirectory).createTable(message);
+                    ApplicationContext.updateContext(dataDirectory);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -65,7 +66,7 @@ public class Generator {
         try {
             String query = params.query;
             DMLRequestMessage requestPayload = new DMLRequestMessage(query);
-            String logicalPlan  = RelOptUtil.toString(ApplicationContext.getRelationalAlgebraGenerator().getRelationalAlgebra(requestPayload.getQuery()));
+            String logicalPlan  = RelOptUtil.toString(ApplicationContext.getRelationalAlgebraGenerator(dataDirectory).getRelationalAlgebra(requestPayload.getQuery()));
             System.out.println("@JSON");
             System.out.println(logicalPlan);
         } catch (Exception e) {

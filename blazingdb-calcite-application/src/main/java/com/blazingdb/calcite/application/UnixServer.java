@@ -166,14 +166,16 @@ try {
 
         final CalciteApplicationOptions calciteApplicationOptions = parseArguments(args);
 
+        final String dataDirectory = calciteApplicationOptions.dataDirectory();
+        
     	try {
-    		executeUpdate(calciteApplicationOptions.dataDirectory());
+    		executeUpdate(dataDirectory);
     	}catch(Exception e) {
         	 e.printStackTrace();
     	}
 
 
-        ApplicationContext.init(); //any api call initializes it actually
+        ApplicationContext.init(dataDirectory); //any api call initializes it actually
         File unixSocketFile = new File("/tmp/calcite.socket");
         unixSocketFile.deleteOnExit();
 
@@ -190,7 +192,7 @@ try {
 
                     try {
                       String logicalPlan = RelOptUtil.toString(
-                          ApplicationContext.getRelationalAlgebraGenerator()
+                          ApplicationContext.getRelationalAlgebraGenerator(dataDirectory)
                               .getRelationalAlgebra(requestPayload.getQuery()));
                       DMLResponseMessage responsePayload =
                           new DMLResponseMessage(
@@ -219,10 +221,10 @@ try {
                     DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(requestMessage.getPayloadBuffer());
                     ResponseMessage response = null;
                     try {
-                        ApplicationContext.getCatalogService().createTable(message);
+                        ApplicationContext.getCatalogService(dataDirectory).createTable(message);
                         //I am unsure at this point if we have to update the schema or not but for safety I do it here
                         //need to see what hibernate moves around :)
-                        ApplicationContext.updateContext();
+                        ApplicationContext.updateContext(dataDirectory);
                         DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
                         response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
                     }catch(Exception e){
@@ -236,8 +238,8 @@ try {
 
                     DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(requestMessage.getPayloadBuffer());
                     try {
-                        ApplicationContext.getCatalogService().dropTable(message);
-                        ApplicationContext.updateContext();
+                        ApplicationContext.getCatalogService(dataDirectory).dropTable(message);
+                        ApplicationContext.updateContext(dataDirectory);
                         DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
                         response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
                     } catch (Exception e) {

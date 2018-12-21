@@ -39,8 +39,8 @@ public class ApplicationContext {
 	 * Private Constructore method. This class is currently a singleton so this is never invoked 
 	 * outside of the class.
 	 */
-	private ApplicationContext() {
-		catalogService = new CatalogServiceImpl();
+	private ApplicationContext(final String dataDirectory) {
+		catalogService = new CatalogServiceImpl(dataDirectory);
 		CatalogDatabaseImpl db = catalogService.getDatabase("main");
 		if(db == null) {
 			db = new CatalogDatabaseImpl("main");
@@ -55,26 +55,26 @@ public class ApplicationContext {
 	 * Initializes the application context by calling the private constructor if necessary
 	 * before any operations occur.
 	 */
-	public static void init() {
+	public static void init(final String dataDirectory) {
 		if(instance == null) {
-			instance = new ApplicationContext();
+			instance = new ApplicationContext(dataDirectory);
 		}
 	}
 	/**
 	 * Getter function for catalogService
 	 * @return {@link #catalogService}
 	 */
-	public static CatalogServiceImpl getCatalogService() {
+	public static CatalogServiceImpl getCatalogService(final String dataDirectory) {
 
-		init();
+		init(dataDirectory);
 		return instance.getService();
 	}
 	/**
 	 * Getter function for relationalAlgebraGenerator
 	 * @return {@link #relationalAlgebraGenerator}
 	 */	
-	public static RelationalAlgebraGenerator getRelationalAlgebraGenerator() {
-		init();
+	public static RelationalAlgebraGenerator getRelationalAlgebraGenerator(final String dataDirectory) {
+		init(dataDirectory);
 		return instance.getAlgebraGenerator();
 
 	}
@@ -109,9 +109,9 @@ public class ApplicationContext {
 	/**
 	 * The public api for update the context. Calls the synchronized method {@link #updateSchema()}
 	 */
-	public static void updateContext() {
+	public static void updateContext(final String dataDirectory) {
 		// TODO Auto-generated method stub
-		init();
+		init(dataDirectory);
 		instance.updateSchema();
 	}
 
