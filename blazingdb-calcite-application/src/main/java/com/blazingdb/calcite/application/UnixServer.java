@@ -24,6 +24,7 @@ import java.sql.SQLException;
 
 import javax.naming.NamingException;
 
+import com.blazingdb.protocol.util.ByteBufferUtil;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.commons.dbcp.BasicDataSource;
 
@@ -59,204 +60,212 @@ import liquibase.resource.ResourceAccessor;
  */
 
 
-
-
-
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import com.blazingdb.calcite.application.Chrono.Chronometer;
+import org.zeromq.ZContext;
+import org.zeromq.ZMQ;
+
+import java.nio.charset.Charset;
 
 public class UnixServer {
 
-	private static void executeUpdate() throws NamingException, SQLException, LiquibaseException, InstantiationException,
-	IllegalAccessException, ClassNotFoundException {
+    private static void executeUpdate() throws NamingException, SQLException, LiquibaseException, InstantiationException,
+            IllegalAccessException, ClassNotFoundException {
 // setDataSource((String) servletValueContainer.getValue(LIQUIBASE_DATASOURCE));
 
- final String LIQUIBASE_CHANGELOG = "liquibase.changelog";
-final String LIQUIBASE_DATASOURCE = "liquibase.datasource";
+        final String LIQUIBASE_CHANGELOG = "liquibase.changelog";
+        final String LIQUIBASE_DATASOURCE = "liquibase.datasource";
 
 
-String dataSourceName;
-String changeLogFile;
-String contexts;
-String labels;
-
-
-
+        String dataSourceName;
+        String changeLogFile;
+        String contexts;
+        String labels;
 
 
 // setChangeLogFile((String) servletValueContainer.getValue(LIQUIBASE_CHANGELOG));
-changeLogFile = "liquibase-bz-master.xml";
+        changeLogFile = "liquibase-bz-master.xml";
 
 
 // setContexts((String) servletValueContainer.getValue(LIQUIBASE_CONTEXTS));
-contexts = "";
+        contexts = "";
 // setLabels((String) servletValueContainer.getValue(LIQUIBASE_LABELS));
 
-labels = "";
+        labels = "";
 
 // defaultSchema = StringUtil.trimToNull((String)
 // servletValueContainer.getValue(LIQUIBASE_SCHEMA_DEFAULT));
 // defaultSchema =
 
-Connection connection = null;
-Database database = null;
-try {
-	// DriverManager.registerDriver((Driver) Class.forName("com.mysql.jdbc.Driver").newInstance());
-	// String url = "jdbc:mysql://localhost:3306/bz3";
-	// connection = DriverManager.getConnection(url);
+        Connection connection = null;
+        Database database = null;
+        try {
+            // DriverManager.registerDriver((Driver) Class.forName("com.mysql.jdbc.Driver").newInstance());
+            // String url = "jdbc:mysql://localhost:3306/bz3";
+            // connection = DriverManager.getConnection(url);
 
 
+            BasicDataSource dataSource = new BasicDataSource();
+            dataSource.setDriverClassName("org.h2.Driver");
+            dataSource.setUsername("blazing");
+            dataSource.setPassword("blazing");
+            dataSource.setUrl("jdbc:h2:/blazingsql/bz3");
+            dataSource.setMaxActive(10);
+            dataSource.setMaxIdle(5);
+            dataSource.setInitialSize(5);
+            dataSource.setValidationQuery("SELECT 1");
 
+            // MySQLData dataSource = new JdbcDataSource(); // (DataSource) ic.lookup(dataSourceName);
+            // dataSource.setURL("jdbc:mysql://localhost:3306/bz3");
+            // dataSource.setUser("blazing");
+            // dataSource.setPassword("blazing");
+            connection = dataSource.getConnection();
 
-	BasicDataSource dataSource = new BasicDataSource();
-	dataSource.setDriverClassName("org.h2.Driver");
-	dataSource.setUsername("blazing");
-	dataSource.setPassword("blazing");
-	dataSource.setUrl("jdbc:h2:/blazingsql/bz3");
-	dataSource.setMaxActive(10);
-	dataSource.setMaxIdle(5);
-	dataSource.setInitialSize(5);
-	dataSource.setValidationQuery("SELECT 1");
+            Thread currentThread = Thread.currentThread();
+            ClassLoader contextClassLoader = currentThread.getContextClassLoader();
+            ResourceAccessor threadClFO = new ClassLoaderResourceAccessor(contextClassLoader);
 
-	// MySQLData dataSource = new JdbcDataSource(); // (DataSource) ic.lookup(dataSourceName);
-	// dataSource.setURL("jdbc:mysql://localhost:3306/bz3");
-	// dataSource.setUser("blazing");
-	// dataSource.setPassword("blazing");
-	connection = dataSource.getConnection();
+            ResourceAccessor clFO = new ClassLoaderResourceAccessor();
+            ResourceAccessor fsFO = new FileSystemResourceAccessor();
 
-	Thread currentThread = Thread.currentThread();
-	ClassLoader contextClassLoader = currentThread.getContextClassLoader();
-	ResourceAccessor threadClFO = new ClassLoaderResourceAccessor(contextClassLoader);
+            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
 
-	ResourceAccessor clFO = new ClassLoaderResourceAccessor();
-	ResourceAccessor fsFO = new FileSystemResourceAccessor();
+            Liquibase liquibase = new Liquibase(changeLogFile,
+                    new CompositeResourceAccessor(clFO, fsFO, threadClFO), database);
 
-	database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            // @SuppressWarnings("unchecked")
+            // StringTokenizer initParameters = new StringTokenizer(""); // servletContext.getInitParameterNames();
+            // while (initParameters.hasMoreElements()) {
+            // String name = initParameters.nextElement().trim();
+            // if (name.startsWith(LIQUIBASE_PARAMETER + ".")) {
+            // // liquibase.setChangeLogParameter(name.substring(LIQUIBASE_PARAMETER.length() + 1),
+            // // servletValueContainer.getValue(name));
+            // }
+            // }
 
-	Liquibase liquibase = new Liquibase(changeLogFile,
-			new CompositeResourceAccessor(clFO, fsFO, threadClFO), database);
+            liquibase.update(new Contexts(contexts), new LabelExpression(labels));
+        } finally {
+            if (database != null) {
+                database.close();
+            } else if (connection != null) {
+                connection.close();
+            }
+        }
+    }
 
-	// @SuppressWarnings("unchecked")
-	// StringTokenizer initParameters = new StringTokenizer(""); // servletContext.getInitParameterNames();
-	// while (initParameters.hasMoreElements()) {
-	// String name = initParameters.nextElement().trim();
-	// if (name.startsWith(LIQUIBASE_PARAMETER + ".")) {
-	// // liquibase.setChangeLogParameter(name.substring(LIQUIBASE_PARAMETER.length() + 1),
-	// // servletValueContainer.getValue(name));
-	// }
-	// }
+    public static ByteBuffer calciteService(ByteBuffer buffer) {
+        Chronometer chronometer = Chronometer.makeStarted();
+        RequestMessage requestMessage = null;
+        try {
+            requestMessage = new RequestMessage(buffer);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
 
-	liquibase.update(new Contexts(contexts), new LabelExpression(labels));
-} finally {
-	if (database != null) {
-		database.close();
-	} else if (connection != null) {
-		connection.close();
-	}
-}
-}
+        if (requestMessage != null && requestMessage.getHeaderType() == MessageType.DML) {
+            DMLRequestMessage requestPayload = new DMLRequestMessage(requestMessage.getPayloadBuffer());
+            ResponseMessage response = null;
+            System.out.println("DML: " + requestPayload.getQuery());
 
+            try {
+                String logicalPlan = RelOptUtil.toString(
+                        ApplicationContext.getRelationalAlgebraGenerator()
+                                .getRelationalAlgebra(requestPayload.getQuery()));
+                DMLResponseMessage responsePayload =
+                        new DMLResponseMessage(
+                                logicalPlan, chronometer.elapsed(MILLISECONDS));
+                response = new ResponseMessage(
+                        Status.Success, responsePayload.getBufferData());
+            } catch (SqlSyntaxException e) {
+                ResponseErrorMessage error =
+                        new ResponseErrorMessage(e.getMessage());
+                response = new ResponseMessage(Status.Error,
+                        error.getBufferData());
+            } catch (SqlValidationException e) {
+                ResponseErrorMessage error =
+                        new ResponseErrorMessage(e.getMessage());
+                response = new ResponseMessage(Status.Error,
+                        error.getBufferData());
+            } catch (Exception e) {
+                ResponseErrorMessage error = new ResponseErrorMessage(
+                        "Improperly Formatted Query\n" +
+                                e.getStackTrace()[0]);
+                response = new ResponseMessage(Status.Error,
+                        error.getBufferData());
+            }
+            return response.getBufferData();
+        } else if (requestMessage.getHeaderType() == MessageType.DDL_CREATE_TABLE) {
+            DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(requestMessage.getPayloadBuffer());
+            ResponseMessage response = null;
+            try {
+                ApplicationContext.getCatalogService().createTable(message);
+                //I am unsure at this point if we have to update the schema or not but for safety I do it here
+                //need to see what hibernate moves around :)
+                ApplicationContext.updateContext();
+                DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
+                response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
+            } catch (Exception e) {
+                ResponseErrorMessage error = new ResponseErrorMessage("Could not create table");
+                response = new ResponseMessage(Status.Error, error.getBufferData());
 
+            }
+            return response.getBufferData();
+        } else if (requestMessage.getHeaderType() == MessageType.DDL_DROP_TABLE) {
+            ResponseMessage response = null;
 
+            DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(requestMessage.getPayloadBuffer());
+            try {
+                ApplicationContext.getCatalogService().dropTable(message);
+                ApplicationContext.updateContext();
+                DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
+                response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                ResponseErrorMessage error = new ResponseErrorMessage("Could not drop table");
+                response = new ResponseMessage(Status.Error, error.getBufferData());
+
+            }
+            return response.getBufferData();
+
+        } else {
+            ResponseMessage response = null;
+
+            ResponseErrorMessage error = new ResponseErrorMessage("unhandled request type");
+            response = new ResponseMessage(Status.Error, error.getBufferData());
+
+            return response.getBufferData();
+
+        }
+    }
     public static void main(String[] args) throws IOException {
 
-    	try {
-    		executeUpdate();
-    	}catch(Exception e) {
-        	 e.printStackTrace();
-    	}
+        try {
+            executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        ZContext ctx = new ZContext();
+        ZMQ.Socket  server = ctx.createSocket(ZMQ.REP);
+        server.bind("ipc:///tmp/calcite.socket");
 
-        ApplicationContext.init(); //any api call initializes it actually
-        File unixSocketFile = new File("/tmp/calcite.socket");
-        unixSocketFile.deleteOnExit();
+        while (true){
+            byte[] inputBytes = server.recv(0);
+            ByteBuffer inputBuffer = ByteBuffer.wrap(inputBytes);
+            ByteBuffer resultBuffer = calciteService(inputBuffer);
+            resultBuffer.rewind();
+            server.send(resultBuffer.array(), 0);
+        }
 
-        IService calciteService  = new IService() {
+        /*IService calciteService = new IService() {
             @Override
             public ByteBuffer process(ByteBuffer buffer) {
-								Chronometer chronometer = Chronometer.makeStarted();
-
-                RequestMessage requestMessage = new RequestMessage(buffer);
-                if(requestMessage.getHeaderType() == MessageType.DML) {
-                    DMLRequestMessage requestPayload = new DMLRequestMessage(requestMessage.getPayloadBuffer());
-                    ResponseMessage response = null;
-                    System.out.println("DML: " + requestPayload.getQuery());
-
-                    try {
-                      String logicalPlan = RelOptUtil.toString(
-                          ApplicationContext.getRelationalAlgebraGenerator()
-                              .getRelationalAlgebra(requestPayload.getQuery()));
-                      DMLResponseMessage responsePayload =
-                          new DMLResponseMessage(
-                              logicalPlan, chronometer.elapsed(MILLISECONDS));
-                      response = new ResponseMessage(
-                          Status.Success, responsePayload.getBufferData());
-                    } catch (SqlSyntaxException e) {
-                      ResponseErrorMessage error =
-                          new ResponseErrorMessage(e.getMessage());
-                      response = new ResponseMessage(Status.Error,
-                                                     error.getBufferData());
-                    } catch (SqlValidationException e) {
-                      ResponseErrorMessage error =
-                          new ResponseErrorMessage(e.getMessage());
-                      response = new ResponseMessage(Status.Error,
-                                                     error.getBufferData());
-                    } catch (Exception e) {
-                      ResponseErrorMessage error = new ResponseErrorMessage(
-                          "Improperly Formatted Query\n" +
-                          e.getStackTrace()[0]);
-                      response = new ResponseMessage(Status.Error,
-                                                     error.getBufferData());
-                    }
-                    return response.getBufferData();
-                }else if(requestMessage.getHeaderType() == MessageType.DDL_CREATE_TABLE) {
-                    DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(requestMessage.getPayloadBuffer());
-                    ResponseMessage response = null;
-                    try {
-                        ApplicationContext.getCatalogService().createTable(message);
-                        //I am unsure at this point if we have to update the schema or not but for safety I do it here
-                        //need to see what hibernate moves around :)
-                        ApplicationContext.updateContext();
-                        DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
-                        response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
-                    }catch(Exception e){
-                        ResponseErrorMessage error = new ResponseErrorMessage("Could not create table");
-                        response = new ResponseMessage(Status.Error, error.getBufferData());
-
-                    }
-                    return response.getBufferData();
-                }else if(requestMessage.getHeaderType() == MessageType.DDL_DROP_TABLE) {
-                    ResponseMessage response = null;
-
-                    DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(requestMessage.getPayloadBuffer());
-                    try {
-                        ApplicationContext.getCatalogService().dropTable(message);
-                        ApplicationContext.updateContext();
-                        DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
-                        response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        ResponseErrorMessage error = new ResponseErrorMessage("Could not drop table");
-                        response = new ResponseMessage(Status.Error, error.getBufferData());
-
-                    }
-                    return response.getBufferData();
-
-                }else {
-                    ResponseMessage response = null;
-
-                    ResponseErrorMessage error = new ResponseErrorMessage("unhandled request type");
-                    response = new ResponseMessage(Status.Error, error.getBufferData());
-
-                    return response.getBufferData();
-
-                }
 
             }
         };
         UnixService service = new UnixService(calciteService);
         service.bind(unixSocketFile);
-        new Thread(service).start();
+        new Thread(service).start();*/
     }
 }
