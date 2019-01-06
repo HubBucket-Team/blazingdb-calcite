@@ -16,18 +16,15 @@
 
 package com.blazingdb.calcite.application;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.sql.Connection;
-import java.sql.SQLException;
+/**
+ * Class which holds main function. Listens in on a unix domain socket
+ * for protocol buffer requests and then processes these requests.
+ * @author felipe
+ *
+ */
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import javax.naming.NamingException;
-
-import com.blazingdb.protocol.util.ByteBufferUtil;
-import org.apache.calcite.plan.RelOptUtil;
-import org.apache.commons.dbcp.BasicDataSource;
-
+import com.blazingdb.calcite.application.Chrono.Chronometer;
 import com.blazingdb.protocol.IService;
 import com.blazingdb.protocol.UnixService;
 import com.blazingdb.protocol.message.RequestMessage;
@@ -38,6 +35,25 @@ import com.blazingdb.protocol.message.calcite.DDLDropTableRequestMessage;
 import com.blazingdb.protocol.message.calcite.DDLResponseMessage;
 import com.blazingdb.protocol.message.calcite.DMLRequestMessage;
 import com.blazingdb.protocol.message.calcite.DMLResponseMessage;
+
+import org.apache.calcite.plan.RelOptUtil;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.dbcp.BasicDataSource;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import java.nio.ByteBuffer;
+
+import java.io.File;
+import java.io.IOException;
+import javax.naming.NamingException;
 
 import blazingdb.protocol.Status;
 import blazingdb.protocol.calcite.MessageType;
@@ -52,17 +68,7 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-/**
- * Class which holds main function. Listens in on a unix domain socket
- * for protocol buffer requests and then processes these requests.
- * @author felipe
- *
- */
 
-
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
-import com.blazingdb.calcite.application.Chrono.Chronometer;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 
@@ -70,7 +76,7 @@ import java.nio.charset.Charset;
 
 public class UnixServer {
 
-    private static void executeUpdate() throws NamingException, SQLException, LiquibaseException, InstantiationException,
+    private static void executeUpdate(final String dataDirectory) throws NamingException, SQLException, LiquibaseException, InstantiationException,
             IllegalAccessException, ClassNotFoundException {
 // setDataSource((String) servletValueContainer.getValue(LIQUIBASE_DATASOURCE));
 
@@ -82,6 +88,9 @@ public class UnixServer {
         String changeLogFile;
         String contexts;
         String labels;
+
+
+
 
 
 // setChangeLogFile((String) servletValueContainer.getValue(LIQUIBASE_CHANGELOG));
@@ -106,11 +115,13 @@ public class UnixServer {
             // connection = DriverManager.getConnection(url);
 
 
+
+
             BasicDataSource dataSource = new BasicDataSource();
             dataSource.setDriverClassName("org.h2.Driver");
             dataSource.setUsername("blazing");
             dataSource.setPassword("blazing");
-            dataSource.setUrl("jdbc:h2:/blazingsql/bz3");
+            dataSource.setUrl("jdbc:h2:" + dataDirectory + "/bz3");
             dataSource.setMaxActive(10);
             dataSource.setMaxIdle(5);
             dataSource.setInitialSize(5);
@@ -154,23 +165,18 @@ public class UnixServer {
         }
     }
 
-    public static ByteBuffer calciteService(ByteBuffer buffer) {
+    public static ByteBuffer calciteService(ByteBuffer buffer, final String dataDirectory) {
         Chronometer chronometer = Chronometer.makeStarted();
-        RequestMessage requestMessage = null;
-        try {
-            requestMessage = new RequestMessage(buffer);
-        } catch (Exception e) {
-            System.out.println(e.toString());
-        }
 
-        if (requestMessage != null && requestMessage.getHeaderType() == MessageType.DML) {
+        RequestMessage requestMessage = new RequestMessage(buffer);
+        if(requestMessage.getHeaderType() == MessageType.DML) {
             DMLRequestMessage requestPayload = new DMLRequestMessage(requestMessage.getPayloadBuffer());
             ResponseMessage response = null;
             System.out.println("DML: " + requestPayload.getQuery());
 
             try {
                 String logicalPlan = RelOptUtil.toString(
-                        ApplicationContext.getRelationalAlgebraGenerator()
+                        ApplicationContext.getRelationalAlgebraGenerator(dataDirectory)
                                 .getRelationalAlgebra(requestPayload.getQuery()));
                 DMLResponseMessage responsePayload =
                         new DMLResponseMessage(
@@ -195,29 +201,29 @@ public class UnixServer {
                         error.getBufferData());
             }
             return response.getBufferData();
-        } else if (requestMessage.getHeaderType() == MessageType.DDL_CREATE_TABLE) {
+        }else if(requestMessage.getHeaderType() == MessageType.DDL_CREATE_TABLE) {
             DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(requestMessage.getPayloadBuffer());
             ResponseMessage response = null;
             try {
-                ApplicationContext.getCatalogService().createTable(message);
+                ApplicationContext.getCatalogService(dataDirectory).createTable(message);
                 //I am unsure at this point if we have to update the schema or not but for safety I do it here
                 //need to see what hibernate moves around :)
-                ApplicationContext.updateContext();
+                ApplicationContext.updateContext(dataDirectory);
                 DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
                 response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
-            } catch (Exception e) {
+            }catch(Exception e){
                 ResponseErrorMessage error = new ResponseErrorMessage("Could not create table");
                 response = new ResponseMessage(Status.Error, error.getBufferData());
 
             }
             return response.getBufferData();
-        } else if (requestMessage.getHeaderType() == MessageType.DDL_DROP_TABLE) {
+        }else if(requestMessage.getHeaderType() == MessageType.DDL_DROP_TABLE) {
             ResponseMessage response = null;
 
             DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(requestMessage.getPayloadBuffer());
             try {
-                ApplicationContext.getCatalogService().dropTable(message);
-                ApplicationContext.updateContext();
+                ApplicationContext.getCatalogService(dataDirectory).dropTable(message);
+                ApplicationContext.updateContext(dataDirectory);
                 DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
                 response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
             } catch (Exception e) {
@@ -228,7 +234,7 @@ public class UnixServer {
             }
             return response.getBufferData();
 
-        } else {
+        }else {
             ResponseMessage response = null;
 
             ResponseErrorMessage error = new ResponseErrorMessage("unhandled request type");
@@ -239,33 +245,73 @@ public class UnixServer {
         }
     }
     public static void main(String[] args) throws IOException {
+        final CalciteApplicationOptions calciteApplicationOptions = parseArguments(args);
+
+        final String dataDirectory = calciteApplicationOptions.dataDirectory();
 
         try {
-            executeUpdate();
-        } catch (Exception e) {
+            executeUpdate(dataDirectory);
+        }catch(Exception e) {
             e.printStackTrace();
         }
 
         ZContext ctx = new ZContext();
-        ZMQ.Socket  server = ctx.createSocket(ZMQ.REP);
+        ZMQ.Socket server = ctx.createSocket(ZMQ.REP);
         server.bind("ipc:///tmp/calcite.socket");
 
-        while (true){
+        while (true) {
             byte[] inputBytes = server.recv(0);
             ByteBuffer inputBuffer = ByteBuffer.wrap(inputBytes);
-            ByteBuffer resultBuffer = calciteService(inputBuffer);
+            ByteBuffer resultBuffer = calciteService(inputBuffer, dataDirectory);
             resultBuffer.rewind();
             server.send(resultBuffer.array(), 0);
         }
+    }
 
-        /*IService calciteService = new IService() {
-            @Override
-            public ByteBuffer process(ByteBuffer buffer) {
+    private static CalciteApplicationOptions
+    parseArguments(String[] arguments) {
+        final Options options = new Options();
 
-            }
-        };
-        UnixService service = new UnixService(calciteService);
-        service.bind(unixSocketFile);
-        new Thread(service).start();*/
+        final String dataDirectoryDefaultValue = "/blazingsql";
+        final Option dataDirectoryOption =
+                Option.builder("d")
+                        .required(false)
+                        .longOpt("data_directory")
+                        .hasArg()
+                        .argName("PATH")
+                        .desc("Path to data directory where calcite put"
+                                + " the metastore files")
+                        .build();
+        options.addOption(dataDirectoryOption);
+
+        try {
+            final CommandLineParser commandLineParser = new DefaultParser();
+            final CommandLine commandLine =
+                    commandLineParser.parse(options, arguments);
+
+            CalciteApplicationOptions calciteApplicationOptions =
+                    new CalciteApplicationOptions(
+                            commandLine.getOptionValue(dataDirectoryOption.getLongOpt(),
+                                    dataDirectoryDefaultValue));
+
+            return calciteApplicationOptions;
+        } catch (ParseException e) {
+            System.out.println(e);
+            final HelpFormatter helpFormatter = new HelpFormatter();
+            helpFormatter.printHelp("CalciteApplication", options);
+            System.exit(1);
+            return null;
+        }
+    }
+
+    private static class CalciteApplicationOptions {
+
+        private final String dataDirectory;
+
+        public CalciteApplicationOptions(final String dataDirectory) {
+            this.dataDirectory = dataDirectory;
+        }
+
+        public String dataDirectory() { return dataDirectory; }
     }
 }

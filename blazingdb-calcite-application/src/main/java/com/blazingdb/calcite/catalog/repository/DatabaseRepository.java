@@ -23,8 +23,8 @@ public class DatabaseRepository {
 	/**
 	 * Constructor initializes the hibernate session
 	 */
-	public DatabaseRepository() {
-		sessionObj = getSessionFactory().openSession();
+	public DatabaseRepository(final String dataDirectory) {
+		sessionObj = getSessionFactory(dataDirectory).openSession();
 	}
 	
 	/**
@@ -39,8 +39,9 @@ public class DatabaseRepository {
 	   * Creates a SessionFactory
 	   * @return A session factory capable of opening sessions
 	   */
-	private static SessionFactory getSessionFactory() {
+	private static SessionFactory getSessionFactory(final String dataDirectory) {
 		Configuration configuration = new Configuration().configure();
+		configuration = configuration.setProperty("hibernate.connection.url", "jdbc:h2:" + dataDirectory + "/bz3");
 		SessionFactory sessionFactory = configuration.buildSessionFactory();
 		return sessionFactory;
 	}

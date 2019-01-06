@@ -14,8 +14,8 @@ public class CatalogServiceImpl {
 
 	DatabaseRepository repo;
 	
-	public CatalogServiceImpl() {
-		repo = new DatabaseRepository();
+	public CatalogServiceImpl(final String dataDirectory) {
+		repo = new DatabaseRepository(dataDirectory);
 	}
 	
 	public void createTable(DDLCreateTableRequestMessage message) throws Exception{
