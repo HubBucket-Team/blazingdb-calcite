@@ -162,7 +162,9 @@ public class RelationalAlgebraGenerator {
     SqlNode tempNode;
     try {
       tempNode = planner.parse(sql);
-    } catch (SqlParseException e) { throw new SqlSyntaxException(sql, e); }
+    } catch (SqlParseException e) {
+      throw new SqlSyntaxException(sql, e);
+    }
 
     SqlNode validatedSqlNode;
     try {
