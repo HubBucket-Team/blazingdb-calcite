@@ -61,6 +61,7 @@ import java.io.PrintWriter;
 import javax.naming.NamingException;
 
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -238,51 +239,11 @@ public class UnixServer {
 		}
 	}
 
-	// send a message on a specific host and port
-	public byte[] sendMessage(final String host, final Integer port, String message) throws IOException {
-		Socket socket = null;
-		PrintWriter out = null;
-
-		try {
-			socket = new Socket(host, port);
-		} catch (Exception e) {
-			// TODO percy arrow needs to generate error messages for the webapp .. add return
-			final String error = "ERROR: Unknown BlazingDB host - " + host
-					+ ". The host seems offline: fail to create the connection socket.";
-			System.err.println(error);
-		}
-
-		byte[] arrowBytes = null;
-
-		if (socket != null) {
-			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(socket.getOutputStream(), "UTF-8");
-			BufferedWriter outBufferedWriter = new BufferedWriter(outputStreamWriter);
-			out = new PrintWriter(outBufferedWriter, true);
-
-			// we have to append size of message
-			// messageSize:<message.size()>;dataSize:0;<message-here>
-			out.println("messageSize:" + message.getBytes("UTF-8").length + ";dataSize:0;" + message);
-
-			try {
-				arrowBytes = IOUtils.toByteArray(socket.getInputStream());
-			} catch (Exception e) {
-				System.out.println(e);
-			}
-
-			outBufferedWriter.close();
-			outputStreamWriter.close();
-
-			out.close();
-			socket.close();
-
-		}
-
-		return arrowBytes;
-	}
-
 	public static void main(String[] args) throws IOException {
 		final CalciteApplicationOptions calciteApplicationOptions = parseArguments(args);
 
+		final String ip = calciteApplicationOptions.ip();
+		final Integer port = calciteApplicationOptions.port();
 		final String dataDirectory = calciteApplicationOptions.dataDirectory();
 
 		try {
@@ -291,7 +252,8 @@ public class UnixServer {
 			e.printStackTrace();
 		}
 
-		ServerSocket server = new ServerSocket(6789);
+		int conn_queue = 1; // backlog
+		ServerSocket server = new ServerSocket(port, conn_queue, InetAddress.getByName(ip));
 
 		while (true) {
 			Socket connectionSocket = server.accept();
@@ -327,7 +289,18 @@ public class UnixServer {
 	private static CalciteApplicationOptions parseArguments(String[] arguments) {
 		final Options options = new Options();
 
+		final String ipDefaultValue = "localhost";
+		final Integer portDefaultValue = 8891;
 		final String dataDirectoryDefaultValue = "/blazingsql";
+
+		final Option ipOption = Option.builder("i").required(true).longOpt("ip").hasArg()
+				.argName("IP").desc("IP (v4) for this service").build();
+		options.addOption(ipOption);
+
+		final Option portOption = Option.builder("p").required(true).longOpt("port").hasArg()
+				.argName("PORT").desc("TCP port for this service").type(Integer.class).build();
+		options.addOption(portOption);
+
 		final Option dataDirectoryOption = Option.builder("d").required(false).longOpt("data_directory").hasArg()
 				.argName("PATH").desc("Path to data directory where calcite put" + " the metastore files").build();
 		options.addOption(dataDirectoryOption);
@@ -336,8 +309,11 @@ public class UnixServer {
 			final CommandLineParser commandLineParser = new DefaultParser();
 			final CommandLine commandLine = commandLineParser.parse(options, arguments);
 
-			CalciteApplicationOptions calciteApplicationOptions = new CalciteApplicationOptions(
-					commandLine.getOptionValue(dataDirectoryOption.getLongOpt(), dataDirectoryDefaultValue));
+			final String ip = commandLine.getOptionValue(ipOption.getLongOpt(), ipDefaultValue);
+			final Integer port = new Integer(((Number)commandLine.getParsedOptionValue(portOption.getLongOpt())).intValue());
+			final String dataDirectory = commandLine.getOptionValue(dataDirectoryOption.getLongOpt(), dataDirectoryDefaultValue);
+
+			CalciteApplicationOptions calciteApplicationOptions = new CalciteApplicationOptions(ip, port, dataDirectory);
 
 			return calciteApplicationOptions;
 		} catch (ParseException e) {
@@ -351,10 +327,22 @@ public class UnixServer {
 
 	private static class CalciteApplicationOptions {
 
+		private final String ip;
+		private final Integer port;
 		private final String dataDirectory;
 
-		public CalciteApplicationOptions(final String dataDirectory) {
+		public CalciteApplicationOptions(final String ip, final Integer port, final String dataDirectory) {
+			this.ip = ip;
+			this.port = port;
 			this.dataDirectory = dataDirectory;
+		}
+
+		public String ip() {
+			return this.ip;
+		}
+
+		public Integer port() {
+			return this.port;
 		}
 
 		public String dataDirectory() {
