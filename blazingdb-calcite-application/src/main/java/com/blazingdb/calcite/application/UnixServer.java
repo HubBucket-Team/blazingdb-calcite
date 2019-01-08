@@ -290,15 +290,15 @@ public class UnixServer {
 		final Options options = new Options();
 
 		final String ipDefaultValue = "localhost";
-		final Integer portDefaultValue = 8891;
+		final String portDefaultValue = "8891";
 		final String dataDirectoryDefaultValue = "/blazingsql";
 
 		final Option ipOption = Option.builder("i").required(true).longOpt("ip").hasArg()
-				.argName("IP").desc("IP (v4) for this service").build();
+				.argName("STRING").desc("IP (v4) for this service").build();
 		options.addOption(ipOption);
 
 		final Option portOption = Option.builder("p").required(true).longOpt("port").hasArg()
-				.argName("PORT").desc("TCP port for this service").type(Integer.class).build();
+				.argName("INTEGER").desc("TCP port for this service").type(Integer.class).build();
 		options.addOption(portOption);
 
 		final Option dataDirectoryOption = Option.builder("d").required(false).longOpt("data_directory").hasArg()
@@ -310,7 +310,7 @@ public class UnixServer {
 			final CommandLine commandLine = commandLineParser.parse(options, arguments);
 
 			final String ip = commandLine.getOptionValue(ipOption.getLongOpt(), ipDefaultValue);
-			final Integer port = new Integer(((Number)commandLine.getParsedOptionValue(portOption.getLongOpt())).intValue());
+			final Integer port = Integer.valueOf(commandLine.getOptionValue(portOption.getLongOpt(), portDefaultValue));;
 			final String dataDirectory = commandLine.getOptionValue(dataDirectoryOption.getLongOpt(), dataDirectoryDefaultValue);
 
 			CalciteApplicationOptions calciteApplicationOptions = new CalciteApplicationOptions(ip, port, dataDirectory);
