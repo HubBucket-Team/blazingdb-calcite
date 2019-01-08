@@ -26,7 +26,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import com.blazingdb.calcite.application.Chrono.Chronometer;
 import com.blazingdb.protocol.IService;
-import com.blazingdb.protocol.UnixService;
 import com.blazingdb.protocol.message.RequestMessage;
 import com.blazingdb.protocol.message.ResponseErrorMessage;
 import com.blazingdb.protocol.message.ResponseMessage;
