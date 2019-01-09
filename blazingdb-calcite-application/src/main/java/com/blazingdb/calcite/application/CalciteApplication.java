@@ -17,7 +17,7 @@
 package com.blazingdb.calcite.application;
 
 /**
- * Class which holds main function. Listens in on a unix domain socket
+ * Class which holds main function. Listens in on a TCP socket
  * for protocol buffer requests and then processes these requests.
  * @author felipe
  *
