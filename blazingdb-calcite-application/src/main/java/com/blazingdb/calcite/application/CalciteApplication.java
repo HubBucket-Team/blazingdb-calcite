@@ -246,6 +246,10 @@ public class CalciteApplication {
     return buffer.getInt();
   }
 
+  public static byte[] intToBytes(int value) {
+    return ByteBuffer.allocate(4).putInt(value).array();
+  }
+
 	public static void main(String[] args) throws IOException {
 		final CalciteApplicationOptions calciteApplicationOptions = parseArguments(args);
 
@@ -285,7 +289,9 @@ public class CalciteApplication {
 				ByteBuffer inputBuffer = ByteBuffer.wrap(buf);
 				ByteBuffer resultBuffer = calciteService(inputBuffer, dataDirectory);
 
-				connectionSocket.getOutputStream().write(resultBuffer.array());
+        byte[] resultBytes = resultBuffer.array();
+				connectionSocket.getOutputStream().write(intToBytes(resultBytes.length));
+				connectionSocket.getOutputStream().write(resultBytes);
 				// outToClient.flush();
 			} catch (Exception e) {
 				// TODO percy error
