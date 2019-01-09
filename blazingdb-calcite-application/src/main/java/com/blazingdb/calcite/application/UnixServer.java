@@ -242,7 +242,6 @@ public class UnixServer {
 	public static void main(String[] args) throws IOException {
 		final CalciteApplicationOptions calciteApplicationOptions = parseArguments(args);
 
-		final String ip = calciteApplicationOptions.ip();
 		final Integer port = calciteApplicationOptions.port();
 		final String dataDirectory = calciteApplicationOptions.dataDirectory();
 
@@ -252,8 +251,7 @@ public class UnixServer {
 			e.printStackTrace();
 		}
 
-		int conn_queue = 1; // backlog
-		ServerSocket server = new ServerSocket(port, conn_queue, InetAddress.getByName(ip));
+		ServerSocket server = new ServerSocket(port);
 
 		while (true) {
 			Socket connectionSocket = server.accept();
@@ -289,13 +287,8 @@ public class UnixServer {
 	private static CalciteApplicationOptions parseArguments(String[] arguments) {
 		final Options options = new Options();
 
-		final String ipDefaultValue = "localhost";
 		final String portDefaultValue = "8891";
 		final String dataDirectoryDefaultValue = "/blazingsql";
-
-		final Option ipOption = Option.builder("i").required(true).longOpt("ip").hasArg()
-				.argName("STRING").desc("IP (v4) for this service").build();
-		options.addOption(ipOption);
 
 		final Option portOption = Option.builder("p").required(true).longOpt("port").hasArg()
 				.argName("INTEGER").desc("TCP port for this service").type(Integer.class).build();
@@ -309,11 +302,10 @@ public class UnixServer {
 			final CommandLineParser commandLineParser = new DefaultParser();
 			final CommandLine commandLine = commandLineParser.parse(options, arguments);
 
-			final String ip = commandLine.getOptionValue(ipOption.getLongOpt(), ipDefaultValue);
-			final Integer port = Integer.valueOf(commandLine.getOptionValue(portOption.getLongOpt(), portDefaultValue));;
+			final Integer port = Integer.valueOf(commandLine.getOptionValue(portOption.getLongOpt(), portDefaultValue));
 			final String dataDirectory = commandLine.getOptionValue(dataDirectoryOption.getLongOpt(), dataDirectoryDefaultValue);
 
-			CalciteApplicationOptions calciteApplicationOptions = new CalciteApplicationOptions(ip, port, dataDirectory);
+			CalciteApplicationOptions calciteApplicationOptions = new CalciteApplicationOptions(port, dataDirectory);
 
 			return calciteApplicationOptions;
 		} catch (ParseException e) {
@@ -327,18 +319,12 @@ public class UnixServer {
 
 	private static class CalciteApplicationOptions {
 
-		private final String ip;
 		private final Integer port;
 		private final String dataDirectory;
 
-		public CalciteApplicationOptions(final String ip, final Integer port, final String dataDirectory) {
-			this.ip = ip;
+		public CalciteApplicationOptions(final Integer port, final String dataDirectory) {
 			this.port = port;
 			this.dataDirectory = dataDirectory;
-		}
-
-		public String ip() {
-			return this.ip;
 		}
 
 		public Integer port() {
