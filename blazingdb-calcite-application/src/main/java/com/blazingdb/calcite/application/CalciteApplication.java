@@ -49,6 +49,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import java.nio.ByteBuffer;
+import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.File;
 import java.io.IOException;
@@ -239,12 +240,11 @@ public class CalciteApplication {
 		}
 	}
 
-	public static int bytesToLong(byte[] bytes) {
-		ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
-		buffer.put(bytes);
-		buffer.flip();//need flip
-		return buffer.getInt();
-	}
+  public static int bytesToInt(byte[] bytes) {
+    ByteBuffer buffer = ByteBuffer.wrap(bytes);
+    buffer.order(LITTLE_ENDIAN);
+    return buffer.getInt();
+  }
 
 	public static void main(String[] args) throws IOException {
 		final CalciteApplicationOptions calciteApplicationOptions = parseArguments(args);
@@ -260,16 +260,16 @@ public class CalciteApplication {
 
 		ServerSocket server = new ServerSocket(port);
 
-		byte[] buf = new byte[1024*8];
+		byte[] buf = new byte[1024 * 8];
 		byte[] buf_len = new byte[4]; // NOTE always 8 bytes becouse blazing-protocol format
 
 		while (true) {
 			Socket connectionSocket = server.accept();
 			try {
-                int bytes_read = 0;
+        int bytes_read = 0;
 				bytes_read = connectionSocket.getInputStream().read(buf_len, 0, buf_len.length);
 
-				int len = bytesToLong(buf_len);
+				int len = bytesToInt(buf_len);
 
 				// This call to read() will wait forever, until the
 				// program on the other side either sends some data,
