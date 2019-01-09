@@ -239,11 +239,11 @@ public class UnixServer {
 		}
 	}
 
-	public static long bytesToLong(byte[] bytes) {
-		ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+	public static int bytesToLong(byte[] bytes) {
+		ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
 		buffer.put(bytes);
 		buffer.flip();//need flip
-		return buffer.getLong();
+		return buffer.getInt();
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -261,7 +261,7 @@ public class UnixServer {
 		ServerSocket server = new ServerSocket(port);
 
 		byte[] buf = new byte[1024*8];
-		byte[] buf_len = new byte[8]; // NOTE always 8 bytes becouse blazing-protocol format
+		byte[] buf_len = new byte[4]; // NOTE always 8 bytes becouse blazing-protocol format
 
 		while (true) {
 			Socket connectionSocket = server.accept();
@@ -269,12 +269,12 @@ public class UnixServer {
                 int bytes_read = 0;
 				bytes_read = connectionSocket.getInputStream().read(buf_len, 0, buf_len.length);
 
-				long len = bytesToLong(buf_len);
+				int len = bytesToLong(buf_len);
 
 				// This call to read() will wait forever, until the
 				// program on the other side either sends some data,
 				// or closes the socket.
-				bytes_read = connectionSocket.getInputStream().read(buf, 0, (int)len);
+				bytes_read = connectionSocket.getInputStream().read(buf, 0, len);
 
 				// If the socket is closed, sockInput.read() will return -1.
 				if (bytes_read < 0) {
