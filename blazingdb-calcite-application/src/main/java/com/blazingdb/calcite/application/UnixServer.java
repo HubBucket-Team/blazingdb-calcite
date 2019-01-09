@@ -301,7 +301,7 @@ public class UnixServer {
 		final String portDefaultValue = "8891";
 		final String dataDirectoryDefaultValue = "/blazingsql";
 
-		final Option portOption = Option.builder("p").required(true).longOpt("port").hasArg()
+		final Option portOption = Option.builder("p").required(false).longOpt("port").hasArg()
 				.argName("INTEGER").desc("TCP port for this service").type(Integer.class).build();
 		options.addOption(portOption);
 
