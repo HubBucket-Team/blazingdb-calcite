@@ -86,7 +86,7 @@ import liquibase.resource.ResourceAccessor;
 
 import java.nio.charset.Charset;
 
-public class UnixServer {
+public class CalciteApplication {
 
 	private static void executeUpdate(final String dataDirectory) throws NamingException, SQLException,
 			LiquibaseException, InstantiationException, IllegalAccessException, ClassNotFoundException {
