@@ -239,6 +239,13 @@ public class UnixServer {
 		}
 	}
 
+	public static long bytesToLong(byte[] bytes) {
+		ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+		buffer.put(bytes);
+		buffer.flip();//need flip
+		return buffer.getLong();
+	}
+
 	public static void main(String[] args) throws IOException {
 		final CalciteApplicationOptions calciteApplicationOptions = parseArguments(args);
 
@@ -253,17 +260,21 @@ public class UnixServer {
 
 		ServerSocket server = new ServerSocket(port);
 
+		byte[] buf = new byte[1024*8];
+		byte[] buf_len = new byte[8]; // NOTE always 8 bytes becouse blazing-protocol format
+
 		while (true) {
 			Socket connectionSocket = server.accept();
-
-			byte[] buf = new byte[1024];
-			int bytes_read = 0;
-
 			try {
+                int bytes_read = 0;
+				bytes_read = connectionSocket.getInputStream().read(buf_len, 0, buf_len.length);
+
+				long len = bytesToLong(buf_len);
+
 				// This call to read() will wait forever, until the
 				// program on the other side either sends some data,
 				// or closes the socket.
-				bytes_read = connectionSocket.getInputStream().read(buf, 0, buf.length);
+				bytes_read = connectionSocket.getInputStream().read(buf, 0, (int)len);
 
 				// If the socket is closed, sockInput.read() will return -1.
 				if (bytes_read < 0) {
