@@ -143,7 +143,7 @@ public class BlazingCatalogTest {
 	@BeforeMethod
 	public void setUp() throws Exception {
 		//this.executeUpdate();
-		repo = new DatabaseRepository();
+		repo = new DatabaseRepository("/blazingsql");
 		sessionFactory = new Configuration().configure().buildSessionFactory();
 
 	}
