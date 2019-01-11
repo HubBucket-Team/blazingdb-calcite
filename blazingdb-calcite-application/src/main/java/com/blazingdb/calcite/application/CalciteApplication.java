@@ -271,9 +271,9 @@ public class CalciteApplication {
 		File unixSocketFile = new File("/tmp/calcite.socket");
 		unixSocketFile.deleteOnExit();
 
-		UnixService service = new UnixService();
-		service.bind(unixSocketFile);
-		new Thread(service).start();
+		//UnixService service = new UnixService();
+		//service.bind(unixSocketFile);
+		//new Thread(service).start();
 	}
 
 	private static CalciteApplicationOptions parseArguments(String[] arguments) {

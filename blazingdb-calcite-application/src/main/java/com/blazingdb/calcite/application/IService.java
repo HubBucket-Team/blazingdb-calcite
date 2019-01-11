@@ -1,4 +1,4 @@
-package com.blazingdb.protocol;
+package com.blazingdb.calcite.application;
 
 import java.nio.ByteBuffer;
 
