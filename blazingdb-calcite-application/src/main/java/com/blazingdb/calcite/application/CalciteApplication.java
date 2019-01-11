@@ -200,7 +200,7 @@ public class CalciteApplication {
 		File unixSocketFile = new File("/tmp/calcite.socket");
 		unixSocketFile.deleteOnExit();
 
-		UnixService service = new UnixService();
+		UnixService service = new UnixService(dataDirectory);
 		service.bind(unixSocketFile);
 		new Thread(service).start();
 	}

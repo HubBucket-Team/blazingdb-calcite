@@ -74,7 +74,7 @@ public class UnixService implements Runnable {
                 byte [] buffer = new byte[length];
                 int n = receiver.read(buffer);
                 if (n > 0) {
-                    ByteBuffer response = calciteService(argdataDirectory, ByteBuffer.wrap(buffer));
+                    ByteBuffer response = calciteService(ByteBuffer.wrap(buffer), argdataDirectory);
                     SocketChannelOutputStream sender = new SocketChannelOutputStream(channel);
                     byte [] responseBytes = response.array();
                     sender.write(responseBytes.length);
