@@ -71,6 +71,11 @@ import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 
+import jnr.unixsocket.UnixServerSocket;
+import jnr.unixsocket.UnixServerSocketChannel;
+import jnr.unixsocket.UnixSocketAddress;
+import jnr.unixsocket.UnixSocketChannel;
+
 import blazingdb.protocol.Status;
 import blazingdb.protocol.calcite.MessageType;
 import liquibase.Contexts;
@@ -240,15 +245,15 @@ public class CalciteApplication {
 		}
 	}
 
-  public static int bytesToInt(byte[] bytes) {
-    ByteBuffer buffer = ByteBuffer.wrap(bytes);
-    buffer.order(LITTLE_ENDIAN);
-    return buffer.getInt();
-  }
+	public static int bytesToInt(byte[] bytes) {
+		ByteBuffer buffer = ByteBuffer.wrap(bytes);
+		buffer.order(LITTLE_ENDIAN);
+		return buffer.getInt();
+	}
 
-  public static byte[] intToBytes(int value) {
-    return ByteBuffer.allocate(4).putInt(value).array();
-  }
+	public static byte[] intToBytes(int value) {
+		return ByteBuffer.allocate(4).putInt(value).array();
+	}
 
 	public static void main(String[] args) throws IOException {
 		final CalciteApplicationOptions calciteApplicationOptions = parseArguments(args);
@@ -262,23 +267,30 @@ public class CalciteApplication {
 			e.printStackTrace();
 		}
 
-		ServerSocket server = new ServerSocket(port);
+		File unixSocketFile = new File("/tmp/calcite.socket");
+		unixSocketFile.deleteOnExit();
 
-		byte[] buf = new byte[1024 * 8];
-		byte[] buf_len = new byte[4]; // NOTE always 8 bytes becouse blazing-protocol format
+		UnixSocketAddress address = new UnixSocketAddress(unixSocketFile);
+		UnixServerSocketChannel server = UnixServerSocketChannel.open();
+		server.configureBlocking(false);
+		server.socket().bind(address);
 
 		while (true) {
-			Socket connectionSocket = server.accept();
+			UnixSocketChannel connectionSocket = server.accept();
 			try {
-        int bytes_read = 0;
-				bytes_read = connectionSocket.getInputStream().read(buf_len, 0, buf_len.length);
+				ByteBuffer buf_len = ByteBuffer.allocate(4); // NOTE always 4 bytes becouse blazing-protocol format
 
-				int len = bytesToInt(buf_len);
+				int bytes_read = 0;
+				bytes_read = connectionSocket.read(buf_len);
+
+				int len = bytesToInt(buf_len.array());
+
+				ByteBuffer buf = ByteBuffer.allocate(len);
 
 				// This call to read() will wait forever, until the
 				// program on the other side either sends some data,
 				// or closes the socket.
-				bytes_read = connectionSocket.getInputStream().read(buf, 0, len);
+				bytes_read = connectionSocket.read(buf);
 
 				// If the socket is closed, sockInput.read() will return -1.
 				if (bytes_read < 0) {
@@ -286,12 +298,12 @@ public class CalciteApplication {
 					System.err.println("Server: Tried to read from socket, read() returned < 0,  Closing socket.");
 				}
 
-				ByteBuffer inputBuffer = ByteBuffer.wrap(buf);
+				ByteBuffer inputBuffer = ByteBuffer.wrap(buf.array());
 				ByteBuffer resultBuffer = calciteService(inputBuffer, dataDirectory);
 
-        byte[] resultBytes = resultBuffer.array();
-				connectionSocket.getOutputStream().write(intToBytes(resultBytes.length));
-				connectionSocket.getOutputStream().write(resultBytes);
+				byte[] resultBytes = resultBuffer.array();
+				connectionSocket.write(ByteBuffer.wrap(intToBytes(resultBytes.length)));
+				connectionSocket.write(resultBuffer);
 				// outToClient.flush();
 			} catch (Exception e) {
 				// TODO percy error
@@ -307,8 +319,8 @@ public class CalciteApplication {
 		final String portDefaultValue = "8891";
 		final String dataDirectoryDefaultValue = "/blazingsql";
 
-		final Option portOption = Option.builder("p").required(false).longOpt("port").hasArg()
-				.argName("INTEGER").desc("TCP port for this service").type(Integer.class).build();
+		final Option portOption = Option.builder("p").required(false).longOpt("port").hasArg().argName("INTEGER")
+				.desc("TCP port for this service").type(Integer.class).build();
 		options.addOption(portOption);
 
 		final Option dataDirectoryOption = Option.builder("d").required(false).longOpt("data_directory").hasArg()
@@ -320,7 +332,8 @@ public class CalciteApplication {
 			final CommandLine commandLine = commandLineParser.parse(options, arguments);
 
 			final Integer port = Integer.valueOf(commandLine.getOptionValue(portOption.getLongOpt(), portDefaultValue));
-			final String dataDirectory = commandLine.getOptionValue(dataDirectoryOption.getLongOpt(), dataDirectoryDefaultValue);
+			final String dataDirectory = commandLine.getOptionValue(dataDirectoryOption.getLongOpt(),
+					dataDirectoryDefaultValue);
 
 			CalciteApplicationOptions calciteApplicationOptions = new CalciteApplicationOptions(port, dataDirectory);
 
