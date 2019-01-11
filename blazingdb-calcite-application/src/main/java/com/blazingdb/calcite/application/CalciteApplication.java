@@ -267,53 +267,13 @@ public class CalciteApplication {
 			e.printStackTrace();
 		}
 
+		ApplicationContext.init(); // any api call initializes it actually
 		File unixSocketFile = new File("/tmp/calcite.socket");
 		unixSocketFile.deleteOnExit();
 
-		UnixSocketAddress address = new UnixSocketAddress(unixSocketFile);
-		UnixServerSocketChannel server = UnixServerSocketChannel.open();
-		server.configureBlocking(false);
-		server.socket().bind(address);
-
-		while (true) {
-			UnixSocketChannel connectionSocket = server.accept();
-			try {
-				ByteBuffer buf_len = ByteBuffer.allocate(4); // NOTE always 4 bytes becouse blazing-protocol format
-
-				int bytes_read = 0;
-				bytes_read = connectionSocket.read(buf_len);
-
-				int len = bytesToInt(buf_len.array());
-
-				ByteBuffer buf = ByteBuffer.allocate(len);
-
-				// This call to read() will wait forever, until the
-				// program on the other side either sends some data,
-				// or closes the socket.
-				bytes_read = connectionSocket.read(buf);
-
-				// If the socket is closed, sockInput.read() will return -1.
-				if (bytes_read < 0) {
-					// TODO percy error
-					System.err.println("Server: Tried to read from socket, read() returned < 0,  Closing socket.");
-					connectionSocket.close();
-					break;
-				}
-
-				ByteBuffer inputBuffer = ByteBuffer.wrap(buf.array());
-				ByteBuffer resultBuffer = calciteService(inputBuffer, dataDirectory);
-
-				byte[] resultBytes = resultBuffer.array();
-				connectionSocket.write(ByteBuffer.wrap(intToBytes(resultBytes.length)));
-				connectionSocket.write(resultBuffer);
-				// outToClient.flush();
-				connectionSocket.close();
-			} catch (Exception e) {
-				// TODO percy error
-				System.err.println("Exception reading from/writing to socket, e=" + e);
-				e.printStackTrace(System.err);
-			}
-		}
+		UnixService service = new UnixService();
+		service.bind(unixSocketFile);
+		new Thread(service).start();
 	}
 
 	private static CalciteApplicationOptions parseArguments(String[] arguments) {
