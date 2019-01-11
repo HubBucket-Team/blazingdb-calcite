@@ -71,6 +71,11 @@ import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 
+import jnr.unixsocket.UnixServerSocket;
+import jnr.unixsocket.UnixServerSocketChannel;
+import jnr.unixsocket.UnixSocketAddress;
+import jnr.unixsocket.UnixSocketChannel;
+
 import blazingdb.protocol.Status;
 import blazingdb.protocol.calcite.MessageType;
 import liquibase.Contexts;
@@ -169,86 +174,15 @@ public class CalciteApplication {
 		}
 	}
 
-	public static ByteBuffer calciteService(ByteBuffer buffer, final String dataDirectory) {
-		Chronometer chronometer = Chronometer.makeStarted();
-
-		RequestMessage requestMessage = new RequestMessage(buffer);
-		if (requestMessage.getHeaderType() == MessageType.DML) {
-			DMLRequestMessage requestPayload = new DMLRequestMessage(requestMessage.getPayloadBuffer());
-			ResponseMessage response = null;
-			System.out.println("DML: " + requestPayload.getQuery());
-
-			try {
-				String logicalPlan = RelOptUtil.toString(ApplicationContext.getRelationalAlgebraGenerator(dataDirectory)
-						.getRelationalAlgebra(requestPayload.getQuery()));
-				DMLResponseMessage responsePayload = new DMLResponseMessage(logicalPlan,
-						chronometer.elapsed(MILLISECONDS));
-				response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
-			} catch (SqlSyntaxException e) {
-				ResponseErrorMessage error = new ResponseErrorMessage(e.getMessage());
-				response = new ResponseMessage(Status.Error, error.getBufferData());
-			} catch (SqlValidationException e) {
-				ResponseErrorMessage error = new ResponseErrorMessage(e.getMessage());
-				response = new ResponseMessage(Status.Error, error.getBufferData());
-			} catch (Exception e) {
-				ResponseErrorMessage error = new ResponseErrorMessage(
-						"Improperly Formatted Query\n" + e.getStackTrace()[0]);
-				response = new ResponseMessage(Status.Error, error.getBufferData());
-			}
-			return response.getBufferData();
-		} else if (requestMessage.getHeaderType() == MessageType.DDL_CREATE_TABLE) {
-			DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(requestMessage.getPayloadBuffer());
-			ResponseMessage response = null;
-			try {
-				ApplicationContext.getCatalogService(dataDirectory).createTable(message);
-				// I am unsure at this point if we have to update the schema or not but for safety I do it here
-				// need to see what hibernate moves around :)
-				ApplicationContext.updateContext(dataDirectory);
-				DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
-				response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
-			} catch (Exception e) {
-				ResponseErrorMessage error = new ResponseErrorMessage("Could not create table");
-				response = new ResponseMessage(Status.Error, error.getBufferData());
-
-			}
-			return response.getBufferData();
-		} else if (requestMessage.getHeaderType() == MessageType.DDL_DROP_TABLE) {
-			ResponseMessage response = null;
-
-			DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(requestMessage.getPayloadBuffer());
-			try {
-				ApplicationContext.getCatalogService(dataDirectory).dropTable(message);
-				ApplicationContext.updateContext(dataDirectory);
-				DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
-				response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				ResponseErrorMessage error = new ResponseErrorMessage("Could not drop table");
-				response = new ResponseMessage(Status.Error, error.getBufferData());
-
-			}
-			return response.getBufferData();
-
-		} else {
-			ResponseMessage response = null;
-
-			ResponseErrorMessage error = new ResponseErrorMessage("unhandled request type");
-			response = new ResponseMessage(Status.Error, error.getBufferData());
-
-			return response.getBufferData();
-
-		}
+	public static int bytesToInt(byte[] bytes) {
+		ByteBuffer buffer = ByteBuffer.wrap(bytes);
+		buffer.order(LITTLE_ENDIAN);
+		return buffer.getInt();
 	}
 
-  public static int bytesToInt(byte[] bytes) {
-    ByteBuffer buffer = ByteBuffer.wrap(bytes);
-    buffer.order(LITTLE_ENDIAN);
-    return buffer.getInt();
-  }
-
-  public static byte[] intToBytes(int value) {
-    return ByteBuffer.allocate(4).putInt(value).array();
-  }
+	public static byte[] intToBytes(int value) {
+		return ByteBuffer.allocate(4).putInt(value).array();
+	}
 
 	public static void main(String[] args) throws IOException {
 		final CalciteApplicationOptions calciteApplicationOptions = parseArguments(args);
@@ -262,43 +196,13 @@ public class CalciteApplication {
 			e.printStackTrace();
 		}
 
-		ServerSocket server = new ServerSocket(port);
+		//ApplicationContext.init(); // any api call initializes it actually
+		File unixSocketFile = new File("/tmp/calcite.socket");
+		unixSocketFile.deleteOnExit();
 
-		byte[] buf = new byte[1024 * 8];
-		byte[] buf_len = new byte[4]; // NOTE always 8 bytes becouse blazing-protocol format
-
-		while (true) {
-			Socket connectionSocket = server.accept();
-			try {
-        int bytes_read = 0;
-				bytes_read = connectionSocket.getInputStream().read(buf_len, 0, buf_len.length);
-
-				int len = bytesToInt(buf_len);
-
-				// This call to read() will wait forever, until the
-				// program on the other side either sends some data,
-				// or closes the socket.
-				bytes_read = connectionSocket.getInputStream().read(buf, 0, len);
-
-				// If the socket is closed, sockInput.read() will return -1.
-				if (bytes_read < 0) {
-					// TODO percy error
-					System.err.println("Server: Tried to read from socket, read() returned < 0,  Closing socket.");
-				}
-
-				ByteBuffer inputBuffer = ByteBuffer.wrap(buf);
-				ByteBuffer resultBuffer = calciteService(inputBuffer, dataDirectory);
-
-        byte[] resultBytes = resultBuffer.array();
-				connectionSocket.getOutputStream().write(intToBytes(resultBytes.length));
-				connectionSocket.getOutputStream().write(resultBytes);
-				// outToClient.flush();
-			} catch (Exception e) {
-				// TODO percy error
-				System.err.println("Exception reading from/writing to socket, e=" + e);
-				e.printStackTrace(System.err);
-			}
-		}
+		UnixService service = new UnixService(dataDirectory);
+		service.bind(unixSocketFile);
+		new Thread(service).start();
 	}
 
 	private static CalciteApplicationOptions parseArguments(String[] arguments) {
@@ -307,8 +211,8 @@ public class CalciteApplication {
 		final String portDefaultValue = "8891";
 		final String dataDirectoryDefaultValue = "/blazingsql";
 
-		final Option portOption = Option.builder("p").required(false).longOpt("port").hasArg()
-				.argName("INTEGER").desc("TCP port for this service").type(Integer.class).build();
+		final Option portOption = Option.builder("p").required(false).longOpt("port").hasArg().argName("INTEGER")
+				.desc("TCP port for this service").type(Integer.class).build();
 		options.addOption(portOption);
 
 		final Option dataDirectoryOption = Option.builder("d").required(false).longOpt("data_directory").hasArg()
@@ -320,7 +224,8 @@ public class CalciteApplication {
 			final CommandLine commandLine = commandLineParser.parse(options, arguments);
 
 			final Integer port = Integer.valueOf(commandLine.getOptionValue(portOption.getLongOpt(), portDefaultValue));
-			final String dataDirectory = commandLine.getOptionValue(dataDirectoryOption.getLongOpt(), dataDirectoryDefaultValue);
+			final String dataDirectory = commandLine.getOptionValue(dataDirectoryOption.getLongOpt(),
+					dataDirectoryDefaultValue);
 
 			CalciteApplicationOptions calciteApplicationOptions = new CalciteApplicationOptions(port, dataDirectory);
 
