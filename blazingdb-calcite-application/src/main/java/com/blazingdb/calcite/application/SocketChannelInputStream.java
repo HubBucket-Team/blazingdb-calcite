@@ -1,4 +1,4 @@
-package com.blazingdb.protocol.util;
+package com.blazingdb.calcite.application;
 
 import jnr.unixsocket.UnixSocketChannel;
 
