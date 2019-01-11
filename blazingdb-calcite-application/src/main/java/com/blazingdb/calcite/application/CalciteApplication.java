@@ -296,6 +296,8 @@ public class CalciteApplication {
 				if (bytes_read < 0) {
 					// TODO percy error
 					System.err.println("Server: Tried to read from socket, read() returned < 0,  Closing socket.");
+					connectionSocket.close();
+					break;
 				}
 
 				ByteBuffer inputBuffer = ByteBuffer.wrap(buf.array());
@@ -305,6 +307,7 @@ public class CalciteApplication {
 				connectionSocket.write(ByteBuffer.wrap(intToBytes(resultBytes.length)));
 				connectionSocket.write(resultBuffer);
 				// outToClient.flush();
+				connectionSocket.close();
 			} catch (Exception e) {
 				// TODO percy error
 				System.err.println("Exception reading from/writing to socket, e=" + e);
