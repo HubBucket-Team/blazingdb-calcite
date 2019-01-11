@@ -39,7 +39,7 @@ public class UnixService implements Runnable {
     static int MAX_BUFFER_SIZE = 1024*10;
 
     interface Actor {
-        boolean rxready(IService handler);
+        boolean rxready(String argdataDirectory);
     }
 
     static final class ServerActor implements Actor {
@@ -50,7 +50,7 @@ public class UnixService implements Runnable {
             this.channel = channel;
             this.selector = selector;
         }
-        public final boolean rxready() {
+        public final boolean rxready(String argdataDirectory) {
             try {
                 UnixSocketChannel client = channel.accept();
                 client.configureBlocking(false);
@@ -67,7 +67,7 @@ public class UnixService implements Runnable {
             this.channel = channel;
         }
 
-        public final boolean rxready(string argdataDirectory) {
+        public final boolean rxready(String argdataDirectory) {
             try {
                 SocketChannelInputStream receiver = new SocketChannelInputStream(channel);
                 int length = receiver.read();
@@ -195,7 +195,7 @@ public class UnixService implements Runnable {
                     while (iterator.hasNext()) {
                         SelectionKey k = iterator.next();
                         Actor a = (Actor) k.attachment();
-                        if (a.rxready(handler)) {
+                        if (a.rxready(this.dataDirectory)) {
                             running = true;
                         } else {
                             k.cancel();
