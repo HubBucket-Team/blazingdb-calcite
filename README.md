@@ -13,3 +13,7 @@ To set the data directory where store metadata about the database, we use
 To get help about the command line parameters
 
 > $ java -jar /path/to/BlazingCalcite.jar --help
+
+To use verbose mode use next param:
+
+> java -jar /path/to/BlazingCalcite.jar --verbose true

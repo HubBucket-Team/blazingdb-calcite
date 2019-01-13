@@ -45,20 +45,13 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.dbcp.BasicDataSource;
 
+import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import java.nio.ByteBuffer;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import javax.naming.NamingException;
 
 import java.net.HttpURLConnection;
@@ -187,6 +180,21 @@ public class CalciteApplication {
 	public static void main(String[] args) throws IOException {
 		final CalciteApplicationOptions calciteApplicationOptions = parseArguments(args);
 
+		System.out.println("Calcite is running");
+		if (calciteApplicationOptions.isVerboseMode() == false) {
+			System.setOut(new PrintStream(new OutputStream() {
+				public void write(int b) {
+					//DO NOTHING
+				}
+			}));
+
+			System.setErr(new PrintStream(new OutputStream() {
+				public void write(int b) {
+					//DO NOTHING
+				}
+			}));
+		}
+
 		final Integer port = calciteApplicationOptions.port();
 		final String dataDirectory = calciteApplicationOptions.dataDirectory();
 
@@ -208,8 +216,10 @@ public class CalciteApplication {
 	private static CalciteApplicationOptions parseArguments(String[] arguments) {
 		final Options options = new Options();
 
+		final String verboseDefaultValue = "false";
 		final String portDefaultValue = "8891";
 		final String dataDirectoryDefaultValue = "/blazingsql";
+
 
 		final Option portOption = Option.builder("p").required(false).longOpt("port").hasArg().argName("INTEGER")
 				.desc("TCP port for this service").type(Integer.class).build();
@@ -219,6 +229,9 @@ public class CalciteApplication {
 				.argName("PATH").desc("Path to data directory where calcite put" + " the metastore files").build();
 		options.addOption(dataDirectoryOption);
 
+		final Option verboseOption = Option.builder("p").required(false).longOpt("verbose").hasArg().argName("BOOLEAN")
+				.desc("verbose mode").type(Boolean.class).build();
+		options.addOption(verboseOption);
 		try {
 			final CommandLineParser commandLineParser = new DefaultParser();
 			final CommandLine commandLine = commandLineParser.parse(options, arguments);
@@ -226,8 +239,9 @@ public class CalciteApplication {
 			final Integer port = Integer.valueOf(commandLine.getOptionValue(portOption.getLongOpt(), portDefaultValue));
 			final String dataDirectory = commandLine.getOptionValue(dataDirectoryOption.getLongOpt(),
 					dataDirectoryDefaultValue);
+			final Boolean verbose = Boolean.valueOf(commandLine.getOptionValue(verboseOption.getLongOpt(), verboseDefaultValue));
 
-			CalciteApplicationOptions calciteApplicationOptions = new CalciteApplicationOptions(port, dataDirectory);
+			CalciteApplicationOptions calciteApplicationOptions = new CalciteApplicationOptions(port, dataDirectory, verbose);
 
 			return calciteApplicationOptions;
 		} catch (ParseException e) {
@@ -243,10 +257,13 @@ public class CalciteApplication {
 
 		private final Integer port;
 		private final String dataDirectory;
+		private final boolean verbose;
 
-		public CalciteApplicationOptions(final Integer port, final String dataDirectory) {
+
+		public CalciteApplicationOptions(final Integer port, final String dataDirectory, final boolean verbose) {
 			this.port = port;
 			this.dataDirectory = dataDirectory;
+			this.verbose = verbose;
 		}
 
 		public Integer port() {
@@ -256,5 +273,7 @@ public class CalciteApplication {
 		public String dataDirectory() {
 			return dataDirectory;
 		}
+
+		public boolean isVerboseMode() {return verbose; }
 	}
 }
