@@ -120,6 +120,8 @@ public class RelationalAlgebraGenerator {
                     .addRuleInstance(FilterProjectTransposeRule.INSTANCE)
                     .addRuleInstance(
                         FilterJoinRule.JoinConditionPushRule.FILTER_ON_JOIN)
+                    .addRuleInstance(
+	                        FilterJoinRule.JoinConditionPushRule.JOIN)
                     .addRuleInstance(ProjectMergeRule.INSTANCE)
                     .addRuleInstance(FilterMergeRule.INSTANCE)
                     .addRuleInstance(ProjectJoinTransposeRule.INSTANCE)
