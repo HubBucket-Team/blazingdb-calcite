@@ -18,6 +18,7 @@ import org.apache.calcite.rel.rules.FilterMergeRule;
 import org.apache.calcite.rel.rules.FilterProjectTransposeRule;
 import org.apache.calcite.rel.rules.ProjectJoinTransposeRule;
 import org.apache.calcite.rel.rules.ProjectMergeRule;
+import org.apache.calcite.rel.rules.ProjectTableScanRule;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlNode;
@@ -125,6 +126,7 @@ public class RelationalAlgebraGenerator {
                     .addRuleInstance(ProjectMergeRule.INSTANCE)
                     .addRuleInstance(FilterMergeRule.INSTANCE)
                     .addRuleInstance(ProjectJoinTransposeRule.INSTANCE)
+                    .addRuleInstance(ProjectTableScanRule.INSTANCE)
                     //.addRuleInstance(SubQueryRemoveRule.)
                     .build();
 

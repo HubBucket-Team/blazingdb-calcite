@@ -11,13 +11,18 @@ import com.blazingdb.calcite.catalog.domain.CatalogColumnDataType;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.calcite.DataContext;
 import org.apache.calcite.config.CalciteConnectionConfig;
+import org.apache.calcite.linq4j.Enumerable;
 import org.apache.calcite.linq4j.tree.Expression;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
+import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.schema.Function;
+import org.apache.calcite.schema.ProjectableFilterableTable;
 import org.apache.calcite.schema.Schema;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.schema.SchemaVersion;
@@ -31,7 +36,7 @@ import org.apache.calcite.util.ConversionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BlazingTable implements Table {
+public class BlazingTable implements Table, ProjectableFilterableTable  {
 
 	final static Logger LOGGER = LoggerFactory.getLogger(BlazingTable.class);
 
@@ -189,5 +194,11 @@ public class BlazingTable implements Table {
 	@Override
 	public boolean rolledUpColumnValidInsideAgg(String string, SqlCall sc, SqlNode sn, CalciteConnectionConfig ccc) {
 		throw new UnsupportedOperationException("rolledUpColumnValidInsideAgg Not supported yet.");
+	}
+
+	@Override
+	public Enumerable<Object[]> scan(DataContext root, List<RexNode> filters, int[] projects) {
+		//if I am not mistaken we don't need this
+		return null;
 	}
 }
