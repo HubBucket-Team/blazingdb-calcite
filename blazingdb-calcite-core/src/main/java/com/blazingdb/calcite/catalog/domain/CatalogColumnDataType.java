@@ -13,7 +13,8 @@ public enum CatalogColumnDataType {
 	    GDF_DATE64,   	/**< int64_t milliseconds since the UNIX epoch */
 	    GDF_TIMESTAMP,	/**< Exact timestamp encoded with int64 since UNIX epoch (Default unit millisecond) */
 	    GDF_CATEGORY,
-	    GDF_STRING;
+	    GDF_STRING,
+	    GDF_STRING_CATEGORY;
 
 	   public static CatalogColumnDataType fromString(String type) {
 			CatalogColumnDataType dataType = null;
@@ -50,6 +51,9 @@ public enum CatalogColumnDataType {
 				break;
 			case "GDF_STRING":
 				dataType = GDF_STRING;
+				break;
+			case "GDF_STRING_CATEGORY":
+				dataType = GDF_STRING_CATEGORY;
 				break;
 			default:
 				dataType = null;
