@@ -110,6 +110,9 @@ public class BlazingTable implements Table {
 		case GDF_STRING:
 			temp = typeFactory.createSqlType(SqlTypeName.VARCHAR);
 			break;
+		case GDF_STRING_CATEGORY:
+			temp = typeFactory.createSqlType(SqlTypeName.VARCHAR);
+			break;
 		default:
 			temp = null;
 		
