@@ -60,6 +60,7 @@ public class BlazingTable implements Table {
 		// }
 		for(CatalogColumn column : catalogTable.getColumns()) {
 			builder.add(column.getColumnName(),convertToSqlType(column.getColumnDataType(),rdtf));
+			builder.nullable(true);
 		}
 		return builder.build();
 	}
