@@ -125,12 +125,14 @@ public class RelationalAlgebraGenerator {
                         FilterJoinRule.JoinConditionPushRule.FILTER_ON_JOIN)
                     .addRuleInstance(
 	                        FilterJoinRule.JoinConditionPushRule.JOIN)
+
                    .addRuleInstance(ProjectMergeRule.INSTANCE)
                    .addRuleInstance(FilterMergeRule.INSTANCE)
                    .addRuleInstance(ProjectJoinTransposeRule.INSTANCE)
                     //.addRuleInstance(FilterTableScanRule.INSTANCE) //turn this on when we want to enable data skipping
                     .addRuleInstance(ProjectTableScanRule.INSTANCE)
                     
+
                     //.addRuleInstance(SubQueryRemoveRule.)
                     .build();
 
