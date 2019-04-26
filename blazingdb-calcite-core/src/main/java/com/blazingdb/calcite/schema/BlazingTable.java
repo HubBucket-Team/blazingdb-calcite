@@ -201,17 +201,11 @@ public class BlazingTable implements ProjectableFilterableTable {
 		throw new UnsupportedOperationException("rolledUpColumnValidInsideAgg Not supported yet.");
 	}
 
-<<<<<<< HEAD
-	
 
 	@Override
 	public Enumerable<Object[]> scan(DataContext root, List<RexNode> filters, int[] projects) {
 		// TODO Auto-generated method stub
-=======
-	@Override
-	public Enumerable<Object[]> scan(DataContext root, List<RexNode> filters, int[] projects) {
-		//if I am not mistaken we don't need this
->>>>>>> fb3cd7606417dbf0e113c7500805ab1706f90e54
+
 		return null;
 	}
 }
