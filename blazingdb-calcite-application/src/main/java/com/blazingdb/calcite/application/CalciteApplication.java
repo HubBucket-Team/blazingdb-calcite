@@ -196,12 +196,15 @@ public class CalciteApplication {
 			e.printStackTrace();
 		}
 
-		//ApplicationContext.init(); // any api call initializes it actually
-		File unixSocketFile = new File("/tmp/calcite.socket");
-		unixSocketFile.deleteOnExit();
-
-		UnixService service = new UnixService(dataDirectory);
-		service.bind(unixSocketFile);
+		Runnable service = null;
+		
+		if (ProtocolSwitch.TCP == true) {
+			//TODO percy create a tcp runnable service here
+			service = new UnixService(dataDirectory);
+		} else {
+			service = new UnixService(dataDirectory);
+		}
+		
 		new Thread(service).start();
 	}
 

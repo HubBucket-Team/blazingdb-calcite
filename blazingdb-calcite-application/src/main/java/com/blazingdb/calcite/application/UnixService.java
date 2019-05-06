@@ -80,13 +80,25 @@ public class UnixService implements Runnable {
     private UnixServerSocketChannel channel = null;
     private IService handler;
     String dataDirectory;
-
+    private File unixSocketFile = null;
+    
     public UnixService(final String dataDirectory) {
     	this.dataDirectory = dataDirectory;
+    	
+		//ApplicationContext.init(); // any api call initializes it actually
+		unixSocketFile = new File("/tmp/calcite.socket");
+		unixSocketFile.deleteOnExit();
+		
+		try {
+			this.bind();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
-    public void bind(File unixSocket) throws IOException {
-        address = new UnixSocketAddress(unixSocket);
+    private void bind() throws IOException {
+        address = new UnixSocketAddress(this.unixSocketFile);
         channel = UnixServerSocketChannel.open();
     }
 
