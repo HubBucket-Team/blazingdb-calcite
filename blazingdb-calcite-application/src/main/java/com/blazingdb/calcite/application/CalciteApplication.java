@@ -199,10 +199,9 @@ public class CalciteApplication {
 		Runnable service = null;
 		
 		if (ProtocolSwitch.TCP == true) {
-			//TODO percy create a tcp runnable service here
-			service = new UnixService(dataDirectory);
+			service = new TCPService(port, dataDirectory);
 		} else {
-			service = new UnixService(dataDirectory);
+			service = new UnixService("/tmp/calcite.socket", dataDirectory);
 		}
 		
 		new Thread(service).start();

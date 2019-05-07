@@ -79,14 +79,14 @@ public class UnixService implements Runnable {
     private UnixSocketAddress address = null;
     private UnixServerSocketChannel channel = null;
     private IService handler;
-    String dataDirectory;
+    private String dataDirectory;
     private File unixSocketFile = null;
     
-    public UnixService(final String dataDirectory) {
+    public UnixService(final String unixSocketPath, final String dataDirectory) {
     	this.dataDirectory = dataDirectory;
     	
 		//ApplicationContext.init(); // any api call initializes it actually
-		unixSocketFile = new File("/tmp/calcite.socket");
+		unixSocketFile = new File(unixSocketPath);
 		unixSocketFile.deleteOnExit();
 		
 		try {
