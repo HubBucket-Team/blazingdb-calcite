@@ -112,7 +112,7 @@ public class UnixService implements Runnable {
             channel.register(sel, SelectionKey.OP_ACCEPT, new ServerActor(channel, sel));
 
             while (!Thread.currentThread().isInterrupted()) {
-                System.out.println("Waiting for messages");
+                System.out.println("Waiting for messages in unix socket: " + this.unixSocketFile);
                 while (sel.select() > 0) {
                     Set<SelectionKey> keys = sel.selectedKeys();
                     Iterator<SelectionKey> iterator = keys.iterator();

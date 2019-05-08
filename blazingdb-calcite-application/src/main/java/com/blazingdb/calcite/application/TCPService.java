@@ -46,6 +46,8 @@ public class TCPService implements Runnable {
 			byte[] buf_len = new byte[4]; // NOTE always 8 bytes becouse blazing-protocol format
 
 			while (!Thread.currentThread().isInterrupted()) {
+				System.out.println("Waiting for messages in TCP port: " + this.tcpPort.toString());
+				
 				Socket connectionSocket = server.accept();
 				try {
 					int bytes_read = 0;
@@ -76,6 +78,8 @@ public class TCPService implements Runnable {
 					System.err.println("Exception reading from/writing to socket, e=" + e);
 					e.printStackTrace(System.err);
 				}
+				
+				connectionSocket.close();
 			}
 
 			server.close();
