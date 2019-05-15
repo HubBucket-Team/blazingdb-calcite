@@ -13,23 +13,23 @@ import com.blazingdb.protocol.message.calcite.DDLDropTableRequestMessage;
 public class CatalogServiceImpl {
 
 	DatabaseRepository repo;
-	
+	CatalogDatabaseImpl db;
 	public CatalogServiceImpl(final String dataDirectory) {
 		repo = new DatabaseRepository(dataDirectory);
+		db = repo.getDatabase("main");	
 	}
 	
 	public void createTable(DDLCreateTableRequestMessage message) throws Exception{
-		CatalogDatabaseImpl db = repo.getDatabase(message.getDbName());
+		
 		
 		CatalogTableImpl table =  new CatalogTableImpl(message.getName(), db, message.getColumnNames(),message.getColumnTypes());
 		db.addTable(table);
-		repo.updateDatabase(db);
+		//repo.updateDatabase(db);
 	}
 	
 	public void dropTable(DDLDropTableRequestMessage message) throws Exception{
-		CatalogDatabaseImpl db = repo.getDatabase(message.getDbName());
 		db.removeTable(message.getName());
-		repo.updateDatabase(db);
+		//repo.updateDatabase(db);
 
 	}
 	
