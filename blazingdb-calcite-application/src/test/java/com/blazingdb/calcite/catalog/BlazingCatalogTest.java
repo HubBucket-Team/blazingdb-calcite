@@ -192,7 +192,7 @@ public class BlazingCatalogTest {
 		
 		//repo.createTable(table);
 		db.addTable(table);
-		repo.updateDatabase(db);
+	//	repo.updateDatabase(db);
 		
 		db = repo.getDatabase(dbId);
 		System.out.println("The db to delete id is " +  dbId + " it has" + db.getTables().size());
@@ -203,7 +203,7 @@ public class BlazingCatalogTest {
 		}
 		table = db.getTable("table-1");
 		db.removeTable(table);
-		repo.updateDatabase(db);
+		//repo.updateDatabase(db);
 
 		
 		db = repo.getDatabase(dbId); //this updates the hibernate object 
@@ -231,7 +231,7 @@ public class BlazingCatalogTest {
 		CatalogTableImpl table = new CatalogTableImpl("table1",db,columns);
 		
 		db.addTable(table);
-		repo.updateDatabase(db);
+	//	repo.updateDatabase(db);
 	
 		final long endTime = System.currentTimeMillis();
 

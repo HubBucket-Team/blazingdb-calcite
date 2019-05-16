@@ -25,14 +25,8 @@ public class ApplicationContext {
 	 */
 	private CatalogServiceImpl catalogService;
 	//assuming just one database for now
-	/**
-	 * Stores the schema with all the tables and their definitions.
-	 */
-	private BlazingSchema schema;
-	/**
-	 * Used to take sql and convert it to optimied relational algebra logical plans.
-	 */
-	RelationalAlgebraGenerator relationalAlgebraGenerator;
+
+
 	private static ApplicationContext instance = null;
 
 	/**
@@ -41,21 +35,13 @@ public class ApplicationContext {
 	 */
 	private ApplicationContext(final String dataDirectory) {
 		catalogService = new CatalogServiceImpl(dataDirectory);
-		CatalogDatabaseImpl db = catalogService.getDatabase("main");
-		if(db == null) {
-			db = new CatalogDatabaseImpl("main");
-			catalogService.createDatabase(db);
-		}
-		db = catalogService.getDatabase("main");
-		schema = new BlazingSchema(db);
-		relationalAlgebraGenerator = new RelationalAlgebraGenerator(schema);
-
+	
 	}
 	/**
 	 * Initializes the application context by calling the private constructor if necessary
 	 * before any operations occur.
 	 */
-	public static void init(final String dataDirectory) {
+	public static synchronized void init(final String dataDirectory) {
 		if(instance == null) {
 			instance = new ApplicationContext(dataDirectory);
 		}
@@ -92,27 +78,10 @@ public class ApplicationContext {
 	 * @return {@link #relationalAlgebraGenerator}
 	 */
 	private synchronized RelationalAlgebraGenerator getAlgebraGenerator() {
-		return this.relationalAlgebraGenerator;
+		return catalogService.getAlgebraGenerator();
 	}
 
-	/**
-	 * Refreshes the schema after ddl has occurred. The application context needs to reload
-	 * every time we update the ddl right now. Synchronizes access to avoid two threads doing this at once.
-	 * 
-	 */
-	private synchronized void updateSchema() {
-		schema = new BlazingSchema(catalogService.getDatabase("main"));
-		relationalAlgebraGenerator = new RelationalAlgebraGenerator(schema);
 
-	}
 
-	/**
-	 * The public api for update the context. Calls the synchronized method {@link #updateSchema()}
-	 */
-	public static void updateContext(final String dataDirectory) {
-		// TODO Auto-generated method stub
-		init(dataDirectory);
-		instance.updateSchema();
-	}
 
 }
