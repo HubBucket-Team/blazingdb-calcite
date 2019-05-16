@@ -143,6 +143,7 @@ public class UnixService implements Runnable {
 				DDLResponseMessage responsePayload = new DDLResponseMessage(chronometer.elapsed(MILLISECONDS));
 				response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
 			} catch (Exception e) {
+				e.printStackTrace();
 				ResponseErrorMessage error = new ResponseErrorMessage("Could not create table");
 				response = new ResponseMessage(Status.Error, error.getBufferData());
 
@@ -159,6 +160,7 @@ public class UnixService implements Runnable {
 				response = new ResponseMessage(Status.Success, responsePayload.getBufferData());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
+				e.printStackTrace();
 				ResponseErrorMessage error = new ResponseErrorMessage("Could not drop table");
 				response = new ResponseMessage(Status.Error, error.getBufferData());
 
