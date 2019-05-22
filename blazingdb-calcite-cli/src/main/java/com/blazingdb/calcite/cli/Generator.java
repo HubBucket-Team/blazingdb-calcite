@@ -51,12 +51,12 @@ public class Generator {
                 {
                     DDLDropTableRequestMessage message = new DDLDropTableRequestMessage(name, dbName);
                     ApplicationContext.getCatalogService(dataDirectory).dropTable(message);
-                    
+                    ApplicationContext.updateContext(dataDirectory);
                 }
                 {
                     DDLCreateTableRequestMessage message = new DDLCreateTableRequestMessage(columnNames, types, name, dbName);
                     ApplicationContext.getCatalogService(dataDirectory).createTable(message);
-                    
+                    ApplicationContext.updateContext(dataDirectory);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
