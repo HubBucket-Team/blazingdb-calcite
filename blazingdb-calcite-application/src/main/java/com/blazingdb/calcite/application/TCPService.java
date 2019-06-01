@@ -9,6 +9,8 @@ package com.blazingdb.calcite.application;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.io.DataInputStream;
@@ -68,22 +70,32 @@ public class TCPService implements Runnable {
 					
 					byte[] aa = intToBytes(resultBytes.length);
 					
+					
+					
 					//connectionSocket.getOutputStream().write(aa );
+		
 					
-				    for (byte i : aa) {
-							System.out.println("envio tamanioooo : " + String.valueOf(i));
+						int value = resultBytes.length;
+				        ByteBuffer mybuffer = ByteBuffer.allocate(4);
+				        mybuffer.order(ByteOrder.LITTLE_ENDIAN);
+				        mybuffer.putInt(value);
+				        mybuffer.rewind();
+				        byte[] mymyresultBytes = mybuffer.array();
+				        connectionSocket.getOutputStream().write(mymyresultBytes);
+				    
 
-							//connectionSocket.getOutputStream().write(resultBytes);
-					    	connectionSocket.getOutputStream().write(i);
-				        }
 					
+				      connectionSocket.getOutputStream().write(resultBytes);
+					/*
 				    for (byte i : resultBytes) {
 						System.out.println("sendinnngggg byte : " + String.valueOf(i));
 
-						//connectionSocket.getOutputStream().write(resultBytes);
+						
 				    	connectionSocket.getOutputStream().write(i);
 			        }
-				    
+				*/
+				      
+				      
 					// outToClient.flush();
 				} catch (Exception e) {
 					// TODO percy error
