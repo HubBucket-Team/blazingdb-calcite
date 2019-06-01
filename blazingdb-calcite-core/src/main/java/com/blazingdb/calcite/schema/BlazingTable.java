@@ -60,6 +60,7 @@ public class BlazingTable implements Table {
 		// }
 		for(CatalogColumn column : catalogTable.getColumns()) {
 			builder.add(column.getColumnName(),convertToSqlType(column.getColumnDataType(),rdtf));
+			builder.nullable(true);
 		}
 		return builder.build();
 	}
@@ -108,6 +109,9 @@ public class BlazingTable implements Table {
 			temp = null;
 			break;
 		case GDF_STRING:
+			temp = typeFactory.createSqlType(SqlTypeName.VARCHAR);
+			break;
+		case GDF_STRING_CATEGORY:
 			temp = typeFactory.createSqlType(SqlTypeName.VARCHAR);
 			break;
 		default:
