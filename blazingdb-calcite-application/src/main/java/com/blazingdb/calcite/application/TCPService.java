@@ -66,7 +66,16 @@ public class TCPService implements Runnable {
 
 					System.out.println("NOOOOOOOOOOOOOOOOOOOOOO LEN 2:  " + String.valueOf(resultBytes.length));
 					
-					connectionSocket.getOutputStream().write(intToBytes(resultBytes.length));
+					byte[] aa = intToBytes(resultBytes.length);
+					
+					//connectionSocket.getOutputStream().write(aa );
+					
+				    for (byte i : aa) {
+							System.out.println("envio tamanioooo : " + String.valueOf(i));
+
+							//connectionSocket.getOutputStream().write(resultBytes);
+					    	connectionSocket.getOutputStream().write(i);
+				        }
 					
 				    for (byte i : resultBytes) {
 						System.out.println("sendinnngggg byte : " + String.valueOf(i));
