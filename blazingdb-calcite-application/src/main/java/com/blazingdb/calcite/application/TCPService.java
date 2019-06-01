@@ -67,7 +67,14 @@ public class TCPService implements Runnable {
 					System.out.println("NOOOOOOOOOOOOOOOOOOOOOO LEN 2:  " + String.valueOf(resultBytes.length));
 					
 					connectionSocket.getOutputStream().write(intToBytes(resultBytes.length));
-					connectionSocket.getOutputStream().write(resultBytes);
+					
+				    for (byte i : resultBytes) {
+						System.out.println("sendinnngggg byte : " + String.valueOf(i));
+
+						//connectionSocket.getOutputStream().write(resultBytes);
+				    	connectionSocket.getOutputStream().write(i);
+			        }
+				    
 					// outToClient.flush();
 				} catch (Exception e) {
 					// TODO percy error
