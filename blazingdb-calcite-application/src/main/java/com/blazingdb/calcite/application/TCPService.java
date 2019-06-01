@@ -11,6 +11,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import java.nio.ByteBuffer;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -42,34 +43,29 @@ public class TCPService implements Runnable {
 		try {
 			ServerSocket server = new ServerSocket(this.tcpPort);
 
-			byte[] buf = new byte[1024 * 8];
-			byte[] buf_len = new byte[4]; // NOTE always 8 bytes becouse blazing-protocol format
-
 			while (!Thread.currentThread().isInterrupted()) {
 				System.out.println("Waiting for messages in TCP port: " + this.tcpPort.toString());
 				
 				Socket connectionSocket = server.accept();
 				try {
-					int bytes_read = 0;
-					bytes_read = connectionSocket.getInputStream().read(buf_len, 0, buf_len.length);
-
+					DataInputStream dataIn = new DataInputStream(connectionSocket.getInputStream());
+					
+					byte[] buf_len = new byte[4]; // NOTE always 8 bytes becouse blazing-protocol format
+					dataIn.readFully(buf_len);
 					int len = bytesToInt(buf_len);
+					
+					System.out.println("NOOOOOOOOOOOOOOOOOOOOOO LEN 1:  " + String.valueOf(len));
 
-					// This call to read() will wait forever, until the
-					// program on the other side either sends some data,
-					// or closes the socket.
-					bytes_read = connectionSocket.getInputStream().read(buf, 0, len);
-
-					// If the socket is closed, sockInput.read() will return -1.
-					if (bytes_read < 0) {
-						// TODO percy error
-						System.err.println("Server: Tried to read from socket, read() returned < 0,  Closing socket.");
-					}
+					byte[] buf = new byte[len];
+					dataIn.readFully(buf);
 
 					ByteBuffer inputBuffer = ByteBuffer.wrap(buf);
 					ByteBuffer resultBuffer = CalciteService.processRequest(inputBuffer, this.dataDirectory);
 
 					byte[] resultBytes = resultBuffer.array();
+
+					System.out.println("NOOOOOOOOOOOOOOOOOOOOOO LEN 2:  " + String.valueOf(resultBytes.length));
+					
 					connectionSocket.getOutputStream().write(intToBytes(resultBytes.length));
 					connectionSocket.getOutputStream().write(resultBytes);
 					// outToClient.flush();
