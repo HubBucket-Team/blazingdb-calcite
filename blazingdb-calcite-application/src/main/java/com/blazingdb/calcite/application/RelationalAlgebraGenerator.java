@@ -193,6 +193,8 @@ public class RelationalAlgebraGenerator {
     System.out.println("optimized");
     System.out.println(RelOptUtil.toString(node));
 
+    planner.close();
+
     return node;
   }
 }
