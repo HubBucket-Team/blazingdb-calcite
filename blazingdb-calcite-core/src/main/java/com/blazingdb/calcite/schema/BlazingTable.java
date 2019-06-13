@@ -102,6 +102,9 @@ public class BlazingTable implements ProjectableFilterableTable {
 		case GDF_FLOAT64 :
 			temp = typeFactory.createSqlType(SqlTypeName.DOUBLE);
 			break;
+		case GDF_BOOL8 :
+			temp = typeFactory.createSqlType(SqlTypeName.BOOLEAN);
+			break;
 		case GDF_DATE32 :
 			temp = typeFactory.createSqlType(SqlTypeName.DATE);
 			break;

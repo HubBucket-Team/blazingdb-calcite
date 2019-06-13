@@ -8,7 +8,8 @@ public enum CatalogColumnDataType {
 	    GDF_INT32,
 	    GDF_INT64,
 	    GDF_FLOAT32,
-	    GDF_FLOAT64,
+		GDF_FLOAT64,
+		GDF_BOOL8,
 	    GDF_DATE32,   	/**< int32_t days since the UNIX epoch */
 	    GDF_DATE64,   	/**< int64_t milliseconds since the UNIX epoch */
 	    GDF_TIMESTAMP,	/**< Exact timestamp encoded with int64 since UNIX epoch (Default unit millisecond) */
@@ -36,6 +37,9 @@ public enum CatalogColumnDataType {
 				break;
 			case "GDF_FLOAT64":
 				dataType = GDF_FLOAT64;
+				break;
+			case "GDF_BOOL8":
+				dataType = GDF_BOOL8;
 				break;
 			case "GDF_DATE32":
 				dataType = GDF_DATE32;
