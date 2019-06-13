@@ -16,8 +16,11 @@ import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.rules.FilterJoinRule;
 import org.apache.calcite.rel.rules.FilterMergeRule;
 import org.apache.calcite.rel.rules.FilterProjectTransposeRule;
+import org.apache.calcite.rel.rules.FilterTableScanRule;
+import org.apache.calcite.rel.rules.ProjectFilterTransposeRule;
 import org.apache.calcite.rel.rules.ProjectJoinTransposeRule;
 import org.apache.calcite.rel.rules.ProjectMergeRule;
+import org.apache.calcite.rel.rules.ProjectTableScanRule;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlNode;
@@ -117,14 +120,19 @@ public class RelationalAlgebraGenerator {
 
       // these were the rules i found in the foo code from BlazingSQLParser
       program = new HepProgramBuilder()
-                    .addRuleInstance(FilterProjectTransposeRule.INSTANCE)
+                    .addRuleInstance(ProjectFilterTransposeRule.INSTANCE)
                     .addRuleInstance(
                         FilterJoinRule.JoinConditionPushRule.FILTER_ON_JOIN)
                     .addRuleInstance(
 	                        FilterJoinRule.JoinConditionPushRule.JOIN)
-                    .addRuleInstance(ProjectMergeRule.INSTANCE)
-                    .addRuleInstance(FilterMergeRule.INSTANCE)
-                    .addRuleInstance(ProjectJoinTransposeRule.INSTANCE)
+
+                   .addRuleInstance(ProjectMergeRule.INSTANCE)
+                   .addRuleInstance(FilterMergeRule.INSTANCE)
+                   .addRuleInstance(ProjectJoinTransposeRule.INSTANCE)
+                    //.addRuleInstance(FilterTableScanRule.INSTANCE) //turn this on when we want to enable data skipping
+                    .addRuleInstance(ProjectTableScanRule.INSTANCE)
+                    
+
                     //.addRuleInstance(SubQueryRemoveRule.)
                     .build();
 
@@ -184,6 +192,8 @@ public class RelationalAlgebraGenerator {
     node = hepPlanner.findBestExp();
     System.out.println("optimized");
     System.out.println(RelOptUtil.toString(node));
+
+    planner.close();
 
     return node;
   }
