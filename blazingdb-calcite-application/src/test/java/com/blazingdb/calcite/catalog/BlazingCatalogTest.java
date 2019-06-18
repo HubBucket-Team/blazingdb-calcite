@@ -223,10 +223,12 @@ public class BlazingCatalogTest {
 	
 		CatalogColumnImpl column1 = new CatalogColumnImpl("col1",CatalogColumnDataType.GDF_INT64, 1);
 		CatalogColumnImpl column2 = new CatalogColumnImpl("col2",CatalogColumnDataType.GDF_INT32, 2);
-	
+		CatalogColumnImpl column3 = new CatalogColumnImpl("col3",CatalogColumnDataType.GDF_INT32, 2);
+		
 		List<CatalogColumnImpl> columns = new ArrayList<CatalogColumnImpl>();
 		columns.add(column1);
 		columns.add(column2);
+		columns.add(column3);
 		
 		CatalogTableImpl table = new CatalogTableImpl("table1",db,columns);
 		
@@ -250,7 +252,7 @@ public class BlazingCatalogTest {
 		}
 		RelationalAlgebraGenerator algebraGen = new RelationalAlgebraGenerator(schema);
 		
-		RelNode node = algebraGen.getRelationalAlgebra("select *, col1 * col2 from testdb.table1");
+		RelNode node = algebraGen.getRelationalAlgebra("select col1 + 2 from testdb.table1 where col2 > 4");
 		
 		repo.dropDatabase(db);
 		//TODO: some kind of assertion that we got the reight relational algebra
