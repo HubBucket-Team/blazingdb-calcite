@@ -56,8 +56,6 @@ public class TCPService implements Runnable {
 					dataIn.readFully(buf_len);
 					int len = bytesToInt(buf_len);
 					
-					System.out.println("NOOOOOOOOOOOOOOOOOOOOOO LEN 1:  " + String.valueOf(len));
-
 					byte[] buf = new byte[len];
 					dataIn.readFully(buf);
 
@@ -66,8 +64,6 @@ public class TCPService implements Runnable {
 
 					byte[] resultBytes = resultBuffer.array();
 
-					System.out.println("NOOOOOOOOOOOOOOOOOOOOOO LEN 2:  " + String.valueOf(resultBytes.length));
-					
 					byte[] aa = intToBytes(resultBytes.length);
 					
 					
