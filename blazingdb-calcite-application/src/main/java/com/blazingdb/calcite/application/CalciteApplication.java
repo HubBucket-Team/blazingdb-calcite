@@ -187,7 +187,6 @@ public class CalciteApplication {
 	public static void main(String[] args) throws IOException {
 		final CalciteApplicationOptions calciteApplicationOptions = parseArguments(args);
 
-		final Integer port = calciteApplicationOptions.port();
 		final String dataDirectory = calciteApplicationOptions.dataDirectory();
 
 		try {
@@ -196,39 +195,66 @@ public class CalciteApplication {
 			e.printStackTrace();
 		}
 
-		//ApplicationContext.init(); // any api call initializes it actually
-		File unixSocketFile = new File("/tmp/calcite.socket");
-		unixSocketFile.deleteOnExit();
-
-		UnixService service = new UnixService(dataDirectory);
-		service.bind(unixSocketFile);
+		Runnable service = null;
+		
+		final boolean isTCP = (calciteApplicationOptions.connectionType() == CalciteApplicationOptions.ConnectionType.TCP);
+		
+		if (isTCP == true) {
+			final Integer tcpPort = calciteApplicationOptions.tcpPort();
+			service = new TCPService(tcpPort, dataDirectory);
+		} else {
+			final String unixSocketPath = calciteApplicationOptions.unixSocketPath();
+			service = new UnixService(unixSocketPath, dataDirectory);
+		}
+		
 		new Thread(service).start();
 	}
 
 	private static CalciteApplicationOptions parseArguments(String[] arguments) {
 		final Options options = new Options();
 
-		final String portDefaultValue = "8891";
 		final String dataDirectoryDefaultValue = "/blazingsql";
-
-		final Option portOption = Option.builder("p").required(false).longOpt("port").hasArg().argName("INTEGER")
-				.desc("TCP port for this service").type(Integer.class).build();
-		options.addOption(portOption);
-
 		final Option dataDirectoryOption = Option.builder("d").required(false).longOpt("data_directory").hasArg()
 				.argName("PATH").desc("Path to data directory where calcite put" + " the metastore files").build();
 		options.addOption(dataDirectoryOption);
+
+		final String tcpPortDefaultValue = "8891";
+		final Option tcpPortOption = Option.builder("p").required(false).longOpt("port").hasArg().argName("INTEGER")
+				.desc("TCP port for this service").type(Integer.class).build();
+		options.addOption(tcpPortOption);
+
+		final String unixSocketPathDefaultValue = "/tmp/calcite.socket";
+		final Option unixSocketPathOption = Option.builder("u").required(false).longOpt("unix_socket_path").hasArg().argName("FILE PATH STRING")
+				.desc("Unix socket file path for this service").build();
+		options.addOption(unixSocketPathOption);
 
 		try {
 			final CommandLineParser commandLineParser = new DefaultParser();
 			final CommandLine commandLine = commandLineParser.parse(options, arguments);
 
-			final Integer port = Integer.valueOf(commandLine.getOptionValue(portOption.getLongOpt(), portDefaultValue));
 			final String dataDirectory = commandLine.getOptionValue(dataDirectoryOption.getLongOpt(),
 					dataDirectoryDefaultValue);
 
-			CalciteApplicationOptions calciteApplicationOptions = new CalciteApplicationOptions(port, dataDirectory);
+			final Integer tcpPort = Integer.valueOf(commandLine.getOptionValue(tcpPortOption.getLongOpt(), tcpPortDefaultValue));
+			
+			final String unixSocketPath = commandLine.getOptionValue(unixSocketPathOption.getLongOpt(),
+					unixSocketPathDefaultValue);
 
+			final boolean hasTCPOpt = commandLine.hasOption("p");
+			final boolean hasUnixSocketOpt = commandLine.hasOption("u");
+			
+			final boolean hasTCPOnly = (hasTCPOpt == true && hasUnixSocketOpt == false);
+			final boolean hasEmptyProtocolArgs = (hasTCPOpt == false && hasUnixSocketOpt == false);
+			final boolean isTCP = (hasTCPOnly == true && hasEmptyProtocolArgs == false);
+			
+			CalciteApplicationOptions calciteApplicationOptions = null;
+			
+			if (isTCP) {
+				calciteApplicationOptions = new CalciteApplicationOptions(tcpPort, dataDirectory);
+			} else {
+				calciteApplicationOptions = new CalciteApplicationOptions(unixSocketPath, dataDirectory);
+			}
+			
 			return calciteApplicationOptions;
 		} catch (ParseException e) {
 			System.out.println(e);
@@ -238,19 +264,43 @@ public class CalciteApplication {
 			return null;
 		}
 	}
-
+	
 	private static class CalciteApplicationOptions {
-
-		private final Integer port;
+		public static enum ConnectionType {
+			UNIX_SOCKET,
+			TCP
+		}
+		
+		private String unixSocketPath = null;
+		private Integer tcpPort = null;
 		private final String dataDirectory;
 
-		public CalciteApplicationOptions(final Integer port, final String dataDirectory) {
-			this.port = port;
+		//ctor for TCP
+		public CalciteApplicationOptions(final Integer tcpPort, final String dataDirectory) {
+			this.tcpPort = tcpPort;
 			this.dataDirectory = dataDirectory;
 		}
+		
+		//ctor for Unix Socket
+		public CalciteApplicationOptions(final String unixSocketPath, final String dataDirectory) {
+			this.unixSocketPath = unixSocketPath;
+			this.dataDirectory = dataDirectory;
+		}
+		
+		public ConnectionType connectionType() {
+			if (this.unixSocketPath == null && this.tcpPort != null) {
+				return ConnectionType.TCP;
+			}
+			
+			return ConnectionType.UNIX_SOCKET;
+		}
+		
+		public String unixSocketPath() {
+			return this.unixSocketPath;
+		}
 
-		public Integer port() {
-			return this.port;
+		public Integer tcpPort() {
+			return this.tcpPort;
 		}
 
 		public String dataDirectory() {
