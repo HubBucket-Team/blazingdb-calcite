@@ -3,6 +3,7 @@ package com.blazingdb.calcite.catalog.domain;
 public enum CatalogColumnDataType {
 
 	//TODO: handle situations where our column type is timestamp of not the default millisecond resolution
+		GDF_invalid,
 		GDF_INT8,
 	    GDF_INT16,
 	    GDF_INT32,
@@ -20,6 +21,9 @@ public enum CatalogColumnDataType {
 	   public static CatalogColumnDataType fromString(String type) {
 			CatalogColumnDataType dataType = null;
 		   switch(type) {
+			case "GDF_invalid":
+				dataType = GDF_invalid;
+				break;
 			case "GDF_INT8":
 				dataType = GDF_INT8;
 				break;
