@@ -252,7 +252,7 @@ public class BlazingCatalogTest {
 		}
 		RelationalAlgebraGenerator algebraGen = new RelationalAlgebraGenerator(schema);
 		
-		RelNode node = algebraGen.getRelationalAlgebra("select col1 + 2 from testdb.table1 where col2 > 4");
+		RelNode node = algebraGen.getRelationalAlgebra("select col1 + 2 from table1 where col2 > 4");
 		
 		repo.dropDatabase(db);
 		//TODO: some kind of assertion that we got the reight relational algebra

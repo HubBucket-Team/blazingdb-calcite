@@ -88,10 +88,10 @@ public class RelationalAlgebraGenerator {
       CalciteConnection calciteConnection =
           connection.unwrap(CalciteConnection.class);
       SchemaPlus schema = calciteConnection.getRootSchema();
-
-
+      
       schema.add(newSchema.getName(), newSchema);
-
+      calciteConnection.setSchema(newSchema.getName());
+      
       // schema.add("EMP", table);
       List<String> defaultSchema = new ArrayList<String>();
       defaultSchema.add(newSchema.getName());
