@@ -87,10 +87,12 @@ public class RelationalAlgebraGenerator {
           DriverManager.getConnection("jdbc:calcite:", info);
       CalciteConnection calciteConnection =
           connection.unwrap(CalciteConnection.class);
+      calciteConnection.setSchema(newSchema.getName());
+      
       SchemaPlus schema = calciteConnection.getRootSchema();
       
       schema.add(newSchema.getName(), newSchema);
-      calciteConnection.setSchema(newSchema.getName());
+      
       
       // schema.add("EMP", table);
       List<String> defaultSchema = new ArrayList<String>();
@@ -101,7 +103,7 @@ public class RelationalAlgebraGenerator {
       List<SqlOperatorTable> sqlOperatorTables = new ArrayList<>();
       sqlOperatorTables.add(SqlStdOperatorTable.instance());
       sqlOperatorTables.add(new CalciteCatalogReader(
-          CalciteSchema.from(schema),
+          CalciteSchema.from(schema.getSubSchema(newSchema.getName())),
           defaultSchema,
           new JavaTypeFactoryImpl(RelDataTypeSystem.DEFAULT),
           new CalciteConnectionConfigImpl(props)));
@@ -109,7 +111,7 @@ public class RelationalAlgebraGenerator {
 
       config =
           Frameworks.newConfigBuilder()
-              .defaultSchema(schema)
+              .defaultSchema(schema.getSubSchema(newSchema.getName()))
               .parserConfig(SqlParser.configBuilder().setLex(Lex.MYSQL).build())
               .operatorTable(new ChainedSqlOperatorTable(sqlOperatorTables))
               .build();
