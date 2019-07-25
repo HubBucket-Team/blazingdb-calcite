@@ -216,7 +216,7 @@ public class BlazingCatalogTest {
 		final long startTime = System.currentTimeMillis();
 		
 		
-		CatalogDatabaseImpl db = new CatalogDatabaseImpl("testdb");
+		CatalogDatabaseImpl db = new CatalogDatabaseImpl("main");
 
 		repo.createDatabase(db);
 		dbId = db.getId();
@@ -252,7 +252,7 @@ public class BlazingCatalogTest {
 		}
 		RelationalAlgebraGenerator algebraGen = new RelationalAlgebraGenerator(schema);
 		
-		RelNode node = algebraGen.getRelationalAlgebra("select col1 + 2 from table1 where col2 > 4");
+		RelNode node = algebraGen.getRelationalAlgebra("select col1 + 2 from `table1` where col2 > 4");
 		
 		repo.dropDatabase(db);
 		//TODO: some kind of assertion that we got the reight relational algebra
