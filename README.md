@@ -1,12 +1,12 @@
-# BlazingDB Calcite
+# <div align="left"><img src="img/blazingSQL.png" width="200px"/>&nbsp;BlazingSQL</div>
 
-# How to run Calcite Application
+# BlazingSQL Apache Calcite Application
 
-To launch calcite-application with default arguments just run
+The Apache Calcite Application is a java service which uses [Apache Calcite](https://calcite.apache.org/) to perform query parsing, query validation and query optimization for the BlazingSQL engine.
 
-```shell-script
-java -jar BlazingCalcite.jar -p CALCITE_PROTOCOL_TCP_PORT --data_directory=DIR_PATH_WHERE_IS_THE_H2_CATALOG_DATABASE
-
-#Example for localhost:
-java -jar BlazingCalcite.jar -p 8890 --data_directory=/blazingsql
-```
+For more information about the BlazingSQL engine please see our [main repo](https://github.com/BlazingDB/pyBlazing). There you will find the following information:
+- Getting started info
+- How to use BlazingSQL
+- Build instructions
+- Contribution Guide
+- How to file an issue
