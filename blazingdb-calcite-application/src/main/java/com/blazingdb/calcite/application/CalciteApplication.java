@@ -201,7 +201,7 @@ public class CalciteApplication {
 		
 		if (isTCP == true) {
 			final Integer tcpPort = calciteApplicationOptions.tcpPort();
-			service = new TCPService(tcpPort, dataDirectory);
+			service = new TCPService(tcpPort, dataDirectory, calciteApplicationOptions.getOrchestratorIp(), calciteApplicationOptions.getOrchestratorPort());
 		} else {
 			final String unixSocketPath = calciteApplicationOptions.unixSocketPath();
 			service = new UnixService(unixSocketPath, dataDirectory);
@@ -228,6 +228,16 @@ public class CalciteApplication {
 				.desc("Unix socket file path for this service").build();
 		options.addOption(unixSocketPathOption);
 
+		final String orchestratorIpDefaultValue = "127.0.0.1";
+		final Option orchestratorIp = Option.builder("oip").required(false).longOpt("orch_ip").hasArg()
+				.argName("HOSTNAME").desc("Orchestrator hostname").build();
+		options.addOption(orchestratorIp);
+
+		final String orchestratorPortDefaultValue = "8889";
+		final Option orchestratorPort = Option.builder("oport").required(false).longOpt("orch_port").hasArg()
+				.argName("INTEGER").desc("Orchestrator port").build();
+		options.addOption(orchestratorPort);
+
 		try {
 			final CommandLineParser commandLineParser = new DefaultParser();
 			final CommandLine commandLine = commandLineParser.parse(options, arguments);
@@ -250,7 +260,10 @@ public class CalciteApplication {
 			CalciteApplicationOptions calciteApplicationOptions = null;
 			
 			if (isTCP) {
-				calciteApplicationOptions = new CalciteApplicationOptions(tcpPort, dataDirectory);
+				final String orchIp = commandLine.getOptionValue(orchestratorIp.getLongOpt(), orchestratorIpDefaultValue);
+				final Integer orchPort = Integer.valueOf(commandLine.getOptionValue(orchestratorPort.getLongOpt(), orchestratorPortDefaultValue));
+
+				calciteApplicationOptions = new CalciteApplicationOptions(tcpPort, dataDirectory, orchIp, orchPort);
 			} else {
 				calciteApplicationOptions = new CalciteApplicationOptions(unixSocketPath, dataDirectory);
 			}
@@ -274,11 +287,15 @@ public class CalciteApplication {
 		private String unixSocketPath = null;
 		private Integer tcpPort = null;
 		private final String dataDirectory;
+		private String  orchestratorIp = null;
+		private Integer orchestratorPort = null;
 
 		//ctor for TCP
-		public CalciteApplicationOptions(final Integer tcpPort, final String dataDirectory) {
+		public CalciteApplicationOptions(final Integer tcpPort, final String dataDirectory, final String orchestratorIp, final Integer orchestratorPort) {
 			this.tcpPort = tcpPort;
 			this.dataDirectory = dataDirectory;
+			this.orchestratorIp = orchestratorIp;
+			this.orchestratorPort = orchestratorPort;
 		}
 		
 		//ctor for Unix Socket
@@ -305,6 +322,14 @@ public class CalciteApplication {
 
 		public String dataDirectory() {
 			return dataDirectory;
+		}
+
+		public String getOrchestratorIp() {
+			return orchestratorIp;
+		}
+
+		public Integer getOrchestratorPort() {
+			return orchestratorPort;
 		}
 	}
 }

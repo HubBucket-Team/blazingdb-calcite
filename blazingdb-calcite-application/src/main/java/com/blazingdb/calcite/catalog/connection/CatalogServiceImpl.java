@@ -1,6 +1,9 @@
 package com.blazingdb.calcite.catalog.connection;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import com.blazingdb.calcite.catalog.domain.CatalogDatabaseImpl;
 import com.blazingdb.calcite.catalog.domain.CatalogSchemaImpl;
@@ -13,8 +16,9 @@ import com.blazingdb.protocol.message.calcite.DDLDropTableRequestMessage;
 public class CatalogServiceImpl {
 
 	DatabaseRepository repo;
-	
+	Set<String> dbNames;
 	public CatalogServiceImpl(final String dataDirectory) {
+		dbNames = new HashSet<>();
 		repo = new DatabaseRepository(dataDirectory);
 	}
 	
@@ -30,7 +34,16 @@ public class CatalogServiceImpl {
 		CatalogDatabaseImpl db = repo.getDatabase(message.getDbName());
 		db.removeTable(message.getName());
 		repo.updateDatabase(db);
+	}
 
+	public void dropAllTables() {
+		for (String dbName : this.dbNames) {
+			CatalogDatabaseImpl db = repo.getDatabase(dbName);
+			for (String tableName : db.getTableNames()) {
+				db.removeTable(tableName);
+			}
+			repo.updateDatabase(db);
+		}
 	}
 	
 	public CatalogSchemaImpl getSchema(String schemaName) {
@@ -57,7 +70,7 @@ public class CatalogServiceImpl {
 
 	public void createDatabase(CatalogDatabaseImpl db) {
 		repo.createDatabase(db);
-		
+		dbNames.add(db.getDatabaseName());
 	}
 
 }

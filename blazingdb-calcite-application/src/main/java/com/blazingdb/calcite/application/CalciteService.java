@@ -5,6 +5,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import com.blazingdb.protocol.IService;
 import org.apache.calcite.plan.RelOptUtil;
 
 import com.blazingdb.calcite.application.Chrono.Chronometer;
@@ -23,6 +24,22 @@ import blazingdb.protocol.calcite.MessageType;
 //NOTE this is a static class only thats why the ctr is private and the def is final
 public final class CalciteService {
 	private CalciteService() {
+	}
+
+
+	public static  ByteBuffer processRequestSample(ByteBuffer buffer, final String dataDirectory) {
+		DMLRequestMessage request = new DMLRequestMessage(buffer);
+		System.out.println("##ByteBuffer statement_:" + request.getQuery());
+
+		String logicalPlan = "LogicalUnion(all=[false])\n" +
+				"  LogicalUnion(all=[false])\n" +
+				"    LogicalProject(EXPR$0=[$1], join_x=[$0])\n" +
+				"      LogicalAggregate(group=[{0}], EXPR$0=[SUM($1)])\n" +
+				"        LogicalProject(join_x=[$4], join_x0=[$7])\n" +
+				"          LogicalJoin(condition=[=($7, $0)], joinType=[inner])\n";
+
+		DMLResponseMessage response = new DMLResponseMessage(logicalPlan, 0);
+		return response.getBufferData();
 	}
 
 	public static ByteBuffer processRequest(ByteBuffer buffer, final String dataDirectory) {
@@ -65,7 +82,6 @@ public final class CalciteService {
 			} catch (Exception e) {
 				ResponseErrorMessage error = new ResponseErrorMessage("Could not create table");
 				response = new ResponseMessage(Status.Error, error.getBufferData());
-
 			}
 			return response.getBufferData();
 		} else if (requestMessage.getHeaderType() == MessageType.DDL_DROP_TABLE) {
