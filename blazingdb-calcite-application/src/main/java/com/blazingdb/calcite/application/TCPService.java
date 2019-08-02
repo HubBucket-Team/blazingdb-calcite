@@ -52,7 +52,7 @@ public class TCPService implements Runnable {
 		try {
 			this.synchronizeSchema();
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("schema synchronization with Orchestrator failed");
 		}
 	}
 
@@ -65,23 +65,25 @@ public class TCPService implements Runnable {
 
 		if (response.getStatus() == Status.Error) {
 			ResponseErrorMessage responsePayload = new ResponseErrorMessage(response.getPayload());
-			System.out.println(responsePayload.getError());
-		}
-		SchemaListMessage responsePayload = new SchemaListMessage(response.getPayload());
+			System.out.println("No orchestrator found: " + responsePayload.getError());
+		} else {
+			SchemaListMessage responsePayload = new SchemaListMessage(response.getPayload());
 
-		System.out.println("synchronizeSchema, total: " + responsePayload.getSchemas().size());
-		ApplicationContext.getCatalogService(dataDirectory).dropAllTables();
+			System.out.println("synchronizeSchema, number of tables: " + responsePayload.getSchemas().size());
+			ApplicationContext.getCatalogService(dataDirectory).dropAllTables();
 
-		if (responsePayload.getSchemas().size() > 0) {
-			String dbName = responsePayload.getSchemas().get(0).getDbName();
-			System.out.println("dbName from orch: " + dbName);
-			for (DDLCreateTableRequestMessage schema : responsePayload.getSchemas()) {
-				ApplicationContext.getCatalogService(dataDirectory).createTable(schema);
-				// I am unsure at this point if we have to update the schema or not but for safety I do it here
-				// need to see what hibernate moves around :)
-				ApplicationContext.updateContext(dataDirectory);
+			if (responsePayload.getSchemas().size() > 0) {
+				String dbName = responsePayload.getSchemas().get(0).getDbName();
+				System.out.println("dbName from orch: " + dbName);
+				for (DDLCreateTableRequestMessage schema : responsePayload.getSchemas()) {
+					ApplicationContext.getCatalogService(dataDirectory).createTable(schema);
+					// I am unsure at this point if we have to update the schema or not but for safety I do it here
+					// need to see what hibernate moves around :)
+					ApplicationContext.updateContext(dataDirectory);
+				}
 			}
 		}
+
 	}
 
 	public static int bytesToInt(byte[] bytes) {
