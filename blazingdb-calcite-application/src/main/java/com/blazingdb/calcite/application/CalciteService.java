@@ -25,23 +25,7 @@ import blazingdb.protocol.calcite.MessageType;
 public final class CalciteService {
 	private CalciteService() {
 	}
-
-
-	public static  ByteBuffer processRequestSample(ByteBuffer buffer, final String dataDirectory) {
-		DMLRequestMessage request = new DMLRequestMessage(buffer);
-		System.out.println("##ByteBuffer statement_:" + request.getQuery());
-
-		String logicalPlan = "LogicalUnion(all=[false])\n" +
-				"  LogicalUnion(all=[false])\n" +
-				"    LogicalProject(EXPR$0=[$1], join_x=[$0])\n" +
-				"      LogicalAggregate(group=[{0}], EXPR$0=[SUM($1)])\n" +
-				"        LogicalProject(join_x=[$4], join_x0=[$7])\n" +
-				"          LogicalJoin(condition=[=($7, $0)], joinType=[inner])\n";
-
-		DMLResponseMessage response = new DMLResponseMessage(logicalPlan, 0);
-		return response.getBufferData();
-	}
-
+	
 	public static ByteBuffer processRequest(ByteBuffer buffer, final String dataDirectory) {
 		Chronometer chronometer = Chronometer.makeStarted();
 
