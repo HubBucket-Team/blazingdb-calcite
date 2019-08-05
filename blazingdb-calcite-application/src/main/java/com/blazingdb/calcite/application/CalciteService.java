@@ -5,6 +5,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import com.blazingdb.protocol.IService;
 import org.apache.calcite.plan.RelOptUtil;
 
 import com.blazingdb.calcite.application.Chrono.Chronometer;
@@ -24,7 +25,7 @@ import blazingdb.protocol.calcite.MessageType;
 public final class CalciteService {
 	private CalciteService() {
 	}
-
+	
 	public static ByteBuffer processRequest(ByteBuffer buffer, final String dataDirectory) {
 		Chronometer chronometer = Chronometer.makeStarted();
 
@@ -65,7 +66,6 @@ public final class CalciteService {
 			} catch (Exception e) {
 				ResponseErrorMessage error = new ResponseErrorMessage("Could not create table");
 				response = new ResponseMessage(Status.Error, error.getBufferData());
-
 			}
 			return response.getBufferData();
 		} else if (requestMessage.getHeaderType() == MessageType.DDL_DROP_TABLE) {
